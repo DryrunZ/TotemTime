@@ -1,0 +1,11 @@
+{
+  "game.title": "The Haunted Manor",
+  "step1.c1.src": "stock/fireplace.jpg",
+  "step1.c2.text": "The number is carved above the fireplace",
+  "step1.c3.hint": "Look for a four-digit date",
+  "step1.outcome": "The door creaks open...",
+  "step2.c1.text": "Everyone, place a hand on the totem when you're ready",
+  "step2.ready": "Ready",
+  "cust.team_name": "Your team name",
+  "cust.hero_image": "A photo for the intro"
+}

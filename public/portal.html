@@ -1,0 +1,1819 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0B0C">
+<title>TotemTime</title>
+<link rel="icon" href="/assets/brand/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png">
+<link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TotemTime — design tokens (from the Figma "Color" sheet)
+   Change a value here and it changes everywhere. Same palette
+   the game engine uses, so portal and game read as one product.
+   ============================================================ */
+:root{
+  /* neutrals */
+  --black:#000000; --white:#ffffff;
+  --ltc-700:#191B1F; --ltc-600:#373D40; --ltc-500:#5E6366; --ltc-400:#6B6F89;
+  --ltc-300:#A5AABE; --ltc-200:#C9CCD8; --ltc-100:#DBDDE5; --ltc-50:#F9F8F8;
+
+  /* primary (lime) */
+  --p-700:#34410E; --p-600:#ADCB53; --p-500:#D0F267; --p-400:#D9F585;
+  --p-300:#E3F7A4; --p-200:#ECFAC2; --p-100:#F1FBD1; --p-50:#F6FCE1;
+
+  /* blue */
+  --b-700:#214878; --b-600:#417FD1; --b-500:#519BFC; --b-400:#74AFFD;
+  --b-300:#97C3FD; --b-200:#B9D7FE; --b-100:#B9D7FE; --b-50:#EEF5FF;
+
+  /* semantic */
+  --danger:#F64C4C; --danger-700:#2E1009; --danger-50:#FCEDEA;
+  --warning:#FFAD0D; --warning-700:#FE9B0E; --warning-50:#FFFDFA;
+  --success:var(--p-500);
+
+  /* surfaces */
+  --bg:#0B0B0C;
+  --surface:#141416;
+  --surface-2:#1E1E20;
+  --surface-3:#282829;
+  --hairline:rgba(255,255,255,.08);
+  --hairline-2:rgba(255,255,255,.14);
+
+  /* type */
+  --font:'Outfit','Heebo',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-he:'Heebo','Outfit',system-ui,sans-serif;
+
+  /* shape */
+  --r-xs:10px; --r-sm:14px; --r-md:18px; --r-lg:24px; --r-xl:32px; --r-pill:999px;
+
+  /* spacing rhythm */
+  --gap:14px; --pad:18px;
+
+  /* layout */
+  --rail:264px;
+  --shell-max:1180px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px);
+}
+
+/* ============================================================
+   base
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ltc-50);
+  font-family:var(--font); font-size:16px; line-height:1.45;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  overscroll-behavior-y:none;
+}
+html[dir="rtl"] body{font-family:var(--font-he)}
+img,video{max-width:100%;display:block}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--p-500);text-decoration:none}
+h1,h2,h3,h4,p{margin:0}
+:focus-visible{outline:2px solid var(--p-500);outline-offset:2px;border-radius:6px}
+.hide{display:none !important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ============================================================
+   type scale
+   ============================================================ */
+.display{font-size:clamp(30px,7vw,44px);font-weight:800;letter-spacing:-.02em;line-height:1.05}
+.h1{font-size:26px;font-weight:700;letter-spacing:-.015em}
+.h2{font-size:20px;font-weight:700;letter-spacing:-.01em}
+.h3{font-size:17px;font-weight:600}
+.body{font-size:15px}
+.small{font-size:13.5px}
+.tiny{font-size:12px;letter-spacing:.01em}
+.muted{color:var(--ltc-400)}
+.dim{color:var(--ltc-300)}
+.lime{color:var(--p-500)}
+.center{text-align:center}
+
+/* ============================================================
+   buttons
+   ============================================================ */
+.btn{
+  -webkit-appearance:none;appearance:none;border:0;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  min-height:52px;padding:0 22px;border-radius:var(--r-md);
+  font-weight:700;font-size:15.5px;letter-spacing:.005em;
+  background:var(--p-500);color:#12160A;
+  transition:transform .12s ease,filter .16s ease,background .16s ease;
+  user-select:none;-webkit-tap-highlight-color:transparent;
+}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:scale(.975)}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.btn.block{width:100%}
+.btn.sm{min-height:40px;padding:0 16px;font-size:14px;border-radius:var(--r-sm)}
+.btn.xs{min-height:34px;padding:0 13px;font-size:13px;border-radius:var(--r-xs);gap:6px}
+.btn.ghost{background:var(--surface-2);color:var(--ltc-50);box-shadow:inset 0 0 0 1px var(--hairline)}
+.btn.ghost:hover{background:var(--surface-3)}
+.btn.blue{background:var(--b-500);color:#06121F}
+.btn.danger{background:transparent;color:var(--danger);box-shadow:inset 0 0 0 1px rgba(246,76,76,.45)}
+.btn.danger:hover{background:rgba(246,76,76,.1)}
+.btn.solid-danger{background:var(--danger);color:#fff}
+.btn.link{background:none;min-height:auto;padding:0;color:var(--p-500);font-weight:600;font-size:14px}
+.btn.link:hover{filter:none;text-decoration:underline}
+
+/* ============================================================
+   inputs
+   ============================================================ */
+.field{display:block;margin-bottom:var(--gap)}
+.field > .label{display:block;font-size:13px;font-weight:600;color:var(--ltc-300);margin:0 2px 7px}
+.input,.select,.textarea{
+  width:100%;min-height:52px;padding:14px 16px;
+  background:var(--surface-2);border:1px solid var(--hairline);
+  border-radius:var(--r-md);color:var(--ltc-50);font-size:16px;
+  transition:border-color .16s ease,background .16s ease;
+}
+.textarea{min-height:110px;resize:vertical;line-height:1.5}
+.input::placeholder,.textarea::placeholder{color:var(--ltc-500)}
+.input:focus,.select:focus,.textarea:focus{outline:none;border-color:var(--p-500);background:var(--surface-3)}
+.input.err{border-color:var(--danger)}
+.select{
+  -webkit-appearance:none;appearance:none;padding-inline-end:42px;
+  background-image:linear-gradient(45deg,transparent 50%,var(--ltc-300) 50%),linear-gradient(135deg,var(--ltc-300) 50%,transparent 50%);
+  background-position:right 20px center,right 14px center;background-size:6px 6px,6px 6px;background-repeat:no-repeat;
+}
+html[dir="rtl"] .select{background-position:left 14px center,left 20px center;
+  background-image:linear-gradient(135deg,transparent 50%,var(--ltc-300) 50%),linear-gradient(45deg,var(--ltc-300) 50%,transparent 50%);}
+.hint{font-size:12.5px;color:var(--ltc-500);margin:6px 2px 0}
+.hint.err{color:var(--danger)}
+
+/* ============================================================
+   cards
+   ============================================================ */
+.card{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:var(--pad)}
+.card.flush{padding:0;overflow:hidden}
+.card.lime{background:var(--p-500);border-color:transparent;color:#12160A}
+.card.lime .muted,.card.lime .dim{color:rgba(18,22,10,.62)}
+.card.tight{padding:14px}
+.stack{display:flex;flex-direction:column;gap:var(--gap)}
+.row{display:flex;align-items:center;gap:12px}
+.row.between{justify-content:space-between}
+.row.wrap{flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+.sep{height:1px;background:var(--hairline);margin:2px 0}
+.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* chips / badges */
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:var(--r-pill);
+  background:var(--surface-2);color:var(--ltc-200);font-size:12.5px;font-weight:600;
+  box-shadow:inset 0 0 0 1px var(--hairline);white-space:nowrap;
+}
+.chip.lime{background:rgba(208,242,103,.14);color:var(--p-500);box-shadow:inset 0 0 0 1px rgba(208,242,103,.3)}
+.chip.blue{background:rgba(81,155,252,.14);color:var(--b-400);box-shadow:inset 0 0 0 1px rgba(81,155,252,.3)}
+.chip.warn{background:rgba(255,173,13,.14);color:var(--warning);box-shadow:inset 0 0 0 1px rgba(255,173,13,.3)}
+.chip.dead{background:var(--surface-2);color:var(--ltc-500)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+
+/* ============================================================
+   app shell
+   ============================================================ */
+.appbar{
+  position:sticky;top:0;z-index:40;
+  padding:calc(var(--safe-t) + 12px) 16px 12px;
+  background:linear-gradient(180deg,var(--bg) 72%,rgba(11,11,12,0));
+}
+.appbar .row{gap:10px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:800;letter-spacing:-.02em;font-size:18px}
+.brand .mark{
+  width:30px;height:30px;border-radius:9px;flex:none;
+  background:var(--p-500);color:#12160A;display:grid;place-items:center;font-size:15px;font-weight:800;
+}
+.iconbtn{
+  width:40px;height:40px;border-radius:var(--r-sm);flex:none;border:0;cursor:pointer;
+  background:var(--surface-2);color:var(--ltc-200);display:grid;place-items:center;
+  box-shadow:inset 0 0 0 1px var(--hairline);font-size:15px;font-weight:600;
+}
+.iconbtn:hover{background:var(--surface-3);color:var(--ltc-50)}
+
+main{padding:4px 16px 132px;max-width:var(--shell-max);margin:0 auto}
+.view{animation:fade .22s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.page-title{margin:6px 2px 16px}
+
+/* bottom nav (mobile) */
+.tabbar{
+  position:fixed;inset-inline:0;bottom:0;z-index:50;
+  display:grid;grid-auto-flow:column;grid-auto-columns:1fr;
+  padding:10px 8px calc(10px + var(--safe-b));
+  background:rgba(15,15,17,.86);backdrop-filter:blur(18px);
+  border-top:1px solid var(--hairline);
+}
+.tab{
+  background:none;border:0;cursor:pointer;padding:7px 4px;border-radius:var(--r-sm);
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  color:var(--ltc-400);font-size:11px;font-weight:600;letter-spacing:.01em;
+}
+.tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tab.on{color:var(--p-500)}
+.tab .lbl{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.backarrow{display:inline-block}
+html[dir="rtl"] .backarrow{transform:scaleX(-1)}
+@media (max-width:420px){ .tab{font-size:10px} .tab svg{width:21px;height:21px} }
+
+/* side rail (desktop) */
+.rail{display:none}
+
+/* ============================================================
+   game cards
+   ============================================================ */
+.gamecard{position:relative;background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-lg);overflow:hidden}
+.gamecard .cover{
+  aspect-ratio:16/9;background:var(--surface-3) center/cover no-repeat;position:relative;
+}
+.gamecard .cover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 35%,rgba(0,0,0,.72))}
+.gamecard .cover .over{position:absolute;inset-inline:14px;bottom:12px;z-index:2;display:flex;gap:8px;align-items:flex-end;justify-content:space-between}
+.gamecard .body{padding:16px}
+.gamecard .body .h2{margin-bottom:4px}
+.progress{height:6px;border-radius:var(--r-pill);background:var(--surface-3);overflow:hidden}
+.progress > i{display:block;height:100%;background:var(--p-500);border-radius:inherit;transition:width .4s ease}
+
+/* store */
+.pricetag{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.seatpick{display:flex;gap:8px;flex-wrap:wrap}
+.seatpick .opt{
+  flex:1;min-width:78px;cursor:pointer;border-radius:var(--r-md);padding:11px 8px;text-align:center;
+  background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--hairline);
+  font-weight:700;font-size:15px;transition:.15s;
+}
+.seatpick .opt small{display:block;font-weight:500;font-size:11.5px;color:var(--ltc-400);margin-top:2px}
+.seatpick .opt.on{background:rgba(208,242,103,.13);box-shadow:inset 0 0 0 1.5px var(--p-500);color:var(--p-500)}
+.seatpick .opt.on small{color:var(--p-600)}
+
+/* coupons */
+.coupon{
+  position:relative;border-radius:var(--r-lg);padding:16px 18px;overflow:hidden;
+  background:linear-gradient(135deg,var(--p-500),var(--p-400));color:#12160A;
+}
+.coupon.used{background:var(--surface-2);color:var(--ltc-400);box-shadow:inset 0 0 0 1px var(--hairline)}
+.coupon .code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;font-size:17px;letter-spacing:.09em;
+  background:rgba(0,0,0,.14);border-radius:var(--r-xs);padding:8px 12px;display:inline-flex;align-items:center;gap:10px;
+}
+.coupon.used .code{background:var(--surface-3)}
+.coupon::before,.coupon::after{
+  content:"";position:absolute;width:22px;height:22px;border-radius:50%;background:var(--bg);
+  inset-inline-start:-11px;
+}
+.coupon::before{top:calc(50% - 11px)}
+.coupon::after{inset-inline-start:auto;inset-inline-end:-11px;top:calc(50% - 11px)}
+
+/* avatars */
+.avatar{
+  border-radius:50%;display:grid;place-items:center;flex:none;
+  width:44px;height:44px;font-size:22px;line-height:1;
+  background:var(--surface-3);box-shadow:inset 0 0 0 1px var(--hairline);
+}
+.avatar.lg{width:84px;height:84px;font-size:40px}
+.avatar.sm{width:34px;height:34px;font-size:17px}
+.avgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:10px}
+.avgrid button{
+  aspect-ratio:1;border:0;cursor:pointer;border-radius:50%;font-size:26px;
+  background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--hairline);transition:.15s;
+}
+.avgrid button.on{box-shadow:inset 0 0 0 2.5px var(--p-500);background:rgba(208,242,103,.12)}
+
+/* invite list rows */
+.rowitem{display:flex;align-items:center;gap:12px;padding:13px 0}
+.rowitem + .rowitem{border-top:1px solid var(--hairline)}
+.seatbar{display:flex;gap:5px;flex-wrap:wrap}
+.seatbar i{width:22px;height:6px;border-radius:var(--r-pill);background:var(--surface-3)}
+.seatbar i.on{background:var(--p-500)}
+
+/* empty state */
+.empty{text-align:center;padding:44px 20px}
+.empty .ic{font-size:40px;margin-bottom:12px;opacity:.85}
+
+/* skeleton */
+.sk{background:linear-gradient(90deg,var(--surface-2) 25%,var(--surface-3) 37%,var(--surface-2) 63%);
+  background-size:400% 100%;animation:shim 1.3s ease infinite;border-radius:var(--r-md)}
+@keyframes shim{0%{background-position:100% 0}100%{background-position:0 0}}
+
+/* ============================================================
+   modal / sheet
+   ============================================================ */
+.scrim{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.66);backdrop-filter:blur(3px);
+  display:flex;align-items:flex-end;justify-content:center;animation:fade .18s ease}
+.sheet{
+  width:100%;max-width:540px;max-height:88vh;overflow:auto;
+  background:var(--surface);border:1px solid var(--hairline-2);
+  border-radius:var(--r-xl) var(--r-xl) 0 0;padding:18px 18px calc(22px + var(--safe-b));
+  animation:up .24s cubic-bezier(.2,.8,.25,1);
+}
+@keyframes up{from{transform:translateY(26px);opacity:.4}to{transform:none;opacity:1}}
+.sheet .grip{width:44px;height:4px;border-radius:var(--r-pill);background:var(--surface-3);margin:0 auto 14px}
+
+/* toast */
+.toast{
+  position:fixed;z-index:90;inset-inline:16px;bottom:calc(96px + var(--safe-b));margin:0 auto;max-width:420px;
+  background:var(--surface-3);border:1px solid var(--hairline-2);border-radius:var(--r-md);
+  padding:13px 16px;font-size:14px;font-weight:500;box-shadow:0 12px 34px rgba(0,0,0,.5);
+  animation:up .2s ease;
+}
+.toast.ok{border-color:rgba(208,242,103,.5)}
+.toast.bad{border-color:rgba(246,76,76,.6);color:#FFD9D4}
+
+/* share targets */
+.sharegrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center}
+.sharegrid button{background:none;border:0;cursor:pointer;color:var(--ltc-200);font-size:12px;font-weight:600}
+.sharegrid .bub{width:56px;height:56px;border-radius:50%;margin:0 auto 8px;display:grid;place-items:center;
+  font-size:24px;background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--hairline)}
+
+/* auth screen */
+.authwrap{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;
+  padding:32px 20px calc(32px + var(--safe-b));max-width:440px;margin:0 auto}
+.authwrap .logo{width:64px;height:64px;border-radius:20px;background:var(--p-500);color:#12160A;
+  display:grid;place-items:center;font-size:30px;font-weight:800;margin:0 auto 20px}
+.seg{display:flex;gap:6px;background:var(--surface-2);border-radius:var(--r-md);padding:5px;margin-bottom:20px}
+.seg button{flex:1;border:0;background:none;cursor:pointer;padding:11px;border-radius:var(--r-sm);
+  color:var(--ltc-400);font-weight:600;font-size:14.5px}
+.seg button.on{background:var(--surface-3);color:var(--ltc-50)}
+
+/* uploader */
+.drop{
+  border:1.5px dashed var(--hairline-2);border-radius:var(--r-md);padding:18px;text-align:center;
+  background:var(--surface-2);cursor:pointer;transition:.15s;
+}
+.drop:hover{border-color:var(--p-500);background:var(--surface-3)}
+.thumb{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:var(--r-md);background:var(--surface-3)}
+
+/* ============================================================
+   desktop
+   ============================================================ */
+@media (min-width:900px){
+  :root{--pad:22px;--gap:16px}
+  #root{display:grid;grid-template-columns:var(--rail) 1fr;align-items:start;min-height:100dvh}
+  body.auth-mode #root{display:block}
+  .tabbar{display:none}
+  .rail{
+    display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100dvh;
+    padding:26px 16px;border-inline-end:1px solid var(--hairline);background:var(--surface);
+  }
+  .rail .brand{margin:0 8px 26px;font-size:20px}
+  .rail .navbtn{
+    display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-md);
+    border:0;background:none;cursor:pointer;color:var(--ltc-300);font-weight:600;font-size:15px;text-align:start;
+  }
+  .rail .navbtn svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .rail .navbtn:hover{background:var(--surface-2);color:var(--ltc-50)}
+  .rail .navbtn.on{background:rgba(208,242,103,.12);color:var(--p-500)}
+  .rail .foot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+  .appbar{padding:26px 30px 14px;background:none;position:static}
+  .appbar > .row{display:none}
+  main{padding:0 30px 60px}
+  .page-title{margin:0 0 22px}
+  .cols{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:var(--gap);align-items:start}
+  .cols-2{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:var(--gap);align-items:start}
+  .scrim{align-items:center}
+  .sheet{border-radius:var(--r-xl);padding:24px;max-height:84vh}
+  .toast{bottom:26px}
+  .authwrap{grid-column:1/-1}
+}
+@media (max-width:899px){
+  .cols,.cols-2{display:flex;flex-direction:column;gap:var(--gap)}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+</style>
+</head>
+<body class="auth-mode">
+<div id="root"></div>
+<div id="layer"></div>
+
+<script type="module">
+/* ================================================================
+   TotemTime — Portal
+   Single page, hash routes, no build step. Firebase Web SDK via CDN.
+
+   Principle carried over from the engine: DATA, NOT CODE.
+     - every user-facing string is a KEY  -> I18N
+     - what a Director may customize is a MANIFEST on the game doc
+     - roles/capabilities come from the instance, not from the code
+   ================================================================ */
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  sendPasswordResetEmail, signOut, updateProfile, deleteUser,
+  EmailAuthProvider, reauthenticateWithCredential
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs,
+  query, where, addDoc, serverTimestamp, arrayUnion
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import { getFunctions, httpsCallable }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-functions.js";
+
+import { firebaseConfig } from "./config.js";
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const store= getStorage(app);
+const fns  = getFunctions(app);
+
+/* ================================================================
+   1. STRINGS — every visible word is a key.
+   Add a language = add a block below (and a LANGS entry). No other
+   code changes. Missing keys fall back to English, never a raw key.
+   ================================================================ */
+const LANGS = [
+  { code:"en", label:"English",  dir:"ltr" },
+  { code:"he", label:"עברית",    dir:"rtl" }
+];
+
+const I18N = {
+  en: {
+    "app.name":"TotemTime",
+    "app.tagline":"Escape together. Anywhere.",
+
+    "nav.games":"My Games", "nav.store":"Store", "nav.coupons":"Coupons",
+    "nav.account":"Account", "nav.director":"Director",
+
+    "auth.signin":"Sign in", "auth.signup":"Create account",
+    "auth.email":"Email", "auth.password":"Password", "auth.name":"Your name",
+    "auth.email.ph":"you@example.com", "auth.password.ph":"At least 6 characters",
+    "auth.name.ph":"How should we call you?",
+    "auth.forgot":"Forgot your password?",
+    "auth.reset.sent":"Password reset email sent.",
+    "auth.reset.need_email":"Enter your email first.",
+    "auth.have_account":"Already have an account?",
+    "auth.no_account":"New here?",
+    "auth.accept":"By continuing you agree to the Terms and Privacy Policy.",
+    "auth.err.generic":"That didn't work. Check your details and try again.",
+    "auth.err.invalid":"Wrong email or password.",
+    "auth.err.exists":"That email is already registered.",
+    "auth.err.weak":"Password is too short.",
+    "auth.signout":"Sign out",
+
+    "games.title":"My Games",
+    "games.sub":"Everything you own or were invited to.",
+    "games.empty.title":"No games yet",
+    "games.empty.body":"Buy a game, or ask your Director for an invite link.",
+    "games.empty.cta":"Browse the store",
+    "games.start":"Start game",
+    "games.resume":"Resume",
+    "games.replay":"Play again",
+    "games.code":"Game code",
+    "games.status.ready":"Ready to play",
+    "games.status.playing":"In progress",
+    "games.status.done":"Completed",
+    "games.role.director":"Director",
+    "games.role.player":"Player",
+    "games.seats":"{used} of {total} seats",
+    "games.players_short":"{n} players",
+
+    "store.title":"Store",
+    "store.sub":"Pick a game, pick your team size, play tonight.",
+    "store.from":"from",
+    "store.buy":"Buy game",
+    "store.seats":"Team size",
+    "store.seats.n":"{n} players",
+    "store.coupon":"Coupon code",
+    "store.coupon.apply":"Apply",
+    "store.coupon.ok":"Coupon applied — {pct}% off",
+    "store.coupon.bad":"That coupon isn't valid.",
+    "store.total":"Total",
+    "store.freelaunch":"Free launch",
+    "store.claim":"Launch code",
+    "store.claim.ph":"Got the code? Enter it here",
+    "store.claim.bad":"That code isn't right.",
+    "store.claimed":"It's yours! Find it in My Games.",
+    "store.checkout":"Continue to payment",
+    "store.checkout.soon":"Payment isn't connected yet. Your order was prepared — we'll finish checkout once Stripe is live.",
+    "store.empty":"No games published yet.",
+    "store.what":"What you get",
+    "store.perk.1":"One shareable game, played together",
+    "store.perk.2":"You become the Director — invite your team",
+    "store.perk.3":"Make it personal with your own photos and words",
+
+    "coupons.title":"Coupons",
+    "coupons.sub":"Earned by playing. Spend on your next game.",
+    "coupons.empty.title":"No coupons yet",
+    "coupons.empty.body":"Finish a game and we'll drop one here.",
+    "coupons.off":"{pct}% off",
+    "coupons.expires":"Expires {date}",
+    "coupons.expired":"Expired",
+    "coupons.used":"Used",
+    "coupons.copy":"Copy",
+    "coupons.copied":"Copied to clipboard",
+    "coupons.use":"Use it",
+
+    "account.title":"Account",
+    "account.sub":"Your name, your face, your language.",
+    "account.avatar":"Avatar",
+    "account.avatar.pick":"Choose an avatar",
+    "account.nickname":"Nickname",
+    "account.nickname.ph":"Shown to your team in game",
+    "account.fullname":"Full name",
+    "account.email":"Email",
+    "account.email.locked":"Email can't be changed here.",
+    "account.language":"Language",
+    "account.type":"Account type",
+    "account.type.personal":"Personal",
+    "account.type.company":"Company",
+    "account.company":"Company name",
+    "account.member_since":"Member since {date}",
+    "account.save":"Save changes",
+    "account.saved":"Saved",
+    "account.stats.played":"Games played",
+    "account.stats.done":"Completed",
+    "account.stats.coupons":"Coupons",
+    "account.danger":"Danger zone",
+    "account.delete":"Delete my account",
+    "account.delete.warn":"This permanently deletes your profile, history and coupons. Games you bought stay with your team but you'll lose access. This cannot be undone.",
+    "account.delete.confirm":"Type DELETE to confirm",
+    "account.delete.pw":"Confirm your password",
+    "account.delete.go":"Delete permanently",
+    "account.delete.done":"Your account has been deleted.",
+    "account.delete.needpw":"Please re-enter your password to continue.",
+
+    "dir.title":"Director",
+    "dir.sub":"Invite your team and make each game personal.",
+    "dir.empty.title":"You're not directing yet",
+    "dir.empty.body":"Buy a game and you become its Director.",
+    "dir.invite":"Invite players",
+    "dir.customize":"Customize",
+    "dir.back":"Back",
+
+    "inv.title":"Invite players",
+    "inv.sub":"{left} seats left of {total}. Add a name and email, then share the link.",
+    "inv.full":"All {total} seats are taken.",
+    "inv.name":"Player name",
+    "inv.name.ph":"Dana",
+    "inv.email":"Email",
+    "inv.add":"Create invite",
+    "inv.you":"You (Director)",
+    "inv.pending":"Invited",
+    "inv.accepted":"Joined",
+    "inv.share":"Share",
+    "inv.remove":"Remove",
+    "inv.remove.confirm":"Remove {name} from this game?",
+    "inv.link":"Invite link",
+    "inv.share.title":"Share the invite",
+    "inv.share.with":"Or share with a link",
+    "inv.share.msg":"{name}, you're invited to play {game} with us on TotemTime. Join here: {link}",
+    "inv.created":"Invite created",
+    "inv.none":"No players invited yet.",
+    "inv.err.dupe":"That email is already invited.",
+    "inv.err.email":"Enter a valid email.",
+
+    "cust.title":"Customize",
+    "cust.sub":"A few words and pictures of your own turn a game into your game.",
+    "cust.none":"This game has nothing to customize yet.",
+    "cust.locked":"The game has started, so customization is locked.",
+    "cust.save":"Save customization",
+    "cust.saved":"Customization saved",
+    "cust.upload":"Upload",
+    "cust.replace":"Replace",
+    "cust.remove":"Remove",
+    "cust.drop":"Tap to upload an image",
+    "cust.drop.video":"Tap to upload a video",
+    "cust.or_url":"…or paste a link",
+    "cust.default":"Using the default",
+    "cust.uploading":"Uploading…",
+    "cust.toobig":"That file is too large (max {mb} MB).",
+    "cust.preview":"Preview",
+
+    "join.title":"You're invited",
+    "join.body":"{director} invited you to play {game}.",
+    "join.cta":"Join the game",
+    "join.signin":"Sign in to accept this invite",
+    "join.invited":"You're invited, {name}! 👋",
+    "dir.addseat":"Add seat",
+    "dir.addseat.done":"Seat added — {n} seats now",
+    "dir.addseat.max":"Seat limit reached.",
+    "join.done":"You're in! The game is now in My Games.",
+    "join.bad":"This invite link is not valid any more.",
+
+    "common.cancel":"Cancel", "common.close":"Close", "common.copy":"Copy link",
+    "common.copied":"Link copied", "common.saving":"Saving…", "common.loading":"Loading…",
+    "common.error":"Something went wrong. Please try again.",
+    "common.whatsapp":"WhatsApp", "common.email":"Email", "common.telegram":"Telegram",
+    "common.more":"More", "common.optional":"optional", "common.free":"Free"
+  },
+
+  /* Hebrew — the words go here when they're ready. Anything missing
+     falls back to English automatically, so this can land in pieces. */
+  he: {
+    "app.tagline":"בורחים ביחד. מכל מקום.",
+    "nav.games":"המשחקים שלי", "nav.store":"חנות", "nav.coupons":"קופונים",
+    "nav.account":"החשבון שלי", "nav.director":"מנהל המשחק",
+    "auth.signin":"כניסה", "auth.signup":"יצירת חשבון",
+    "auth.email":"אימייל", "auth.password":"סיסמה", "auth.name":"השם שלך",
+    "games.title":"המשחקים שלי", "games.start":"התחילו לשחק", "games.resume":"המשך משחק",
+    "games.code":"קוד משחק",
+    "store.title":"חנות", "store.freelaunch":"חינם להשקה", "store.claim":"קוד השקה", "join.invited":"הוזמנת, {name}! 👋", "dir.addseat":"הוספת מקום", "dir.addseat.done":"נוסף מקום — {n} מקומות", "dir.addseat.max":"הגעתם למקסימום המקומות.", "coupons.title":"קופונים", "account.title":"החשבון שלי",
+    "dir.title":"מנהל המשחק", "inv.title":"הזמנת שחקנים", "cust.title":"התאמה אישית",
+    "common.cancel":"ביטול", "common.close":"סגירה", "common.copy":"העתקת קישור"
+  }
+};
+
+const AVATARS = ["🦊","🐺","🦉","🐙","🦁","🐨","🐸","🦄","🐲","🦅","🐯","🐼","👻","🤖","🎭","🕵️"];
+
+/* ================================================================
+   2. Small helpers
+   ================================================================ */
+const $  = (s,r=document)=>r.querySelector(s);
+const root  = $("#root");
+const layer = $("#layer");
+
+const S = {                       // app state
+  lang: localStorage.getItem("tt.lang") || "en",
+  user: null,                     // firebase auth user
+  profile: null,                  // users/{uid}
+  instances: [],                  // purchases this user can see (+ .game, .role)
+  gamesById: {},                  // games/{id} cache
+  localesCache: {},               // `${gameId}:${lang}` -> map
+  catalog: [],                    // store listings
+  route: { name:"games", args:[] },
+  busy: false
+};
+
+function t(key, vars){
+  const dict = I18N[S.lang] || {};
+  let s = dict[key] ?? I18N.en[key] ?? key;
+  if (vars) for (const k in vars) s = s.split("{"+k+"}").join(vars[k]);
+  return s;
+}
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c =>
+  ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+
+function setLang(code){
+  S.lang = code;
+  localStorage.setItem("tt.lang", code);
+  const meta = LANGS.find(l=>l.code===code) || LANGS[0];
+  document.documentElement.lang = code;
+  document.documentElement.dir  = meta.dir;
+  render();
+}
+
+const fmtDate = iso => {
+  if (!iso) return "";
+  const d = iso.toDate ? iso.toDate() : new Date(iso);
+  if (isNaN(d)) return "";
+  return d.toLocaleDateString(S.lang === "he" ? "he-IL" : "en-GB",
+    { day:"numeric", month:"short", year:"numeric" });
+};
+const money = (cents, cur="usd") =>
+  new Intl.NumberFormat(S.lang==="he"?"he-IL":"en-US",
+    { style:"currency", currency:(cur||"usd").toUpperCase(), maximumFractionDigits:0 })
+    .format((cents||0)/100);
+
+function toast(msg, kind="ok"){
+  const el = document.createElement("div");
+  el.className = "toast " + kind;
+  el.textContent = msg;
+  layer.appendChild(el);
+  setTimeout(()=>{ el.style.opacity="0"; el.style.transition="opacity .25s"; }, 2400);
+  setTimeout(()=> el.remove(), 2750);
+}
+
+/* bottom sheet on mobile, centred modal on desktop — one function */
+function sheet(innerHTML, onMount){
+  closeSheet();
+  const scrim = document.createElement("div");
+  scrim.className = "scrim";
+  scrim.innerHTML = `<div class="sheet" role="dialog" aria-modal="true">
+      <div class="grip"></div>${innerHTML}</div>`;
+  scrim.addEventListener("click", e => { if (e.target === scrim) closeSheet(); });
+  layer.appendChild(scrim);
+  document.body.style.overflow = "hidden";
+  onMount && onMount(scrim);
+  return scrim;
+}
+function closeSheet(){
+  layer.querySelectorAll(".scrim").forEach(n=>n.remove());
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+
+async function copy(text){
+  try { await navigator.clipboard.writeText(text); }
+  catch { const ta=document.createElement("textarea"); ta.value=text;
+          document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); }
+}
+
+const ICONS = {
+  games:'<svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="5"/><path d="M7 10v4M5 12h4M16 11h.01M18.5 13.5h.01"/></svg>',
+  store:'<svg viewBox="0 0 24 24"><path d="M3 9h18l-1.4 9.3a2 2 0 0 1-2 1.7H6.4a2 2 0 0 1-2-1.7L3 9Z"/><path d="M8 9V7a4 4 0 0 1 8 0v2"/></svg>',
+  coupons:'<svg viewBox="0 0 24 24"><path d="M3 9.5V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2.5a2.5 2.5 0 0 0 0 5V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2.5a2.5 2.5 0 0 0 0-5Z"/><path d="M14 8.5 10 15.5"/></svg>',
+  account:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>',
+  director:'<svg viewBox="0 0 24 24"><path d="M4 7h16v10H4z"/><path d="M4 11h16M9 7 7 17M15 7l-2 10"/></svg>'
+};
+
+/* ================================================================
+   3. Auth screens
+   ================================================================ */
+let authMode = "signin";
+let invitePrev = null, invitePrevReq = false;
+
+function renderAuth(){
+  document.body.classList.add("auth-mode");
+  if (S.route && S.route.name === "join" && !invitePrevReq){
+    invitePrevReq = true;
+    const iid = S.route.args[0], tok = S.route.args[1];
+    httpsCallable(fns, "getInvitePreview")({ instanceId: iid, token: tok })
+      .then(r => {
+        invitePrev = r.data || null;
+        if (invitePrev){
+          if (invitePrev.status === "pending") authMode = "signup";
+          try{ if (invitePrev.language && invitePrev.language !== S.lang){ S.lang = invitePrev.language; setLangSilent(S.lang); } }catch(e){}
+        }
+        renderAuth();
+      })
+      .catch(e => console.warn("invite preview", e));
+  }
+  root.innerHTML = `
+  <div class="authwrap">
+    <div class="logo">TT</div>
+    <h1 class="display center" style="margin-bottom:8px">${esc(t("app.name"))}</h1>
+    <p class="body dim center" style="margin-bottom:26px">${esc(t("app.tagline"))}</p>
+    ${invitePrev ? `<p class="body center" style="color:#c8f542;margin-bottom:18px">${esc(t("join.invited",{name:invitePrev.name||""}))}</p>` : ""}
+
+    <div class="seg">
+      <button class="${authMode==="signin"?"on":""}" data-act="mode" data-v="signin">${esc(t("auth.signin"))}</button>
+      <button class="${authMode==="signup"?"on":""}" data-act="mode" data-v="signup">${esc(t("auth.signup"))}</button>
+    </div>
+
+    <form id="authform" class="stack" novalidate>
+      ${authMode==="signup" ? `
+      <label class="field"><span class="label">${esc(t("auth.name"))}</span>
+        <input class="input" name="name" autocomplete="name" value="${esc((invitePrev&&invitePrev.name)||"")}" placeholder="${esc(t("auth.name.ph"))}" required>
+      </label>` : ``}
+      <label class="field"><span class="label">${esc(t("auth.email"))}</span>
+        <input class="input" name="email" type="email" inputmode="email" autocomplete="email"
+               value="${esc((invitePrev&&invitePrev.email)||"")}" ${invitePrev&&invitePrev.email?'readonly style="opacity:.75"':''}
+               placeholder="${esc(t("auth.email.ph"))}" required>
+      </label>
+      <label class="field"><span class="label">${esc(t("auth.password"))}</span>
+        <input class="input" name="password" type="password"
+               autocomplete="${authMode==="signup"?"new-password":"current-password"}"
+               placeholder="${esc(t("auth.password.ph"))}" required>
+      </label>
+      <p class="hint err hide" id="autherr"></p>
+      <button class="btn block" type="submit">
+        ${esc(authMode==="signin" ? t("auth.signin") : t("auth.signup"))}
+      </button>
+    </form>
+
+    <div class="row between" style="margin-top:16px">
+      <button class="btn link" data-act="forgot">${esc(t("auth.forgot"))}</button>
+      <button class="btn link" data-act="langpick">${esc(LANGS.find(l=>l.code===S.lang).label)}</button>
+    </div>
+    <p class="tiny muted center" style="margin-top:24px">${esc(t("auth.accept"))}</p>
+  </div>`;
+
+  $("#authform").addEventListener("submit", async e => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const email = String(f.get("email")||"").trim();
+    const pw    = String(f.get("password")||"");
+    const name  = String(f.get("name")||"").trim();
+    const err   = $("#autherr");
+    const btn   = e.target.querySelector("button[type=submit]");
+    err.classList.add("hide"); btn.disabled = true;
+    try{
+      if (authMode === "signup"){
+        const cred = await createUserWithEmailAndPassword(auth, email, pw);
+        if (name) await updateProfile(cred.user, { displayName: name });
+        await ensureProfile(cred.user, { displayName: name });
+      } else {
+        await signInWithEmailAndPassword(auth, email, pw);
+      }
+    }catch(ex){
+      err.textContent = authErr(ex);
+      err.classList.remove("hide");
+      btn.disabled = false;
+    }
+  });
+}
+
+function authErr(ex){
+  const c = ex && ex.code || "";
+  if (c.includes("email-already-in-use")) return t("auth.err.exists");
+  if (c.includes("weak-password"))        return t("auth.err.weak");
+  if (c.includes("invalid-credential") || c.includes("wrong-password") || c.includes("user-not-found"))
+    return t("auth.err.invalid");
+  return t("auth.err.generic");
+}
+
+/* ================================================================
+   4. Data layer
+   ================================================================ */
+async function ensureProfile(user, extra={}){
+  const ref  = doc(db, "users", user.uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()){
+    const fresh = {
+      uid:user.uid, email:user.email || "",
+      displayName: extra.displayName || user.displayName || (user.email||"").split("@")[0],
+      nickname: extra.displayName || user.displayName || "",
+      avatar: AVATARS[Math.floor(Math.random()*AVATARS.length)],
+      preferredLanguage: S.lang,
+      accountType:"personal", companyName:null,
+      createdAt: new Date().toISOString(),
+      instances: [], history: [], coupons: []
+    };
+    await setDoc(ref, fresh);
+    return fresh;
+  }
+  return snap.data();
+}
+
+async function loadGame(gameId){
+  if (S.gamesById[gameId]) return S.gamesById[gameId];
+  try{
+    const snap = await getDoc(doc(db, "games", gameId));
+    const data = snap.exists() ? { id:gameId, ...snap.data() } : { id:gameId };
+    S.gamesById[gameId] = data;
+    return data;
+  }catch{ return { id:gameId }; }
+}
+
+/* game titles/labels also live as keys — resolve them from the game locale */
+async function loadGameLocale(gameId, lang){
+  const k = gameId + ":" + lang;
+  if (S.localesCache[k]) return S.localesCache[k];
+  try{
+    const snap = await getDoc(doc(db,"games",gameId,"locales",lang));
+    const m = snap.exists() ? snap.data() : {};
+    S.localesCache[k] = m;
+    return m;
+  }catch{ S.localesCache[k] = {}; return {}; }
+}
+
+/* resolve a game-level key with fallback: chosen lang -> game default -> raw */
+async function gt(game, key, fallback=""){
+  if (!key) return fallback;
+  const a = await loadGameLocale(game.id, S.lang);
+  if (a[key] != null) return a[key];
+  const def = game.defaultLanguage || "he";
+  if (def !== S.lang){
+    const b = await loadGameLocale(game.id, def);
+    if (b[key] != null) return b[key];
+  }
+  return fallback || "";
+}
+
+async function loadEverything(){
+  S.profile = await ensureProfile(S.user);
+  if (S.profile.preferredLanguage && S.profile.preferredLanguage !== S.lang){
+    S.lang = S.profile.preferredLanguage;
+    localStorage.setItem("tt.lang", S.lang);
+    const meta = LANGS.find(l=>l.code===S.lang) || LANGS[0];
+    document.documentElement.lang = S.lang;
+    document.documentElement.dir  = meta.dir;
+  }
+
+  const byId = new Map();
+
+  // (a) games this user bought — they are the Director
+  try{
+    const owned = await getDocs(query(collection(db,"instances"), where("buyerUid","==",S.user.uid)));
+    owned.forEach(d => byId.set(d.id, { id:d.id, ...d.data(), role:"director" }));
+  }catch(e){ console.warn("owned instances", e); }
+
+  // (b) games they were invited to — membership is recorded on their own user doc
+  for (const id of (S.profile.instances || [])){
+    if (byId.has(id)) continue;
+    try{
+      const d = await getDoc(doc(db,"instances",id));
+      if (d.exists()) byId.set(id, { id, ...d.data(), role:"player" });
+    }catch(e){ console.warn("instance", id, e); }
+  }
+
+  S.instances = [...byId.values()];
+  await Promise.all(S.instances.map(async i => { i.game = await loadGame(i.gameId); }));
+  S.instances.sort((a,b)=> String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+
+  // store catalog
+  try{
+    const snap = await getDocs(collection(db,"games"));
+    S.catalog = [];
+    snap.forEach(d => {
+      const g = { id:d.id, ...d.data() };
+      S.gamesById[d.id] = S.gamesById[d.id] || g;
+      if (g.published !== false) S.catalog.push(g);
+    });
+  }catch(e){ console.warn("catalog", e); S.catalog = []; }
+}
+
+const isDirector = () => S.instances.some(i => i.role === "director");
+const priceOf    = g => (g.store && g.store.price) ?? g.price ?? 0;
+const currencyOf = g => (g.store && g.store.currency) || g.currency || "usd";
+const seatOpts   = g => (g.store && g.store.seatOptions) || g.seatOptions || [4,6,8];
+const coverOf    = g => (g.store && g.store.cover) || g.cover || g.hero || "";
+const freeLaunch = g => !!(g.store && g.store.freeLaunch);
+
+async function resolveTitles(){
+  await Promise.all(S.instances.map(async i => {
+    i.title = await gt(i.game, i.game.title_key, i.game.title || i.gameId);
+  }));
+  await Promise.all(S.catalog.map(async g => {
+    g._title  = await gt(g, g.title_key,  g.title || g.id);
+    g._blurb  = await gt(g, g.blurb_key || (g.store && g.store.blurb_key), (g.store && g.store.blurb) || g.blurb || "");
+  }));
+}
+
+/* ================================================================
+   5. Router
+   ================================================================ */
+const TABS = ["games","store","coupons","account"];
+
+function parseHash(){
+  const raw = (location.hash || "#/games").replace(/^#\/?/, "");
+  const parts = raw.split("/").filter(Boolean);
+  return { name: parts[0] || "games", args: parts.slice(1) };
+}
+function go(path){ location.hash = "#/" + path.replace(/^\/+/, ""); }
+window.addEventListener("hashchange", () => { S.route = parseHash(); closeSheet(); render(); });
+
+/* ================================================================
+   6. Shell
+   ================================================================ */
+function shell(content){
+  const dir = isDirector();
+  const tabs = dir ? [...TABS.slice(0,3), "director", "account"] : TABS;
+  const active = ["invites","customize","director"].includes(S.route.name) ? "director" : S.route.name;
+  const av = (S.profile && S.profile.avatar) || "🎭";
+
+  return `
+  <nav class="rail" aria-label="Main">
+    <div class="brand"><span class="mark">TT</span>${esc(t("app.name"))}</div>
+    ${tabs.map(k=>`<button class="navbtn ${active===k?"on":""}" data-act="go" data-v="${k}">
+        ${ICONS[k]}<span>${esc(t("nav."+k))}</span></button>`).join("")}
+    <div class="foot">
+      <button class="navbtn" data-act="langpick">🌐 <span>${esc(LANGS.find(l=>l.code===S.lang).label)}</span></button>
+      <div class="row" style="padding:10px 14px;gap:10px">
+        <div class="avatar sm">${esc(av)}</div>
+        <div class="grow"><div class="small truncate" style="font-weight:600">${esc(nameOf())}</div>
+          <div class="tiny muted truncate">${esc(S.user.email||"")}</div></div>
+      </div>
+    </div>
+  </nav>
+
+  <div>
+    <header class="appbar">
+      <div class="row between">
+        <div class="brand"><span class="mark">TT</span>${esc(t("app.name"))}</div>
+        <div class="row" style="gap:8px">
+          <button class="iconbtn" data-act="langpick" aria-label="Language">🌐</button>
+          <button class="iconbtn" data-act="go" data-v="account" aria-label="${esc(t("nav.account"))}">${esc(av)}</button>
+        </div>
+      </div>
+    </header>
+    <main>${content}</main>
+  </div>
+
+  <nav class="tabbar" aria-label="Main">
+    ${tabs.map(k=>`<button class="tab ${active===k?"on":""}" data-act="go" data-v="${k}">
+        ${ICONS[k]}<span class="lbl">${esc(t("nav."+k))}</span></button>`).join("")}
+  </nav>`;
+}
+
+const nameOf = () => (S.profile && (S.profile.nickname || S.profile.displayName))
+  || (S.user && S.user.displayName) || (S.user && (S.user.email||"").split("@")[0]) || "";
+
+function pageTitle(title, sub, backTo){
+  return `<div class="page-title">
+    ${backTo ? `<button class="btn link" data-act="go" data-v="${backTo}" style="margin-bottom:10px"><span class="backarrow">←</span> ${esc(t("dir.back"))}</button>` : ""}
+    <h1 class="h1">${esc(title)}</h1>
+    ${sub ? `<p class="body muted" style="margin-top:4px">${esc(sub)}</p>` : ""}
+  </div>`;
+}
+function emptyState(icon, title, body, ctaLabel, ctaRoute){
+  return `<div class="card empty">
+    <div class="ic">${icon}</div>
+    <h3 class="h2" style="margin-bottom:6px">${esc(title)}</h3>
+    <p class="body muted" style="max-width:34ch;margin:0 auto 18px">${esc(body)}</p>
+    ${ctaLabel ? `<button class="btn" data-act="go" data-v="${ctaRoute}">${esc(ctaLabel)}</button>` : ""}
+  </div>`;
+}
+
+/* ================================================================
+   7. Views — Player
+   ================================================================ */
+function statusOf(inst){
+  if (inst.completedAt || (inst.room && inst.room.status === "completed")) return "done";
+  if (inst.playedAt   || (inst.room && inst.room.status === "playing"))   return "playing";
+  return "ready";
+}
+
+function viewGames(){
+  if (!S.instances.length)
+    return pageTitle(t("games.title"), t("games.sub"))
+      + emptyState("🎟️", t("games.empty.title"), t("games.empty.body"), t("games.empty.cta"), "store");
+
+  const cards = S.instances.map(i => {
+    const st  = statusOf(i);
+    const cov = coverOf(i.game);
+    const seatsUsed = 1 + (i.invitesCount || 0);
+    return `
+    <article class="gamecard">
+      <div class="cover" style="${cov?`background-image:url('${esc(cov)}')`:""}">
+        <div class="over">
+          <span class="chip ${st==="done"?"dead":st==="playing"?"warn":"lime"}">
+            <span class="dot"></span>${esc(t("games.status."+st))}</span>
+          <span class="chip ${i.role==="director"?"blue":""}">${esc(t("games.role."+i.role))}</span>
+        </div>
+      </div>
+      <div class="body">
+        <h3 class="h2">${esc(i.title || i.gameId)}</h3>
+        <p class="small muted" style="margin-bottom:14px">
+          ${esc(t("games.seats",{used:seatsUsed,total:i.seatCount||seatsUsed}))}
+          ${i.code?` · ${esc(t("games.code"))} <b class="lime">${esc(i.code)}</b>`:""}
+        </p>
+        <button class="btn block" data-act="play" data-v="${esc(i.id)}">
+          ${esc(st==="playing"?t("games.resume"):st==="done"?t("games.replay"):t("games.start"))}
+        </button>
+        ${i.role==="director" ? `
+        <div class="row" style="gap:8px;margin-top:8px">
+          <button class="btn ghost sm grow" data-act="go" data-v="invites/${esc(i.id)}">👥 ${esc(t("dir.invite"))}</button>
+          <button class="btn ghost sm grow" data-act="go" data-v="customize/${esc(i.id)}">✨ ${esc(t("dir.customize"))}</button>
+        </div>` : ""}
+      </div>
+    </article>`;
+  }).join("");
+
+  return pageTitle(t("games.title"), t("games.sub")) + `<div class="cols">${cards}</div>`;
+}
+
+function viewStore(){
+  if (!S.catalog.length)
+    return pageTitle(t("store.title"), t("store.sub")) + emptyState("🛒", t("store.empty"), t("games.empty.body"));
+
+  const cards = S.catalog.map(g => {
+    const cov = coverOf(g);
+    return `
+    <article class="gamecard">
+      <div class="cover" style="${cov?`background-image:url('${esc(cov)}')`:""}">
+        <div class="over"><span class="chip lime">${esc(t("store.seats.n",{n:seatOpts(g)[0]}))}+</span></div>
+      </div>
+      <div class="body">
+        <h3 class="h2">${esc(g._title || g.id)}</h3>
+        <p class="small muted" style="margin:4px 0 14px">${esc(g._blurb || "")}</p>
+        <div class="row between">
+          <div><span class="tiny muted">${esc(t("store.from"))}</span>
+            <div class="pricetag">${freeLaunch(g)?`<s style="opacity:.45;font-size:17px">${money(priceOf(g),currencyOf(g))}</s> <span class="lime">${esc(t("store.freelaunch"))}</span>`:priceOf(g)?money(priceOf(g),currencyOf(g)):esc(t("common.free"))}</div></div>
+          <button class="btn" data-act="buy" data-v="${esc(g.id)}">${esc(t("store.buy"))}</button>
+        </div>
+      </div>
+    </article>`;
+  }).join("");
+
+  return pageTitle(t("store.title"), t("store.sub")) + `
+    <div class="card" style="margin-bottom:var(--gap)">
+      <h3 class="h3" style="margin-bottom:10px">${esc(t("store.what"))}</h3>
+      <div class="stack" style="gap:8px">
+        <div class="row"><span class="lime">✓</span><span class="small">${esc(t("store.perk.1"))}</span></div>
+        <div class="row"><span class="lime">✓</span><span class="small">${esc(t("store.perk.2"))}</span></div>
+        <div class="row"><span class="lime">✓</span><span class="small">${esc(t("store.perk.3"))}</span></div>
+      </div>
+    </div>
+    <div class="cols">${cards}</div>`;
+}
+
+function viewCoupons(){
+  const list = (S.profile.coupons || []);
+  if (!list.length)
+    return pageTitle(t("coupons.title"), t("coupons.sub"))
+      + emptyState("🎁", t("coupons.empty.title"), t("coupons.empty.body"), t("games.empty.cta"), "store");
+
+  const now = Date.now();
+  const cards = list.map((c,idx) => {
+    const expired = c.expiresAt && new Date(c.expiresAt).getTime() < now;
+    const dead = c.used || expired;
+    return `
+    <div class="coupon ${dead?"used":""}">
+      <div class="row between" style="align-items:flex-start;gap:14px">
+        <div class="grow">
+          <div class="h1" style="line-height:1.05">${esc(t("coupons.off",{pct:c.discountPct||0}))}</div>
+          <p class="small" style="opacity:.75;margin:2px 0 12px">
+            ${dead ? esc(c.used?t("coupons.used"):t("coupons.expired"))
+                   : esc(c.expiresAt?t("coupons.expires",{date:fmtDate(c.expiresAt)}):"")}
+          </p>
+          <button class="code" data-act="copycoupon" data-v="${esc(c.code)}">
+            ${esc(c.code)} <span style="opacity:.6;font-size:13px">⧉ ${esc(t("coupons.copy"))}</span>
+          </button>
+        </div>
+        ${dead?"":`<button class="btn xs ghost" data-act="go" data-v="store"
+            style="background:rgba(0,0,0,.16);box-shadow:none;color:#12160A">${esc(t("coupons.use"))}</button>`}
+      </div>
+    </div>`;
+  }).join("");
+
+  return pageTitle(t("coupons.title"), t("coupons.sub")) + `<div class="cols">${cards}</div>`;
+}
+
+function viewAccount(){
+  const p = S.profile;
+  const played = (p.history||[]).length;
+  const done   = (p.history||[]).filter(h=>h.completed).length;
+  const coup   = (p.coupons||[]).filter(c=>!c.used).length;
+
+  return pageTitle(t("account.title"), t("account.sub")) + `
+  <div class="cols-2">
+    <div class="stack">
+      <div class="card">
+        <div class="row" style="gap:16px;margin-bottom:18px">
+          <button class="avatar lg" data-act="pickavatar" title="${esc(t("account.avatar.pick"))}">${esc(p.avatar||"🎭")}</button>
+          <div class="grow">
+            <div class="h2 truncate">${esc(nameOf())}</div>
+            <div class="small muted truncate">${esc(S.user.email||"")}</div>
+            <button class="btn link" data-act="pickavatar" style="margin-top:6px">${esc(t("account.avatar.pick"))}</button>
+          </div>
+        </div>
+
+        <form id="accform" class="stack">
+          <label class="field"><span class="label">${esc(t("account.nickname"))}</span>
+            <input class="input" name="nickname" value="${esc(p.nickname||"")}"
+                   placeholder="${esc(t("account.nickname.ph"))}" maxlength="24"></label>
+          <label class="field"><span class="label">${esc(t("account.fullname"))}</span>
+            <input class="input" name="displayName" value="${esc(p.displayName||"")}" maxlength="60"></label>
+          <label class="field"><span class="label">${esc(t("account.email"))}</span>
+            <input class="input" value="${esc(S.user.email||"")}" disabled>
+            <span class="hint">${esc(t("account.email.locked"))}</span></label>
+          <label class="field"><span class="label">${esc(t("account.language"))}</span>
+            <select class="select" name="preferredLanguage">
+              ${LANGS.map(l=>`<option value="${l.code}" ${p.preferredLanguage===l.code?"selected":""}>${esc(l.label)}</option>`).join("")}
+            </select></label>
+          <label class="field"><span class="label">${esc(t("account.type"))}</span>
+            <select class="select" name="accountType">
+              <option value="personal" ${p.accountType!=="company"?"selected":""}>${esc(t("account.type.personal"))}</option>
+              <option value="company"  ${p.accountType==="company"?"selected":""}>${esc(t("account.type.company"))}</option>
+            </select></label>
+          <label class="field ${p.accountType==="company"?"":"hide"}" id="companyfield">
+            <span class="label">${esc(t("account.company"))}</span>
+            <input class="input" name="companyName" value="${esc(p.companyName||"")}" maxlength="60"></label>
+          <button class="btn block" type="submit">${esc(t("account.save"))}</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <div class="row between" style="text-align:center">
+          <div class="grow"><div class="h1">${played}</div><div class="tiny muted">${esc(t("account.stats.played"))}</div></div>
+          <div class="grow"><div class="h1">${done}</div><div class="tiny muted">${esc(t("account.stats.done"))}</div></div>
+          <div class="grow"><div class="h1 lime">${coup}</div><div class="tiny muted">${esc(t("account.stats.coupons"))}</div></div>
+        </div>
+        <div class="sep" style="margin:16px 0"></div>
+        <p class="tiny muted center">${esc(t("account.member_since",{date:fmtDate(p.createdAt)}))}</p>
+      </div>
+
+      <button class="btn ghost block" data-act="signout">${esc(t("auth.signout"))}</button>
+
+      <div class="card" style="border-color:rgba(246,76,76,.28)">
+        <h3 class="h3" style="color:var(--danger);margin-bottom:8px">${esc(t("account.danger"))}</h3>
+        <p class="small muted" style="margin-bottom:14px">${esc(t("account.delete.warn"))}</p>
+        <button class="btn danger block" data-act="deleteaccount">${esc(t("account.delete"))}</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ================================================================
+   8. Views — Director
+   ================================================================ */
+const instById = id => S.instances.find(i => i.id === id);
+
+async function loadInvites(inst){
+  try{
+    const snap = await getDocs(collection(db,"instances",inst.id,"invites"));
+    inst.invites = [];
+    snap.forEach(d => inst.invites.push({ token:d.id, ...d.data() }));
+    inst.invites.sort((a,b)=> String(a.createdAt||"").localeCompare(String(b.createdAt||"")));
+    inst.invitesCount = inst.invites.length;
+  }catch(e){ console.warn("invites", e); inst.invites = inst.invites || []; }
+  return inst.invites;
+}
+
+function viewDirector(){
+  const mine = S.instances.filter(i => i.role === "director");
+  if (!mine.length)
+    return pageTitle(t("dir.title"), t("dir.sub"))
+      + emptyState("🎬", t("dir.empty.title"), t("dir.empty.body"), t("games.empty.cta"), "store");
+
+  const cards = mine.map(i => {
+    const total = i.seatCount || 6;
+    const used  = 1 + (i.invitesCount || (i.invites||[]).length);
+    return `
+    <article class="card">
+      <div class="row between" style="margin-bottom:12px">
+        <div class="grow">
+          <h3 class="h2 truncate">${esc(i.title || i.gameId)}</h3>
+          <p class="small muted">${esc(t("games.seats",{used,total}))}${i.code?` · <b class="lime">${esc(i.code)}</b>`:""}</p>
+        </div>
+        <span class="chip blue">${esc(t("games.role.director"))}</span>
+      </div>
+      <div class="seatbar" style="margin-bottom:16px">
+        ${Array.from({length:total},(_,k)=>`<i class="${k<used?"on":""}"></i>`).join("")}
+      </div>
+      <div class="row wrap" style="gap:8px">
+        <button class="btn grow sm" data-act="go" data-v="invites/${esc(i.id)}">👥 ${esc(t("dir.invite"))}</button>
+        <button class="btn ghost grow sm" data-act="go" data-v="customize/${esc(i.id)}">✨ ${esc(t("dir.customize"))}</button>
+        ${total < ((i.baseSeatCount||i.seatCount||total)*2) ? `<button class="btn ghost sm" data-act="addseat" data-v="${esc(i.id)}">＋ ${esc(t("dir.addseat"))}</button>` : ""}
+      </div>
+    </article>`;
+  }).join("");
+
+  return pageTitle(t("dir.title"), t("dir.sub")) + `<div class="cols">${cards}</div>`;
+}
+
+function viewInvites(inst){
+  const total = inst.seatCount || 6;
+  const list  = inst.invites || [];
+  const used  = 1 + list.length;
+  const left  = Math.max(0, total - used);
+
+  const rows = `
+  <div class="rowitem">
+    <div class="avatar sm">${esc((S.profile&&S.profile.avatar)||"🎭")}</div>
+    <div class="grow"><div class="small" style="font-weight:600">${esc(nameOf())}</div>
+      <div class="tiny muted truncate">${esc(S.user.email||"")}</div></div>
+    <span class="chip blue">${esc(t("inv.you"))}</span>
+  </div>
+  ` + (list.length ? list.map(v => `
+  <div class="rowitem">
+    <div class="avatar sm">${esc((v.name||"?").trim().charAt(0).toUpperCase())}</div>
+    <div class="grow"><div class="small truncate" style="font-weight:600">${esc(v.name||"")}</div>
+      <div class="tiny muted truncate">${esc(v.email||"")}</div></div>
+    <span class="chip ${v.status==="accepted"?"lime":""}">${esc(v.status==="accepted"?t("inv.accepted"):t("inv.pending"))}</span>
+    <button class="iconbtn" data-act="shareinvite" data-v="${esc(inst.id)}|${esc(v.token)}" aria-label="${esc(t("inv.share"))}">↗</button>
+    <button class="iconbtn" data-act="delinvite" data-v="${esc(inst.id)}|${esc(v.token)}" aria-label="${esc(t("inv.remove"))}">✕</button>
+  </div>`).join("") : `<p class="small muted" style="padding:16px 0">${esc(t("inv.none"))}</p>`);
+
+  return pageTitle(t("inv.title"), left ? t("inv.sub",{left,total}) : t("inv.full",{total}), "director") + `
+  <div class="cols-2">
+    <div class="card">
+      <div class="row between" style="margin-bottom:8px">
+        <h3 class="h3">${esc(inst.title || inst.gameId)}</h3>
+        <span class="chip" dir="ltr">${used} / ${total}</span>
+      </div>
+      <div class="seatbar" style="margin-bottom:6px">
+        ${Array.from({length:total},(_,k)=>`<i class="${k<used?"on":""}"></i>`).join("")}
+      </div>
+      ${rows}
+    </div>
+
+    <div class="card">
+      <form id="invform" class="stack">
+        <label class="field"><span class="label">${esc(t("inv.name"))}</span>
+          <input class="input" name="name" placeholder="${esc(t("inv.name.ph"))}" required maxlength="40"></label>
+        <label class="field"><span class="label">${esc(t("inv.email"))}</span>
+          <input class="input" name="email" type="email" inputmode="email"
+                 placeholder="${esc(t("auth.email.ph"))}" required></label>
+        <p class="hint err hide" id="inverr"></p>
+        <button class="btn block" type="submit" ${left?"":"disabled"}>${esc(t("inv.add"))}</button>
+      </form>
+    </div>
+  </div>`;
+}
+
+function viewCustomize(inst){
+  const manifest = (inst.game && inst.game.customizable) || [];
+  const locked   = !!(inst.playedAt || (inst.room && inst.room.status !== "not_started"));
+  const values   = inst.customization || {};
+
+  if (!manifest.length)
+    return pageTitle(t("cust.title"), t("cust.sub"), "director")
+      + emptyState("✨", t("cust.none"), t("dir.sub"));
+
+  const fields = manifest.map(f => {
+    const v   = values[f.key] ?? "";
+    const lab = f.label || f.key.replace(/_/g," ");
+    const id  = "cf_" + f.key;
+    if (f.type === "image" || f.type === "video"){
+      const has = !!v;
+      return `
+      <div class="field" data-cust="${esc(f.key)}" data-type="${esc(f.type)}">
+        <span class="label">${esc(lab)}</span>
+        ${has ? (f.type==="image"
+            ? `<img class="thumb" src="${esc(v)}" alt="">`
+            : `<video class="thumb" src="${esc(v)}" controls playsinline></video>`)
+          : `<div class="drop" data-act="pickfile" data-v="${esc(f.key)}">
+               <div style="font-size:26px;margin-bottom:6px">${f.type==="image"?"🖼️":"🎬"}</div>
+               <div class="small">${esc(f.type==="image"?t("cust.drop"):t("cust.drop.video"))}</div>
+               <div class="tiny muted" style="margin-top:4px">${esc(t("cust.default"))}</div>
+             </div>`}
+        <input type="file" class="hide" id="file_${esc(f.key)}"
+               accept="${esc((f.accept||[]).join(",") || (f.type==="image"?"image/*":"video/*"))}">
+        <div class="row" style="gap:8px;margin-top:8px">
+          <button type="button" class="btn ghost xs" data-act="pickfile" data-v="${esc(f.key)}">
+            ${esc(has?t("cust.replace"):t("cust.upload"))}</button>
+          ${has?`<button type="button" class="btn ghost xs" data-act="clearfile" data-v="${esc(f.key)}">${esc(t("cust.remove"))}</button>`:""}
+          <span class="tiny muted grow" id="prog_${esc(f.key)}"></span>
+        </div>
+        <input class="input" style="margin-top:8px" name="${esc(f.key)}" value="${esc(v)}"
+               placeholder="${esc(t("cust.or_url"))}" id="${id}">
+      </div>`;
+    }
+    if (f.type === "textarea" || (f.maxLength && f.maxLength > 80)){
+      return `<label class="field"><span class="label">${esc(lab)}</span>
+        <textarea class="textarea" name="${esc(f.key)}" maxlength="${f.maxLength||400}"
+          placeholder="${esc(f._def||f.default||"")}">${esc(v)}</textarea></label>`;
+    }
+    return `<label class="field"><span class="label">${esc(lab)}</span>
+      <input class="input" name="${esc(f.key)}" maxlength="${f.maxLength||60}"
+             value="${esc(v)}" placeholder="${esc(f._def||f.default||"")}"></label>`;
+  }).join("");
+
+  return pageTitle(t("cust.title"), t("cust.sub"), "director") + `
+  ${locked?`<div class="card" style="border-color:rgba(255,173,13,.35);margin-bottom:var(--gap)">
+      <div class="row"><span>⚠️</span><span class="small">${esc(t("cust.locked"))}</span></div></div>`:""}
+  <div class="card">
+    <h3 class="h3" style="margin-bottom:16px">${esc(inst.title || inst.gameId)}</h3>
+    <form id="custform" class="stack" ${locked?"inert":""} style="${locked?"opacity:.55;pointer-events:none":""}">
+      ${fields}
+      <button class="btn block" type="submit">${esc(t("cust.save"))}</button>
+    </form>
+  </div>`;
+}
+
+function viewJoin(instanceId, token, invite, inst){
+  if (!invite) return pageTitle(t("join.title")) + emptyState("🔒", t("join.bad"), t("games.empty.body"), t("games.empty.cta"), "games");
+  return pageTitle(t("join.title")) + `
+  <div class="card center" style="padding:30px 22px">
+    <div style="font-size:44px;margin-bottom:12px">🎟️</div>
+    <h2 class="h1" style="margin-bottom:8px">${esc(invite.name||"")}</h2>
+    <p class="body muted" style="margin-bottom:22px">
+      ${esc(t("join.body",{ director: invite.fromName || "Your Director", game: (inst && inst.title) || "" }))}</p>
+    <button class="btn block" data-act="acceptinvite" data-v="${esc(instanceId)}|${esc(token)}">${esc(t("join.cta"))}</button>
+  </div>`;
+}
+
+/* ================================================================
+   9. Render
+   ================================================================ */
+async function render(){
+  if (!S.user){ renderAuth(); return; }
+  document.body.classList.remove("auth-mode");
+
+  const { name, args } = S.route;
+  let body = "";
+
+  if (name === "join"){
+    const [instanceId, token] = args;
+    let invite = null, inst = null;
+    try{
+      const d = await getDoc(doc(db,"instances",instanceId,"invites",token));
+      if (d.exists()) invite = d.data();
+      const i = await getDoc(doc(db,"instances",instanceId));
+      if (i.exists()){
+        inst = { id:instanceId, ...i.data() };
+        inst.game  = await loadGame(inst.gameId);
+        inst.title = await gt(inst.game, inst.game.title_key, inst.game.title || inst.gameId);
+      }
+    }catch(e){ console.warn("join", e); }
+    body = viewJoin(instanceId, token, invite, inst);
+  }
+  else if (name === "invites" || name === "customize"){
+    const inst = instById(args[0]);
+    if (!inst) { go("director"); return; }
+    if (name === "invites"){
+      await loadInvites(inst);
+      body = viewInvites(inst);
+    } else {
+      const man = (inst.game && inst.game.customizable) || [];
+      await Promise.all(man.map(async f => {
+        f.label = await gt(inst.game, f.label_key, f.label || f.key.replace(/_/g," "));
+        f._def = f.default_key ? await gt(inst.game, f.default_key, f.default || "") : (f.default || "");
+      }));
+      body = viewCustomize(inst);
+    }
+  }
+  else if (name === "store")    body = viewStore();
+  else if (name === "coupons")  body = viewCoupons();
+  else if (name === "account")  body = viewAccount();
+  else if (name === "director") body = viewDirector();
+  else                          body = viewGames();
+
+  root.innerHTML = shell(body);
+  wire();
+}
+
+/* ================================================================
+   10. Interactions — one delegated listener, actions named in data-act
+   ================================================================ */
+function wire(){
+  const form = $("#accform");
+  if (form){
+    form.addEventListener("submit", saveAccount);
+    const sel = form.querySelector("[name=accountType]");
+    sel && sel.addEventListener("change", e => {
+      $("#companyfield").classList.toggle("hide", e.target.value !== "company");
+    });
+  }
+  const inv = $("#invform");
+  inv && inv.addEventListener("submit", createInvite);
+  const cf = $("#custform");
+  cf && cf.addEventListener("submit", saveCustomization);
+
+  document.querySelectorAll('[data-cust] input[type=file]').forEach(i =>
+    i.addEventListener("change", onFileChosen));
+}
+
+document.addEventListener("click", async e => {
+  const btn = e.target.closest("[data-act]");
+  if (!btn) return;
+  const act = btn.dataset.act, v = btn.dataset.v || "";
+
+  switch(act){
+    case "mode":       authMode = v; renderAuth(); break;
+    case "go":         go(v); break;
+    case "langpick":   langSheet(); break;
+    case "setlang":    closeSheet(); setLang(v); if (S.user) saveLangPref(v); break;
+    case "forgot":     await forgot(); break;
+    case "signout":    await signOut(auth); break;
+    case "pickavatar": avatarSheet(); break;
+    case "setavatar":  await setAvatar(v); break;
+    case "play":       playInstance(v); break;
+    case "buy":        buySheet(v); break;
+    case "copycoupon": await copy(v); toast(t("coupons.copied")); break;
+    case "shareinvite":{ const [id,tok]=v.split("|"); shareSheet(id,tok); break; }
+    case "delinvite":  { const [id,tok]=v.split("|"); await removeInvite(id,tok); break; }
+    case "acceptinvite":{ const [id,tok]=v.split("|"); await acceptInvite(id,tok); break; }
+    case "addseat":{
+      try{
+        const r = await httpsCallable(fns, "addSeat")({ instanceId: v });
+        toast(t("dir.addseat.done", { n: r.data.seatCount }));
+        await loadEverything(); await resolveTitles(); render();
+      }catch(ex){ console.warn(ex); toast(t("dir.addseat.max"), "bad"); }
+      break; }
+    case "deleteaccount": deleteSheet(); break;
+    case "closesheet": closeSheet(); break;
+    case "pickfile":   { const el = $("#file_"+v); el && el.click(); break; }
+    case "clearfile":  { const el = $("#cf_"+v); if (el) el.value=""; render(); break; }
+    case "copytext":   await copy(v); toast(t("common.copied")); break;
+  }
+});
+
+/* ---- language ---- */
+function langSheet(){
+  sheet(`<h3 class="h2" style="margin-bottom:14px">🌐 ${esc(t("account.language"))}</h3>
+    <div class="stack">
+      ${LANGS.map(l=>`<button class="btn ${l.code===S.lang?"":"ghost"} block" data-act="setlang" data-v="${l.code}">${esc(l.label)}</button>`).join("")}
+      <button class="btn link" style="margin:6px auto 0" data-act="closesheet">${esc(t("common.close"))}</button>
+    </div>`);
+}
+async function saveLangPref(code){
+  try{ await updateDoc(doc(db,"users",S.user.uid), { preferredLanguage: code });
+       S.profile.preferredLanguage = code; }catch{}
+}
+
+async function forgot(){
+  const email = (document.querySelector("[name=email]")||{}).value;
+  if (!email) return toast(t("auth.reset.need_email"), "bad");
+  try{ await sendPasswordResetEmail(auth, email.trim()); toast(t("auth.reset.sent")); }
+  catch{ toast(t("common.error"), "bad"); }
+}
+
+/* ---- avatar ---- */
+function avatarSheet(){
+  sheet(`<h3 class="h2" style="margin-bottom:14px">${esc(t("account.avatar.pick"))}</h3>
+    <div class="avgrid">
+      ${AVATARS.map(a=>`<button class="${a===S.profile.avatar?"on":""}" data-act="setavatar" data-v="${a}">${a}</button>`).join("")}
+    </div>
+    <button class="btn ghost block" style="margin-top:16px" data-act="closesheet">${esc(t("common.close"))}</button>`);
+}
+async function setAvatar(a){
+  S.profile.avatar = a;
+  closeSheet(); render();
+  try{ await updateDoc(doc(db,"users",S.user.uid), { avatar:a }); }catch{ toast(t("common.error"),"bad"); }
+}
+
+/* ---- account ---- */
+async function saveAccount(e){
+  e.preventDefault();
+  const btn = e.target.querySelector("button[type=submit]");
+  btn.disabled = true; btn.textContent = t("common.saving");
+  const f = new FormData(e.target);
+  const patch = {
+    nickname:   String(f.get("nickname")||"").trim(),
+    displayName:String(f.get("displayName")||"").trim(),
+    preferredLanguage: String(f.get("preferredLanguage")||S.lang),
+    accountType:String(f.get("accountType")||"personal"),
+    companyName:String(f.get("companyName")||"").trim() || null
+  };
+  try{
+    await updateDoc(doc(db,"users",S.user.uid), patch);
+    if (patch.displayName) await updateProfile(S.user, { displayName: patch.displayName });
+    Object.assign(S.profile, patch);
+    toast(t("account.saved"));
+    if (patch.preferredLanguage !== S.lang) setLang(patch.preferredLanguage); else render();
+  }catch(ex){ console.warn(ex); toast(t("common.error"),"bad");
+    btn.disabled=false; btn.textContent=t("account.save"); }
+}
+
+function deleteSheet(){
+  sheet(`<h3 class="h2" style="color:var(--danger);margin-bottom:8px">${esc(t("account.delete"))}</h3>
+    <p class="small muted" style="margin-bottom:16px">${esc(t("account.delete.warn"))}</p>
+    <form id="delform" class="stack">
+      <label class="field"><span class="label">${esc(t("account.delete.pw"))}</span>
+        <input class="input" name="pw" type="password" autocomplete="current-password"></label>
+      <label class="field"><span class="label">${esc(t("account.delete.confirm"))}</span>
+        <input class="input" name="confirm" placeholder="DELETE" autocapitalize="characters"></label>
+      <p class="hint err hide" id="delerr"></p>
+      <button class="btn solid-danger block" type="submit">${esc(t("account.delete.go"))}</button>
+      <button class="btn link" type="button" style="margin:4px auto 0" data-act="closesheet">${esc(t("common.cancel"))}</button>
+    </form>`, scrim => {
+      scrim.querySelector("#delform").addEventListener("submit", doDelete);
+    });
+}
+async function doDelete(e){
+  e.preventDefault();
+  const f = new FormData(e.target), err = $("#delerr");
+  const btn = e.target.querySelector("button[type=submit]");
+  if (String(f.get("confirm")||"").trim().toUpperCase() !== "DELETE"){
+    err.textContent = t("account.delete.confirm"); err.classList.remove("hide"); return;
+  }
+  btn.disabled = true;
+  try{
+    const pw = String(f.get("pw")||"");
+    if (pw) await reauthenticateWithCredential(S.user, EmailAuthProvider.credential(S.user.email, pw));
+    try{ await deleteDoc(doc(db,"users",S.user.uid)); }catch{}
+    await deleteUser(S.user);
+    closeSheet(); toast(t("account.delete.done"));
+  }catch(ex){
+    err.textContent = (ex.code||"").includes("requires-recent-login")
+      ? t("account.delete.needpw") : t("common.error");
+    err.classList.remove("hide"); btn.disabled = false;
+  }
+}
+
+/* ---- play ---- */
+function playInstance(id){
+  const i = instById(id);
+  if (!i) return;
+  const q = i.code ? `?code=${encodeURIComponent(i.code)}` : `?instance=${encodeURIComponent(id)}`;
+  location.href = "game.html" + q + `&lang=${encodeURIComponent(i.language || S.lang)}`;
+}
+
+/* ---- store ---- */
+function buySheet(gameId){
+  const g = S.catalog.find(x=>x.id===gameId) || S.gamesById[gameId] || { id:gameId };
+  const opts = seatOpts(g);
+  const cur  = currencyOf(g);
+  const base = priceOf(g);
+  const usable = (S.profile.coupons||[]).filter(c=>!c.used &&
+      (!c.expiresAt || new Date(c.expiresAt).getTime() > Date.now()));
+
+  sheet(`
+    <h3 class="h2" style="margin-bottom:4px">${esc(g._title || g.title || g.id)}</h3>
+    <p class="small muted" style="margin-bottom:18px">${esc(g._blurb || "")}</p>
+    <form id="buyform" class="stack">
+      <div class="field"><span class="label">${esc(t("store.seats"))}</span>
+        <div class="seatpick" id="seatpick">
+          ${opts.map((n,ix)=>`<div class="opt ${ix===0?"on":""}" data-seats="${n}">${n}
+             <small>${esc(t("store.seats.n",{n}))}</small></div>`).join("")}
+        </div>
+      </div>
+      ${freeLaunch(g)?`
+      <label class="field"><span class="label">${esc(t("store.claim"))}</span>
+        <input class="input" name="claimcode" placeholder="${esc(t("store.claim.ph"))}" autocapitalize="none" autocomplete="off"></label>`:""}
+      ${usable.length?`
+      <label class="field"><span class="label">${esc(t("store.coupon"))}</span>
+        <select class="select" name="coupon">
+          <option value="">—</option>
+          ${usable.map(c=>`<option value="${esc(c.code)}" data-pct="${c.discountPct||0}">${esc(c.code)} · ${esc(t("coupons.off",{pct:c.discountPct||0}))}</option>`).join("")}
+        </select></label>`:""}
+      <div class="sep"></div>
+      <div class="row between">
+        <span class="h3">${esc(t("store.total"))}</span>
+        <span class="pricetag lime" id="buytotal">${base?money(base,cur):esc(t("common.free"))}</span>
+      </div>
+      <button class="btn block" type="submit">${esc(t("store.checkout"))}</button>
+      <button class="btn link" type="button" style="margin:2px auto 0" data-act="closesheet">${esc(t("common.cancel"))}</button>
+    </form>`, scrim => {
+      const pick = scrim.querySelector("#seatpick");
+      const total= scrim.querySelector("#buytotal");
+      const sel  = scrim.querySelector("[name=coupon]");
+      const recalc = () => {
+        const seats = Number(pick.querySelector(".opt.on").dataset.seats);
+        const perSeat = (g.store && g.store.perSeat) || 0;
+        const pct = sel && sel.selectedOptions[0] ? Number(sel.selectedOptions[0].dataset.pct||0) : 0;
+        let cents = base + perSeat * seats;
+        cents = Math.round(cents * (1 - pct/100));
+        if (freeLaunch(g)) cents = 0;
+        total.textContent = cents ? money(cents, cur) : t("common.free");
+        return { seats, pct, cents };
+      };
+      pick.addEventListener("click", ev => {
+        const o = ev.target.closest(".opt"); if (!o) return;
+        pick.querySelectorAll(".opt").forEach(x=>x.classList.remove("on"));
+        o.classList.add("on"); recalc();
+      });
+      sel && sel.addEventListener("change", recalc);
+      scrim.querySelector("#buyform").addEventListener("submit", async ev => {
+        ev.preventDefault();
+        const { seats, cents } = recalc();
+        const payload = { gameId:g.id, seatCount:seats, amount:cents, currency:cur,
+                          language:S.lang, coupon: sel ? sel.value : "" };
+        const b = ev.target.querySelector("button[type=submit]");
+        b.disabled = true; b.textContent = t("common.saving");
+        try{
+          if (freeLaunch(g)){
+            const codeInEl = document.querySelector('input[name="claimcode"]'); const codeIn = String((codeInEl&&codeInEl.value)||"").trim();
+            const claim = httpsCallable(fns, "claimGame");
+            await claim({ gameId:g.id, seatCount:seats, language:S.lang, claimCode:codeIn });
+            closeSheet();
+            await loadEverything(); await resolveTitles();
+            toast(t("store.claimed"));
+            go("games"); render();
+            return;
+          }
+          const call = httpsCallable(fns, "createCheckoutSession");
+          const res  = await call(payload);
+          if (res && res.data && res.data.url){ location.href = res.data.url; return; }
+          throw new Error("no url");
+        }catch(ex){
+          console.warn("claim failed / checkout not available", ex);
+          if (freeLaunch(g)){
+            b.disabled = false; b.textContent = t("store.checkout");
+            toast(t("store.claim.bad"), "bad");
+            return;
+          }
+          closeSheet();
+          toast(t("store.checkout.soon"));
+        }
+      });
+    });
+}
+
+/* ---- invites ---- */
+const token16 = () => {
+  const a = new Uint8Array(12); crypto.getRandomValues(a);
+  return [...a].map(b=>b.toString(36).padStart(2,"0")).join("").slice(0,18);
+};
+const inviteLink = (instanceId, tok) =>
+  `${location.origin}${location.pathname}#/join/${instanceId}/${tok}`;
+
+async function createInvite(e){
+  e.preventDefault();
+  const inst = instById(S.route.args[0]);
+  const f = new FormData(e.target), err = $("#inverr");
+  const name = String(f.get("name")||"").trim();
+  const email= String(f.get("email")||"").trim().toLowerCase();
+  err.classList.add("hide");
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
+    err.textContent = t("inv.err.email"); err.classList.remove("hide"); return;
+  }
+  if ((inst.invites||[]).some(v => (v.email||"").toLowerCase() === email)){
+    err.textContent = t("inv.err.dupe"); err.classList.remove("hide"); return;
+  }
+  const btn = e.target.querySelector("button[type=submit]");
+  btn.disabled = true;
+  const tok = token16();
+  try{
+    await setDoc(doc(db,"instances",inst.id,"invites",tok), {
+      name, email, status:"pending",
+      fromUid:S.user.uid, fromName:nameOf(),
+      createdAt:new Date().toISOString()
+    });
+    await loadInvites(inst);
+    toast(t("inv.created"));
+    await render();
+    shareSheet(inst.id, tok);
+  }catch(ex){
+    console.warn(ex); err.textContent = t("common.error"); err.classList.remove("hide"); btn.disabled=false;
+  }
+}
+
+async function removeInvite(instanceId, tok){
+  const inst = instById(instanceId);
+  const v = (inst.invites||[]).find(x=>x.token===tok);
+  if (!confirm(t("inv.remove.confirm",{name:(v&&v.name)||""}))) return;
+  try{
+    await deleteDoc(doc(db,"instances",instanceId,"invites",tok));
+    await loadInvites(inst); render();
+  }catch{ toast(t("common.error"),"bad"); }
+}
+
+function shareSheet(instanceId, tok){
+  const inst = instById(instanceId) || {};
+  const v = (inst.invites||[]).find(x=>x.token===tok) || {};
+  const link = inviteLink(instanceId, tok);
+  const msg  = t("inv.share.msg", { name:v.name||"", game:inst.title||"", link });
+  const enc  = encodeURIComponent(msg);
+
+  sheet(`
+    <h3 class="h2 center" style="margin-bottom:18px">${esc(t("inv.share.title"))}</h3>
+    <div class="sharegrid">
+      <button data-href="https://wa.me/?text=${enc}"><div class="bub">💬</div>${esc(t("common.whatsapp"))}</button>
+      <button data-href="mailto:${encodeURIComponent(v.email||"")}?subject=${encodeURIComponent(inst.title||"TotemTime")}&body=${enc}"><div class="bub">✉️</div>${esc(t("common.email"))}</button>
+      <button data-href="https://t.me/share/url?url=${encodeURIComponent(link)}&text=${enc}"><div class="bub">✈️</div>${esc(t("common.telegram"))}</button>
+      <button data-native><div class="bub">⋯</div>${esc(t("common.more"))}</button>
+    </div>
+    <p class="tiny muted center" style="margin:20px 0 10px">${esc(t("inv.share.with"))}</p>
+    <div class="row" style="gap:8px">
+      <input class="input grow" readonly value="${esc(link)}" onclick="this.select()">
+      <button class="iconbtn" data-act="copytext" data-v="${esc(link)}" aria-label="${esc(t("common.copy"))}">⧉</button>
+    </div>
+    <button class="btn ghost block" style="margin-top:16px" data-act="closesheet">${esc(t("common.close"))}</button>
+  `, scrim => {
+    scrim.querySelectorAll("[data-href]").forEach(b =>
+      b.addEventListener("click", () => window.open(b.dataset.href, "_blank", "noopener")));
+    const nat = scrim.querySelector("[data-native]");
+    nat && nat.addEventListener("click", async () => {
+      if (navigator.share) { try{ await navigator.share({ title:inst.title||"TotemTime", text:msg, url:link }); }catch{} }
+      else { await copy(link); toast(t("common.copied")); }
+    });
+  });
+}
+
+async function acceptInvite(instanceId, tok){
+  try{
+    await updateDoc(doc(db,"instances",instanceId,"invites",tok), {
+      status:"accepted", uid:S.user.uid, acceptedAt:new Date().toISOString()
+    });
+    await updateDoc(doc(db,"users",S.user.uid), { instances: arrayUnion(instanceId) });
+    S.profile.instances = [...new Set([...(S.profile.instances||[]), instanceId])];
+    await loadEverything(); await resolveTitles();
+    toast(t("join.done"));
+    go("games");
+  }catch(ex){ console.warn(ex); toast(t("common.error"), "bad"); }
+}
+
+/* ---- customization ---- */
+async function onFileChosen(e){
+  const wrap = e.target.closest("[data-cust]");
+  const key  = wrap.dataset.cust;
+  const inst = instById(S.route.args[0]);
+  const file = e.target.files[0];
+  if (!file || !inst) return;
+  const man  = ((inst.game && inst.game.customizable) || []).find(f=>f.key===key) || {};
+  const max  = man.maxBytes || (wrap.dataset.type === "video" ? 60e6 : 5e6);
+  const prog = $("#prog_"+key);
+  if (file.size > max){ toast(t("cust.toobig",{mb:Math.round(max/1e6)}), "bad"); return; }
+  prog.textContent = t("cust.uploading");
+  try{
+    const ext = (file.name.split(".").pop()||"bin").toLowerCase().replace(/[^a-z0-9]/g,"");
+    const r   = sRef(store, `instances/${inst.id}/${key}.${ext}`);
+    await uploadBytes(r, file, { contentType: file.type });
+    const url = await getDownloadURL(r);
+    const input = $("#cf_"+key);
+    if (input) input.value = url;
+    inst.customization = { ...(inst.customization||{}), [key]: url };
+    prog.textContent = "";
+    render();
+  }catch(ex){ console.warn(ex); prog.textContent = ""; toast(t("common.error"), "bad"); }
+}
+
+async function saveCustomization(e){
+  e.preventDefault();
+  const inst = instById(S.route.args[0]);
+  const btn = e.target.querySelector("button[type=submit]");
+  btn.disabled = true; btn.textContent = t("common.saving");
+  const out = {};
+  new FormData(e.target).forEach((val,k)=>{ out[k] = String(val); });
+  try{
+    await updateDoc(doc(db,"instances",inst.id), { customization: out });
+    inst.customization = out;
+    toast(t("cust.saved"));
+    btn.disabled = false; btn.textContent = t("cust.save");
+  }catch(ex){
+    console.warn(ex); toast(t("common.error"), "bad");
+    btn.disabled = false; btn.textContent = t("cust.save");
+  }
+}
+
+/* ================================================================
+   11. Boot
+   ================================================================ */
+setLangSilent(S.lang);
+function setLangSilent(code){
+  const meta = LANGS.find(l=>l.code===code) || LANGS[0];
+  document.documentElement.lang = code;
+  document.documentElement.dir  = meta.dir;
+}
+
+S.route = parseHash();
+root.innerHTML = `<div class="authwrap"><div class="card sk" style="height:220px"></div></div>`;
+
+onAuthStateChanged(auth, async user => {
+  S.user = user;
+  if (!user){ S.profile=null; S.instances=[]; renderAuth(); return; }
+  try{
+    await loadEverything();
+    await resolveTitles();
+    // pre-count invites so seat meters are right on the first paint
+    await Promise.all(S.instances.filter(i=>i.role==="director").map(loadInvites));
+  }catch(e){ console.warn("boot", e); }
+  render();
+});
+</script>
+</body>
+</html>

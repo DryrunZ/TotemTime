@@ -1,0 +1,11 @@
+{
+  "game.title": "אחוזת הרפאים",
+  "step1.c1.src": "stock/fireplace.jpg",
+  "step1.c2.text": "המספר חקוק מעל הקמין",
+  "step1.c3.hint": "חפשו תאריך בן ארבע ספרות",
+  "step1.outcome": "הדלת נפתחת בחריקה...",
+  "step2.c1.text": "כולם, הניחו יד על הטוטם כשאתם מוכנים",
+  "step2.ready": "מוכן",
+  "cust.team_name": "שם הקבוצה שלכם",
+  "cust.hero_image": "תמונה לפתיחה"
+}

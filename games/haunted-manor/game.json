@@ -1,0 +1,32 @@
+{
+  "gameId": "haunted-manor",
+  "title_key": "game.title",
+  "N": 3,
+  "stepCount": 2,
+  "defaultLanguage": "he",
+  "customizable": [
+    { "key": "team_name",  "label_key": "cust.team_name",  "type": "text",  "default": "The Adventurers", "maxLength": 40 },
+    { "key": "hero_image", "label_key": "cust.hero_image", "type": "image", "default": "stock/manor.jpg", "maxBytes": 3000000, "accept": ["image/jpeg", "image/png"] }
+  ],
+  "steps": [
+    {
+      "id": "step_1",
+      "advanceOnClose": true,
+      "gate": null,
+      "components": [
+        { "id": "c1", "type": "image", "visibleTo": [1], "src_key": "step1.c1.src" },
+        { "id": "c2", "type": "text",  "visibleTo": [2], "text_key": "step1.c2.text" },
+        { "id": "c3", "type": "input", "visibleTo": [3], "hint_key": "step1.c3.hint", "outcome_key": "step1.outcome" }
+      ]
+    },
+    {
+      "id": "step_2",
+      "advanceOnClose": true,
+      "gate": { "type": "latching", "threshold": 4 },
+      "components": [
+        { "id": "c1", "type": "text",   "visibleTo": "all", "text_key": "step2.c1.text" },
+        { "id": "c2", "type": "button", "visibleTo": "all", "label_key": "step2.ready", "action": "gate_click" }
+      ]
+    }
+  ]
+}

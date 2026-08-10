@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0B0C">
+<title>Totem Time — Let's solve this together</title>
+<meta name="description" content="Purely digital team escape games. True multiplayer: cooperate or fail. AI, music, location and AR challenges, custom storylines, played from anywhere. $10 per player, from 3 players.">
+<meta property="og:title" content="Totem Time — Let's solve this together">
+<meta property="og:description" content="Purely digital team escape games. Cooperate or fail. From $10 per player.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/brand/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/brand/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/brand/favicon-16.png">
+<link rel="apple-touch-icon" href="assets/brand/apple-touch-icon.png">
+<meta property="og:image" content="assets/games/kidnapped-il/cover.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Heebo:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Totem Time — landing page.
+   Same tokens as portal.html / game.html so the marketing site,
+   the portal and the game read as one product.
+   ============================================================ */
+:root{
+  --ltc-700:#191B1F; --ltc-600:#373D40; --ltc-500:#5E6366; --ltc-400:#6B6F89;
+  --ltc-300:#A5AABE; --ltc-200:#C9CCD8; --ltc-50:#F9F8F8;
+  --p-700:#34410E; --p-600:#ADCB53; --p-500:#D0F267; --p-400:#D9F585; --p-300:#E3F7A4;
+  --b-700:#214878; --b-600:#417FD1; --b-500:#519BFC; --b-400:#74AFFD;
+  --danger:#F64C4C; --warning:#FFAD0D;
+
+  --bg:#0B0B0C; --surface:#141416; --surface-2:#1E1E20; --surface-3:#282829;
+  --hairline:rgba(255,255,255,.08); --hairline-2:rgba(255,255,255,.16);
+
+  --font:'Outfit','Heebo',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-he:'Heebo','Outfit',system-ui,sans-serif;
+
+  --r-xs:10px; --r-sm:14px; --r-md:18px; --r-lg:24px; --r-xl:32px; --r-pill:999px;
+  --max:1180px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{
+  margin:0;background:var(--bg);color:var(--ltc-50);
+  font-family:var(--font);font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+html[dir="rtl"] body{font-family:var(--font-he)}
+img{max-width:100%;display:block}
+h1,h2,h3,h4,p,ul,figure,blockquote,figcaption{margin:0;padding:0}
+ul{list-style:none}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+:focus-visible{outline:2px solid var(--p-500);outline-offset:3px;border-radius:8px}
+.hide{display:none !important}
+
+/* ---------- layout ---------- */
+.wrap{width:100%;max-width:var(--max);margin:0 auto;padding:0 20px}
+section{padding:64px 0;position:relative}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--p-500);margin-bottom:14px;
+}
+.eyebrow::before{content:"";width:18px;height:2px;background:var(--p-500);border-radius:2px}
+html[dir="rtl"] .eyebrow{letter-spacing:0}
+h1,.h1{font-size:clamp(34px,9vw,72px);font-weight:800;line-height:1.02;letter-spacing:-.035em}
+h2,.h2{font-size:clamp(27px,6vw,44px);font-weight:800;line-height:1.08;letter-spacing:-.03em}
+h3,.h3{font-size:20px;font-weight:700;letter-spacing:-.01em}
+.lead{font-size:clamp(16px,4.2vw,19px);color:var(--ltc-300);line-height:1.55}
+.small{font-size:14px}.tiny{font-size:12.5px}
+.muted{color:var(--ltc-400)}.dim{color:var(--ltc-300)}.lime{color:var(--p-500)}
+.center{text-align:center}
+.sec-head{max-width:60ch;margin-bottom:34px}
+.sec-head.mid{margin-inline:auto;text-align:center}
+.sec-head p{margin-top:12px}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  min-height:54px;padding:0 26px;border-radius:var(--r-md);
+  font-weight:700;font-size:16px;background:var(--p-500);color:#12160A;
+  transition:transform .12s ease,filter .16s ease,background .16s ease;
+  -webkit-tap-highlight-color:transparent;white-space:nowrap;
+}
+.btn:hover{filter:brightness(1.07)}
+.btn:active{transform:scale(.975)}
+.btn.block{width:100%}
+.btn.ghost{background:var(--surface-2);color:var(--ltc-50);box-shadow:inset 0 0 0 1px var(--hairline-2)}
+.btn.ghost:hover{background:var(--surface-3)}
+.btn.sm{min-height:44px;padding:0 18px;font-size:14.5px;border-radius:var(--r-sm)}
+.btn.xs{min-height:36px;padding:0 14px;font-size:13px;border-radius:var(--r-xs)}
+.btn.line{background:none;box-shadow:inset 0 0 0 1.5px var(--p-500);color:var(--p-500)}
+.btn.line:hover{background:rgba(208,242,103,.1)}
+
+.chip{
+  display:inline-flex;align-items:center;gap:7px;padding:7px 14px;border-radius:var(--r-pill);
+  background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--hairline);
+  font-size:12.5px;font-weight:600;color:var(--ltc-200);white-space:nowrap;
+}
+.chip.lime{background:rgba(208,242,103,.13);color:var(--p-500);box-shadow:inset 0 0 0 1px rgba(208,242,103,.32)}
+.chip.blue{background:rgba(81,155,252,.13);color:var(--b-400);box-shadow:inset 0 0 0 1px rgba(81,155,252,.32)}
+.chip.warn{background:rgba(255,173,13,.13);color:var(--warning);box-shadow:inset 0 0 0 1px rgba(255,173,13,.32)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+
+.card{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:22px}
+
+/* ---------- nav ---------- */
+header{
+  position:sticky;top:0;z-index:60;
+  background:rgba(11,11,12,.72);backdrop-filter:blur(20px) saturate(1.4);
+  border-bottom:1px solid transparent;transition:border-color .2s ease;
+}
+header.stuck{border-bottom-color:var(--hairline)}
+header .bar{display:flex;align-items:center;gap:14px;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;letter-spacing:-.02em}
+.logo .mark{width:36px;height:36px;flex:none;object-fit:contain;filter:drop-shadow(0 0 14px rgba(208,242,103,.28))}
+footer .logo .mark{width:40px;height:40px}
+nav.links{display:none;gap:4px;margin-inline:auto}
+nav.links a{padding:9px 14px;border-radius:var(--r-sm);font-size:15px;font-weight:600;color:var(--ltc-300)}
+nav.links a:hover{background:var(--surface-2);color:var(--ltc-50)}
+.navend{display:flex;align-items:center;gap:8px;margin-inline-start:auto}
+.langbtn{
+  height:40px;padding:0 12px;border-radius:var(--r-sm);background:var(--surface-2);
+  box-shadow:inset 0 0 0 1px var(--hairline);font-size:13.5px;font-weight:600;color:var(--ltc-200);
+  display:inline-flex;align-items:center;gap:7px;
+}
+.langbtn:hover{background:var(--surface-3)}
+.burger{
+  width:42px;height:42px;border-radius:var(--r-sm);background:var(--surface-2);
+  box-shadow:inset 0 0 0 1px var(--hairline);display:grid;place-items:center;gap:4px;
+}
+.burger i{display:block;width:17px;height:2px;background:var(--ltc-200);border-radius:2px}
+.mobmenu{border-top:1px solid var(--hairline);padding:12px 0 18px}
+.mobmenu a{display:block;padding:13px 4px;font-weight:600;font-size:16px;border-bottom:1px solid var(--hairline)}
+
+/* ---------- hero ---------- */
+.hero{padding:44px 0 56px;position:relative;overflow:hidden}
+.glow{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none;z-index:0}
+.glow.a{width:min(520px,90vw);height:min(520px,90vw);background:rgba(208,242,103,.16);top:-190px;inset-inline-start:-140px}
+.glow.b{width:min(440px,80vw);height:min(440px,80vw);background:rgba(81,155,252,.14);top:120px;inset-inline-end:-160px}
+.hero .wrap{position:relative;z-index:1}
+.hero h1 .sweep{
+  background:linear-gradient(100deg,var(--p-500),var(--p-300) 45%,var(--b-400));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero .lead{margin-top:18px;max-width:52ch}
+.herocta{display:flex;flex-direction:column;gap:12px;margin-top:28px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+
+.statrow{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:34px;
+}
+.stat{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:18px}
+.stat b{display:block;font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.stat span{font-size:12.5px;color:var(--ltc-400);font-weight:500}
+.stat.hi{background:var(--p-500);border-color:transparent;color:#12160A}
+.stat.hi span{color:rgba(18,22,10,.66)}
+
+/* ---------- cooperate band ---------- */
+.band{
+  background:
+    radial-gradient(120% 140% at 50% 0%,rgba(208,242,103,.10),transparent 60%),
+    var(--surface);
+  border-block:1px solid var(--hairline);
+}
+.coop{display:grid;gap:14px}
+.coop .item{
+  background:var(--bg);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:22px;
+  position:relative;overflow:hidden;
+}
+.coop .item .n{
+  font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--p-500);margin-bottom:10px;display:block;
+}
+.coop .item p{color:var(--ltc-300);font-size:15px;margin-top:7px}
+
+/* ---------- steps ---------- */
+.steps{display:grid;gap:14px;counter-reset:s}
+.step{
+  background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-lg);
+  padding:24px 22px;position:relative;
+}
+.step .num{
+  width:38px;height:38px;border-radius:12px;background:var(--p-500);color:#12160A;
+  display:grid;place-items:center;font-weight:800;font-size:17px;margin-bottom:14px;
+}
+.step p{color:var(--ltc-300);font-size:15px;margin-top:7px}
+
+/* ---------- ways to play ---------- */
+.ways{display:grid;gap:14px;margin-top:56px}
+.way{
+  background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-lg);
+  padding:22px;display:flex;flex-direction:column;gap:9px;
+}
+.way .ic{font-size:28px}
+.way h4{font-size:17px;font-weight:700}
+.way p{font-size:14.5px;color:var(--ltc-300);line-height:1.5}
+.way .tools{display:flex;flex-wrap:wrap;gap:7px;margin-top:4px}
+.way .tools span{
+  font-size:11.5px;font-weight:600;color:var(--ltc-300);
+  background:var(--surface-2);box-shadow:inset 0 0 0 1px var(--hairline);
+  padding:5px 10px;border-radius:var(--r-pill);
+}
+
+/* ---------- games ---------- */
+.games{display:grid;gap:16px}
+.game{
+  position:relative;border-radius:var(--r-lg);overflow:hidden;
+  background:var(--surface);border:1px solid var(--hairline);
+  display:flex;flex-direction:column;
+  transition:transform .2s ease,border-color .2s ease;
+}
+.game:hover{transform:translateY(-3px);border-color:var(--hairline-2)}
+.game .art{
+  aspect-ratio:16/9;position:relative;display:grid;place-items:center;overflow:hidden;
+  background:linear-gradient(150deg,var(--surface-3),var(--surface));
+  font-size:62px;
+}
+.game .art img{width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.2,.8,.25,1)}
+.game:hover .art img{transform:scale(1.035)}
+.game .art::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(0,0,0,.28) 0%,transparent 34%,transparent 62%,rgba(0,0,0,.55))}
+.game .badges{position:absolute;top:14px;inset-inline-start:14px;z-index:2;display:flex;gap:8px;flex-wrap:wrap}
+.game .info{padding:20px;display:flex;flex-direction:column;gap:8px;flex:1}
+.game .info .kind{font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--p-500)}
+.game .info p{color:var(--ltc-300);font-size:15px;flex:1}
+.game .buy{display:flex;align-items:center;gap:10px;margin-top:6px}
+.game.soon{border-style:dashed;background:none}
+.game.soon .art{background:none;font-size:44px;opacity:.5;aspect-ratio:16/6}
+
+/* ---------- features ---------- */
+.feats{display:grid;gap:12px;grid-template-columns:repeat(2,1fr)}
+.feat{
+  background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:18px;
+  transition:border-color .2s ease,transform .2s ease;
+}
+.feat:hover{border-color:var(--hairline-2);transform:translateY(-2px)}
+.feat .ic{font-size:26px;margin-bottom:10px;display:block}
+.feat h4{font-size:15.5px;font-weight:700;margin-bottom:5px}
+.feat p{font-size:13.5px;color:var(--ltc-400);line-height:1.45}
+
+/* ---------- pricing ---------- */
+.pricebox{
+  background:linear-gradient(160deg,rgba(208,242,103,.12),transparent 55%),var(--surface);
+  border:1px solid rgba(208,242,103,.28);border-radius:var(--r-xl);padding:26px 22px;
+}
+.bigprice{display:flex;align-items:baseline;gap:8px;justify-content:center;margin-bottom:4px}
+.bigprice b{font-size:clamp(44px,13vw,68px);font-weight:900;letter-spacing:-.04em;line-height:1}
+.bigprice span{font-size:16px;color:var(--ltc-300);font-weight:600}
+.stepper{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  background:var(--bg);border:1px solid var(--hairline);border-radius:var(--r-md);padding:10px 12px;
+}
+.stepper button{
+  width:46px;height:46px;border-radius:var(--r-sm);background:var(--surface-2);
+  box-shadow:inset 0 0 0 1px var(--hairline);font-size:22px;font-weight:700;
+  display:grid;place-items:center;flex:none;
+}
+.stepper button:hover:not(:disabled){background:var(--surface-3)}
+.stepper button:disabled{opacity:.32;cursor:not-allowed}
+.stepper .val{text-align:center;flex:1}
+.stepper .val b{display:block;font-size:26px;font-weight:800;line-height:1.1}
+.stepper .val span{font-size:12px;color:var(--ltc-400)}
+.totrow{display:flex;align-items:center;justify-content:space-between;padding:16px 2px}
+.totrow .amt{font-size:30px;font-weight:800;letter-spacing:-.025em;color:var(--p-500)}
+.incl{display:grid;gap:9px;margin:4px 0 20px}
+.incl li{display:flex;gap:10px;font-size:14.5px;color:var(--ltc-200)}
+.incl li::before{content:"✓";color:var(--p-500);font-weight:800;flex:none}
+
+/* ---------- testimonials ---------- */
+.quotes{display:grid;gap:14px}
+.quote{
+  background:var(--surface);border:1px solid var(--hairline);border-radius:var(--r-lg);padding:22px;
+  display:flex;flex-direction:column;gap:14px;
+}
+.quote .stars{color:var(--p-500);font-size:14px;letter-spacing:2px}
+.quote blockquote{font-size:16.5px;line-height:1.5;flex:1}
+.quote .who{display:flex;align-items:center;gap:11px}
+.quote .who .av{
+  width:40px;height:40px;border-radius:50%;flex:none;display:grid;place-items:center;
+  background:var(--surface-3);box-shadow:inset 0 0 0 1px var(--hairline);
+  font-weight:800;font-size:15px;color:var(--p-500);
+}
+.quote .who b{display:block;font-size:14.5px}
+.quote .who span{font-size:12.5px;color:var(--ltc-400)}
+
+/* ---------- contact ---------- */
+.contact{
+  background:linear-gradient(150deg,var(--p-500),var(--p-600));color:#12160A;
+  border-radius:var(--r-xl);padding:34px 24px;text-align:center;
+}
+.contact h2{margin-bottom:10px}
+.contact p{color:rgba(18,22,10,.72);font-size:16px;max-width:46ch;margin:0 auto 22px}
+.contact .btn{background:#12160A;color:var(--p-500)}
+.contact .btn.ghost{background:rgba(18,22,10,.1);color:#12160A;box-shadow:inset 0 0 0 1.5px rgba(18,22,10,.35)}
+.contactcta{display:flex;flex-direction:column;gap:10px}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--hairline);padding:40px 0 calc(34px + var(--safe-b));margin-top:20px}
+.foot{display:flex;flex-direction:column;gap:22px}
+.footlinks{display:flex;flex-wrap:wrap;gap:8px 22px}
+.footlinks a{font-size:14px;color:var(--ltc-300)}
+.footlinks a:hover{color:var(--p-500)}
+.legal{font-size:12.5px;color:var(--ltc-500);line-height:1.6}
+
+/* ---------- sheet ---------- */
+.scrim{
+  position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.7);backdrop-filter:blur(3px);
+  display:flex;align-items:flex-end;justify-content:center;animation:fade .18s ease;
+}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.sheet{
+  width:100%;max-width:520px;max-height:90vh;overflow:auto;
+  background:var(--surface);border:1px solid var(--hairline-2);
+  border-radius:var(--r-xl) var(--r-xl) 0 0;padding:18px 20px calc(24px + var(--safe-b));
+  animation:up .24s cubic-bezier(.2,.8,.25,1);
+}
+@keyframes up{from{transform:translateY(28px);opacity:.5}to{transform:none;opacity:1}}
+.sheet .grip{width:44px;height:4px;border-radius:var(--r-pill);background:var(--surface-3);margin:0 auto 16px}
+
+/* ---------- reveal on scroll ---------- */
+.rv{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.25,1)}
+.rv.in{opacity:1;transform:none}
+
+/* ---------- desktop ---------- */
+@media (min-width:760px){
+  section{padding:88px 0}
+  .wrap{padding:0 32px}
+  .herocta{flex-direction:row}
+  .contactcta{flex-direction:row;justify-content:center}
+  .statrow{grid-template-columns:repeat(4,1fr)}
+  .coop{grid-template-columns:repeat(3,1fr)}
+  .steps{grid-template-columns:repeat(3,1fr)}
+  .ways{grid-template-columns:repeat(3,1fr)}
+  .games{grid-template-columns:repeat(2,1fr)}
+  .feats{grid-template-columns:repeat(3,1fr);gap:14px}
+  .quotes{grid-template-columns:repeat(3,1fr)}
+  .foot{flex-direction:row;align-items:flex-start;justify-content:space-between}
+  .scrim{align-items:center}
+  .sheet{border-radius:var(--r-xl);padding:26px}
+}
+@media (min-width:1000px){
+  nav.links{display:flex}
+  .burger{display:none}
+  .hero{padding:76px 0 92px}
+  .hero .grid{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);gap:52px;align-items:center}
+  .hero .statrow{grid-template-columns:repeat(2,1fr);gap:14px;margin-top:0}
+  .hero .stat{padding:22px}
+  .hero .stat b{font-size:32px}
+  .feats{grid-template-columns:repeat(5,1fr)}
+  .pricewrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:32px;align-items:center}
+  .contact{padding:52px 40px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *{animation:none !important;transition:none !important}
+  .rv{opacity:1;transform:none}
+}
+.cover-fallback{background:linear-gradient(135deg,#1a1f16,#2a3320 60%,#c8f54222)!important;min-height:180px}
+/* data-coverfallback marker */
+</style>
+</head>
+<body>
+<header id="top">
+  <div class="wrap">
+    <div class="bar">
+      <a class="logo" href="#top"><img class="mark" src="assets/brand/totem-logo.png" alt="Totem Time" width="36" height="36">Totem&nbsp;Time</a>
+      <nav class="links">
+        <a href="#games"        data-t="nav.games">Games</a>
+        <a href="#how"          data-t="nav.how">How it works</a>
+        <a href="#inside"       data-t="nav.inside">What's inside</a>
+        <a href="#pricing"      data-t="nav.pricing">Pricing</a>
+        <a href="#contact"      data-t="nav.contact">Contact</a>
+      </nav>
+      <div class="navend">
+        <button class="langbtn" data-act="lang">🌐 <span id="langlabel">English</span></button>
+        <a class="btn sm" href="portal.html" data-t="nav.login">Log in</a>
+        <button class="burger" data-act="menu" aria-label="Menu" aria-expanded="false"><i></i><i></i><i></i></button>
+      </div>
+    </div>
+    <div class="mobmenu hide" id="mobmenu">
+      <a href="#games"   data-t="nav.games">Games</a>
+      <a href="#how"     data-t="nav.how">How it works</a>
+      <a href="#inside"  data-t="nav.inside">What's inside</a>
+      <a href="#pricing" data-t="nav.pricing">Pricing</a>
+      <a href="#contact" data-t="nav.contact">Contact</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============================ HERO ============================ -->
+<section class="hero">
+  <div class="glow a"></div><div class="glow b"></div>
+  <div class="wrap">
+    <div class="grid">
+      <div>
+        <span class="eyebrow" data-t="hero.eyebrow">Purely digital · Team only</span>
+        <h1 data-t="hero.title">Let's solve<br>this <span class="sweep">together</span>.</h1>
+        <p class="lead" data-t="hero.sub">Online escape games your whole team plays at once — from the same room or five time zones apart. Nobody finishes alone. You crack it together, or you don't crack it at all.</p>
+        <div class="herocta">
+          <a class="btn" href="#games" data-t="hero.cta1">Pick your game</a>
+          <a class="btn ghost" href="#how" data-t="hero.cta2">See how it works</a>
+        </div>
+        <div class="pills">
+          <span class="chip lime"><span class="dot"></span><span data-t="pill.live">True multiplayer</span></span>
+          <span class="chip" data-t="pill.device">Any device, no install</span>
+          <span class="chip" data-t="pill.call">Teams · Zoom · Meet — or same table</span>
+          <span class="chip" data-t="pill.lang">Multilingual</span>
+          <span class="chip" data-t="pill.custom">Custom per team</span>
+        </div>
+      </div>
+
+      <div class="statrow">
+        <div class="stat hi"><b>10,000+</b><span data-t="stat.played">games played worldwide</span></div>
+        <div class="stat"><b>3+</b><span data-t="stat.players">players per team</span></div>
+        <div class="stat"><b>$10</b><span data-t="stat.price">per player</span></div>
+        <div class="stat"><b>60 min</b><span data-t="stat.time">of nobody checking Slack</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= COOPERATE OR FAIL ======================= -->
+<section class="band" id="coop">
+  <div class="wrap">
+    <div class="sec-head mid">
+      <span class="eyebrow" data-t="coop.eyebrow">True multiplayer</span>
+      <h2 data-t="coop.title">Cooperate, or fail.</h2>
+      <p class="lead" data-t="coop.sub">This isn't one person sharing a screen while everyone watches. Every player gets their own piece of the puzzle — and no piece is enough on its own.</p>
+    </div>
+    <div class="coop">
+      <div class="item rv">
+        <span class="n">01</span>
+        <h3 data-t="coop.1.t">Everyone sees something different</h3>
+        <p data-t="coop.1.b">The clue on your screen is useless to you and essential to someone else. Talk, or stay stuck.</p>
+      </div>
+      <div class="item rv">
+        <span class="n">02</span>
+        <h3 data-t="coop.2.t">Advance as a team</h3>
+        <p data-t="coop.2.b">Some doors only open when the whole team acts together. One player pressing harder changes nothing.</p>
+      </div>
+      <div class="item rv">
+        <span class="n">03</span>
+        <h3 data-t="coop.3.t">Win as a team</h3>
+        <p data-t="coop.3.b">There's no top scorer and no MVP. The team finishes together, or the story ends badly for everyone.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ HOW ============================ -->
+<section id="how">
+  <div class="wrap">
+    <div class="sec-head mid">
+      <span class="eyebrow" data-t="how.eyebrow">Three steps</span>
+      <h2 data-t="how.title">From idea to game night in minutes</h2>
+    </div>
+    <div class="steps">
+      <div class="step rv"><div class="num">1</div>
+        <h3 data-t="how.1.t">Buy and set your team size</h3>
+        <p data-t="how.1.b">From 3 players up. Add as many as you need — $10 each, and you can grow the team right up to game night.</p></div>
+      <div class="step rv"><div class="num">2</div>
+        <h3 data-t="how.2.t">Invite and make it yours</h3>
+        <p data-t="how.2.b">Send everyone a link. Then drop in your own photos, names and inside jokes — the story bends around your team.</p></div>
+      <div class="step rv"><div class="num">3</div>
+        <h3 data-t="how.3.t">Play together, anywhere</h3>
+        <p data-t="how.3.b">Everyone opens their own device at the same time. No app, no install, no setup call. Hints live inside the game.</p></div>
+    </div>
+
+    <div class="sec-head mid" style="margin:56px auto 0">
+      <span class="eyebrow" data-t="ways.eyebrow">However you're sitting</span>
+      <h2 style="font-size:clamp(23px,5vw,34px)" data-t="ways.title">Same room, or six time zones</h2>
+      <p class="lead" data-t="ways.sub">The game runs in a browser on each player's own device. How your team talks to each other is entirely up to you.</p>
+    </div>
+    <div class="ways">
+      <div class="way rv">
+        <span class="ic">🎥</span>
+        <h4 data-t="ways.1.t">On a video call</h4>
+        <p data-t="ways.1.b">Put your usual call on one screen and the game on the other. Everyone sees their own clues and talks it out loud, exactly like being in the room.</p>
+        <div class="tools"><span>Microsoft Teams</span><span>Zoom</span><span>Google Meet</span><span data-t="ways.any">…or any call</span></div>
+      </div>
+      <div class="way rv">
+        <span class="ic">🤝</span>
+        <h4 data-t="ways.2.t">Shoulder to shoulder</h4>
+        <p data-t="ways.2.b">Same table, same room, one device each. Nobody needs to pass a phone around — the split screens already gave everyone a job.</p>
+        <div class="tools"><span data-t="ways.2.tag1">No call needed</span><span data-t="ways.2.tag2">One device per player</span></div>
+      </div>
+      <div class="way rv">
+        <span class="ic">🌍</span>
+        <h4 data-t="ways.3.t">Half and half</h4>
+        <p data-t="ways.3.b">Three in the office, two working from home, one on a train. Mix it however your team actually is — nobody plays second class.</p>
+        <div class="tools"><span data-t="ways.3.tag1">Hybrid teams</span><span data-t="ways.3.tag2">Any timezone</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ GAMES ============================ -->
+<section id="games" class="band">
+  <div class="wrap">
+    <div class="sec-head mid">
+      <span class="eyebrow" data-t="games.eyebrow">The catalogue</span>
+      <h2 data-t="games.title">Pick your night</h2>
+      <p class="lead" data-t="games.sub">Every game is fully digital, fully team-based, and customizable for your group.</p>
+    </div>
+
+    <div class="games">
+      <article class="game rv" data-game="kidnapped-il" data-name="KidnAPPed">
+        <div class="art"><img src="assets/games/kidnapped-il/cover.jpg" onerror="this.style.display='none';this.parentElement.classList.add('cover-fallback')" alt="KidnAPPed" loading="lazy" decoding="async" width="1280" height="720"><div class="badges"><span class="chip lime"><span class="dot"></span>10,000+ <span data-t="games.plays">played</span></span></div></div>
+        <div class="info">
+          <span class="kind" data-t="games.k.escape">Escape game</span>
+          <h3>KidnAPPed</h3>
+          <p data-t="games.kidnapped">Someone is missing and the trail is already cold. Thirteen scenes, three sets of eyes, one hour to bring them home. Our most played game, worldwide.</p>
+          <div class="buy">
+            <button class="btn sm" data-act="buy" data-t="games.buy">Buy game</button>
+            <span class="tiny muted" data-t="games.from">from $30 · 3 players</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="game rv" data-game="countdown" data-name="Countdown">
+        <div class="art"><img src="assets/games/countdown/cover.jpg" onerror="this.style.display='none';this.parentElement.classList.add('cover-fallback')" alt="Countdown" loading="lazy" decoding="async" width="1280" height="720"><div class="badges"><span class="chip warn" data-t="games.new">New</span></div></div>
+        <div class="info">
+          <span class="kind" data-t="games.k.boom">An explosive escape game</span>
+          <h3>Countdown</h3>
+          <p data-t="games.countdown">Time is the one thing you can't defuse. Sixty minutes, a locked room, and a device that does not care how clever you are.</p>
+          <div class="buy">
+            <button class="btn sm" data-act="buy" data-t="games.buy">Buy game</button>
+            <span class="tiny muted" data-t="games.from">from $30 · 3 players</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="game rv" data-game="lighthouse" data-name="The Lighthouse">
+        <div class="art"><img src="assets/games/lighthouse/cover.jpg" onerror="this.style.display='none';this.parentElement.classList.add('cover-fallback')" alt="The Lighthouse" loading="lazy" decoding="async" width="1280" height="720"></div>
+        <div class="info">
+          <span class="kind" data-t="games.k.arg">Alternate reality game</span>
+          <h3>The Lighthouse</h3>
+          <p data-t="games.lighthouse">Nothing is as it seems. Uncover the signal, solve the puzzles, change the outcome — an ARG that reaches past the screen and into real places.</p>
+          <div class="buy">
+            <button class="btn sm" data-act="buy" data-t="games.buy">Buy game</button>
+            <span class="tiny muted" data-t="games.from">from $30 · 3 players</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="game rv" data-game="art-of-war" data-name="Sun Tzu: The Art of War">
+        <div class="art"><img src="assets/games/art-of-war/cover.jpg" onerror="this.style.display='none';this.parentElement.classList.add('cover-fallback')" alt="Sun Tzu — The Art of War" loading="lazy" decoding="async" width="1280" height="720"></div>
+        <div class="info">
+          <span class="kind" data-t="games.k.strategy">The Art of War in the AI world</span>
+          <h3>Sun Tzu: The Art of War</h3>
+          <p data-t="games.artofwar">Know yourself, know your enemy. See, think and move before the others — against an AI that adapts to your team and learns from the move you just made.</p>
+          <div class="buy">
+            <button class="btn sm" data-act="buy" data-t="games.buy">Buy game</button>
+            <span class="tiny muted" data-t="games.from">from $30 · 3 players</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="game soon rv">
+        <div class="art">✨</div>
+        <div class="info">
+          <span class="kind" data-t="games.k.soon">In the workshop</span>
+          <h3 data-t="games.more.t">More are coming</h3>
+          <p data-t="games.more.b">New stories, new mechanics, new ways to make your team argue productively. Tell us what you'd want to play.</p>
+          <div class="buy"><a class="btn ghost sm" href="#contact" data-t="games.more.cta">Suggest a game</a></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ INSIDE ============================ -->
+<section id="inside">
+  <div class="wrap">
+    <div class="sec-head mid">
+      <span class="eyebrow" data-t="inside.eyebrow">What's inside</span>
+      <h2 data-t="inside.title">Puzzles that don't feel like homework</h2>
+      <p class="lead" data-t="inside.sub">Ten kinds of challenge, mixed into every story so no two chapters feel the same.</p>
+    </div>
+    <div class="feats">
+      <div class="feat rv"><span class="ic">🤖</span><h4 data-t="f.ai.t">AI challenges</h4><p data-t="f.ai.b">Puzzles that answer back and change with your team.</p></div>
+      <div class="feat rv"><span class="ic">🎧</span><h4 data-t="f.music.t">Music challenges</h4><p data-t="f.music.b">Some clues you have to hear. Headphones on.</p></div>
+      <div class="feat rv"><span class="ic">📍</span><h4 data-t="f.loc.t">Location challenges</h4><p data-t="f.loc.b">The world outside your window becomes part of the board.</p></div>
+      <div class="feat rv"><span class="ic">🪄</span><h4 data-t="f.ar.t">AR elements</h4><p data-t="f.ar.b">Point your camera. Something is there that wasn't before.</p></div>
+      <div class="feat rv"><span class="ic">🤝</span><h4 data-t="f.team.t">Teamwork by design</h4><p data-t="f.team.b">Split views mean the answer is never on one screen.</p></div>
+      <div class="feat rv"><span class="ic">😂</span><h4 data-t="f.story.t">Hilarious custom storyline</h4><p data-t="f.story.b">Your names, your photos, your inside jokes, woven in.</p></div>
+      <div class="feat rv"><span class="ic">💡</span><h4 data-t="f.hints.t">Hints inside</h4><p data-t="f.hints.b">Stuck? Help is in the game. No host to text.</p></div>
+      <div class="feat rv"><span class="ic">🏆</span><h4 data-t="f.score.t">Multi-team scoreboard</h4><p data-t="f.score.b">Run several teams at once and let them race.</p></div>
+      <div class="feat rv"><span class="ic">🌍</span><h4 data-t="f.lang.t">Multilingual</h4><p data-t="f.lang.b">Play in the language your team actually thinks in.</p></div>
+      <div class="feat rv"><span class="ic">📱</span><h4 data-t="f.digital.t">Purely digital</h4><p data-t="f.digital.b">No box, no shipping, no facilitator. Just a link.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ PRICING ============================ -->
+<section id="pricing" class="band">
+  <div class="wrap">
+    <div class="sec-head mid">
+      <span class="eyebrow" data-t="price.eyebrow">Pricing</span>
+      <h2 data-t="price.title">Ten dollars a player. That's it.</h2>
+      <p class="lead" data-t="price.sub">One price, every game. No subscription, no per-month, no seat you forgot you were paying for.</p>
+    </div>
+
+    <div class="pricewrap">
+      <div class="pricebox">
+        <div class="bigprice"><b>$10</b><span data-t="price.per">per player</span></div>
+        <p class="center small muted" style="margin-bottom:22px" data-t="price.min">Minimum 3 players · add as many as you like</p>
+
+        <div class="stepper">
+          <button data-act="minus" aria-label="−">−</button>
+          <div class="val"><b id="seatn">3</b><span data-t="price.players">players</span></div>
+          <button data-act="plus" aria-label="+">+</button>
+        </div>
+
+        <div class="totrow">
+          <span class="h3" data-t="price.total">Total</span>
+          <span class="amt" id="total">$30</span>
+        </div>
+
+        <a class="btn block" href="#games" data-t="price.cta">Choose a game</a>
+        <p class="tiny muted center" style="margin-top:12px" data-t="price.note">You pick the game on the next step. Team size can still change until you play.</p>
+      </div>
+
+      <div>
+        <h3 style="margin-bottom:16px" data-t="price.incl.t">Every game includes</h3>
+        <ul class="incl">
+          <li data-t="price.i1">The full game for your whole team, start to finish</li>
+          <li data-t="price.i2">Custom storyline — your names, photos and jokes inside</li>
+          <li data-t="price.i3">Invite links for every player, sent by you</li>
+          <li data-t="price.i4">Hints built in, so nobody needs a host</li>
+          <li data-t="price.i5">Play in any supported language</li>
+          <li data-t="price.i6">Pause tonight, finish tomorrow — progress is saved</li>
+        </ul>
+        <div class="card" style="border-color:rgba(81,155,252,.3)">
+          <h4 style="font-size:16px;font-weight:700;margin-bottom:6px" data-t="price.big.t">Bigger than a team?</h4>
+          <p class="small dim" style="margin-bottom:14px" data-t="price.big.b">Whole departments, offsites, multi-team tournaments with a shared scoreboard — we'll build the offer around it.</p>
+          <a class="btn ghost sm" href="mailto:totem@totemtime.com" data-t="price.big.cta">Get a custom offer</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ TESTIMONIALS ============================ -->
+<section id="loved">
+  <div class="wrap">
+    <div class="sec-head mid">
+      <span class="eyebrow" data-t="love.eyebrow">From the teams</span>
+      <h2 data-t="love.title">People keep coming back</h2>
+    </div>
+    <div class="quotes">
+      <figure class="quote rv">
+        <div class="stars">★★★★★</div>
+        <blockquote data-t="love.1">"We played with my office team — we're all remote. It was wild!"</blockquote>
+        <figcaption class="who"><span class="av">S</span><span><b>Sherill D.</b><span data-t="love.1.r">Remote team</span></span></figcaption>
+      </figure>
+      <figure class="quote rv">
+        <div class="stars">★★★★★</div>
+        <blockquote data-t="love.2">"We bought it for the entire offshore group. It was a blast. First time we played an ARG — will not be the last time."</blockquote>
+        <figcaption class="who"><span class="av">N</span><span><b>Netta F.</b><span data-t="love.2.r">JR Manager</span></span></figcaption>
+      </figure>
+      <figure class="quote rv">
+        <div class="stars">★★★★★</div>
+        <blockquote data-t="love.3">"We moved out of Sweden some time ago — a great way to keep in touch. KidnAPPed was very good."</blockquote>
+        <figcaption class="who"><span class="av">B</span><span><b>Berk L.</b><span data-t="love.3.r">Family, three countries</span></span></figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ CONTACT ============================ -->
+<section id="contact">
+  <div class="wrap">
+    <div class="contact rv">
+      <h2 data-t="contact.title">Get your team in a room together.<br>Even if there is no room.</h2>
+      <p data-t="contact.sub">Pick a game and play this week — or tell us about your group and we'll put an offer together.</p>
+      <div class="contactcta">
+        <a class="btn" href="#games" data-t="contact.cta1">Pick your game</a>
+        <a class="btn ghost" href="mailto:totem@totemtime.com" data-t="contact.cta2">totem@totemtime.com</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a class="logo" href="#top" style="margin-bottom:12px"><img class="mark" src="assets/brand/totem-logo.png" alt="Totem Time" width="40" height="40">Totem&nbsp;Time</a>
+        <p class="small muted" style="max-width:34ch" data-t="foot.tag">Purely digital team escape games. Cooperate or fail.</p>
+      </div>
+      <div class="footlinks">
+        <a href="#games"   data-t="nav.games">Games</a>
+        <a href="#how"     data-t="nav.how">How it works</a>
+        <a href="#pricing" data-t="nav.pricing">Pricing</a>
+        <a href="portal.html" data-t="nav.login">Log in</a>
+        <a href="mailto:totem@totemtime.com">totem@totemtime.com</a>
+        <a href="privacy.html" data-t="foot.privacy">Privacy Policy</a>
+        <a href="terms.html"   data-t="foot.terms">Terms &amp; Conditions</a>
+      </div>
+    </div>
+    <p class="legal" style="margin-top:26px">
+      © <span id="yr">2026</span> 424 RL Ltd, d/b/a Totem Time. <span data-t="foot.rights">All rights reserved.</span>
+    </p>
+  </div>
+</footer>
+
+<div id="layer"></div>
+
+<script>
+/* ================================================================
+   Totem Time — landing page.
+   No dependencies, no Firebase: this page must load instantly.
+   Same "strings are data" rule as the rest of the product — every
+   visible word carries a data-t key, so a new language is a new
+   block in I18N and nothing else.
+   ================================================================ */
+(function(){
+  "use strict";
+
+  var PRICE_PER_PLAYER = 10;   // USD
+  var MIN_PLAYERS = 3;
+  var MAX_PLAYERS = 60;
+
+  var LANGS = [
+    { code:"en", label:"English", dir:"ltr" },
+    { code:"he", label:"עברית",   dir:"rtl" }
+  ];
+
+  /* English lives in the HTML (good for search engines and for a
+     no-JS reader). Other languages override it from here. */
+  var I18N = {
+    he: {
+      "nav.games":"משחקים","nav.how":"איך זה עובד","nav.inside":"מה יש בפנים",
+      "nav.pricing":"מחירים","nav.contact":"צרו קשר","nav.login":"כניסה",
+      "hero.eyebrow":"דיגיטלי לגמרי · רק בקבוצה",
+      "hero.title":"בואו נפתור<br>את זה <span class=\"sweep\">ביחד</span>.",
+      "hero.sub":"משחקי בריחה אונליין שכל הצוות משחק יחד — מאותו חדר או מחמישה אזורי זמן. אף אחד לא מסיים לבד.",
+      "hero.cta1":"בחרו משחק","hero.cta2":"איך זה עובד",
+      "coop.title":"משתפים פעולה, או נכשלים.",
+      "price.per":"לשחקן","price.players":"שחקנים","price.total":"סה\"כ",
+      "price.title":"עשרה דולר לשחקן. זהו.",
+      "foot.rights":"כל הזכויות שמורות."
+    }
+  };
+
+  var $  = function(s,r){ return (r||document).querySelector(s); };
+  var $$ = function(s,r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)); };
+
+  /* ---------- language ---------- */
+  var EN = {};                                   // captured from the markup on first run
+  $$("[data-t]").forEach(function(el){ EN[el.getAttribute("data-t")] = el.innerHTML; });
+
+  function applyLang(code){
+    var meta = LANGS.filter(function(l){ return l.code === code; })[0] || LANGS[0];
+    var dict = code === "en" ? EN : I18N[code] || {};
+    $$("[data-t]").forEach(function(el){
+      var k = el.getAttribute("data-t");
+      var v = dict[k];
+      if (v == null) v = EN[k];                  // fallback: never show a raw key
+      if (v != null) el.innerHTML = v;
+    });
+    document.documentElement.lang = code;
+    document.documentElement.dir  = meta.dir;
+    $("#langlabel").textContent   = meta.label;
+    try { localStorage.setItem("tt.lang", code); } catch(e){}
+  }
+
+  function langSheet(){
+    sheet(
+      '<h3 class="h3" style="margin-bottom:14px">🌐 Language</h3>' +
+      LANGS.map(function(l){
+        return '<button class="btn ' + (l.code === current() ? '' : 'ghost') +
+               ' block" style="margin-bottom:10px" data-lang="' + l.code + '">' + l.label + '</button>';
+      }).join("") +
+      '<button class="btn ghost block" data-close>Close</button>',
+      function(box){
+        $$("[data-lang]", box).forEach(function(b){
+          b.addEventListener("click", function(){ applyLang(b.getAttribute("data-lang")); close(); });
+        });
+      }
+    );
+  }
+  function current(){ return document.documentElement.lang || "en"; }
+
+  /* ---------- sheet ---------- */
+  function sheet(html, onMount){
+    close();
+    var scrim = document.createElement("div");
+    scrim.className = "scrim";
+    scrim.innerHTML = '<div class="sheet" role="dialog" aria-modal="true"><div class="grip"></div>' + html + '</div>';
+    scrim.addEventListener("click", function(e){ if (e.target === scrim) close(); });
+    $$("[data-close]", scrim).forEach(function(b){ b.addEventListener("click", close); });
+    $("#layer").appendChild(scrim);
+    document.body.style.overflow = "hidden";
+    if (onMount) onMount(scrim);
+  }
+  function close(){
+    $$("#layer .scrim").forEach(function(n){ n.remove(); });
+    document.body.style.overflow = "";
+  }
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") close(); });
+
+  /* ---------- pricing stepper ---------- */
+  var seats = MIN_PLAYERS;
+  function money(n){ return "$" + n.toLocaleString("en-US"); }
+  function paint(){
+    $("#seatn").textContent = seats;
+    $("#total").textContent = money(seats * PRICE_PER_PLAYER);
+    $('[data-act="minus"]').disabled = seats <= MIN_PLAYERS;
+    $('[data-act="plus"]').disabled  = seats >= MAX_PLAYERS;
+  }
+
+  /* ---------- buy sheet (per game) ---------- */
+  function buySheet(gameId, gameName){
+    var n = MIN_PLAYERS;
+    sheet(
+      '<h3 class="h3" style="margin-bottom:4px">' + gameName + '</h3>' +
+      '<p class="small muted" style="margin-bottom:20px" data-x="min">Minimum ' + MIN_PLAYERS +
+        ' players · $' + PRICE_PER_PLAYER + ' each</p>' +
+      '<div class="stepper"><button data-b="-">−</button>' +
+        '<div class="val"><b id="bn">' + n + '</b><span>players</span></div>' +
+        '<button data-b="+">+</button></div>' +
+      '<div class="totrow"><span class="h3">Total</span><span class="amt" id="bt">' +
+        money(n * PRICE_PER_PLAYER) + '</span></div>' +
+      '<a class="btn block" id="bgo" href="#">Continue</a>' +
+      '<p class="tiny muted center" style="margin-top:12px">You can add players later, right up to game night.</p>' +
+      '<button class="btn ghost block" style="margin-top:14px" data-close>Cancel</button>',
+      function(box){
+        function repaint(){
+          $("#bn", box).textContent = n;
+          $("#bt", box).textContent = money(n * PRICE_PER_PLAYER);
+          $('[data-b="-"]', box).disabled = n <= MIN_PLAYERS;
+          $('[data-b="+"]', box).disabled = n >= MAX_PLAYERS;
+          $("#bgo", box).setAttribute("href",
+            "portal.html#/store?game=" + encodeURIComponent(gameId) + "&seats=" + n);
+        }
+        $('[data-b="-"]', box).addEventListener("click", function(){ if (n > MIN_PLAYERS) { n--; repaint(); } });
+        $('[data-b="+"]', box).addEventListener("click", function(){ if (n < MAX_PLAYERS) { n++; repaint(); } });
+        repaint();
+      }
+    );
+  }
+
+  /* ---------- one delegated listener ---------- */
+  document.addEventListener("click", function(e){
+    var el = e.target.closest("[data-act]");
+    if (el){
+      var act = el.getAttribute("data-act");
+      if (act === "lang")  { langSheet(); return; }
+      if (act === "menu")  {
+        var m = $("#mobmenu"), open = m.classList.toggle("hide") === false;
+        el.setAttribute("aria-expanded", String(open)); return;
+      }
+      if (act === "minus") { if (seats > MIN_PLAYERS) { seats--; paint(); } return; }
+      if (act === "plus")  { if (seats < MAX_PLAYERS) { seats++; paint(); } return; }
+      if (act === "buy")   {
+        var card = el.closest("[data-game]");
+        buySheet(card.getAttribute("data-game"), card.getAttribute("data-name"));
+        return;
+      }
+    }
+    // close the mobile menu after tapping a link inside it
+    var link = e.target.closest("#mobmenu a");
+    if (link) $("#mobmenu").classList.add("hide");
+  });
+
+  /* ---------- chrome ---------- */
+  window.addEventListener("scroll", function(){
+    document.querySelector("header").classList.toggle("stuck", window.scrollY > 8);
+  }, { passive:true });
+
+  if ("IntersectionObserver" in window){
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        if (en.isIntersecting){ en.target.classList.add("in"); io.unobserve(en.target); }
+      });
+    }, { rootMargin:"0px 0px -8% 0px", threshold:.08 });
+    $$(".rv").forEach(function(n){ io.observe(n); });
+  } else {
+    $$(".rv").forEach(function(n){ n.classList.add("in"); });
+  }
+
+  $("#yr").textContent = new Date().getFullYear();
+  paint();
+
+  var saved = null;
+  try { saved = localStorage.getItem("tt.lang"); } catch(e){}
+  if (saved && saved !== "en") applyLang(saved);
+})();
+</script>
+</body>
+</html>
