@@ -1,0 +1,52 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /games/{gameId} {
+      allow read: if true;
+      allow write: if false;
+      match /answers/{stepId} { allow read, write: if false; }
+      match /locales/{lang} { allow read: if true; allow write: if false; }
+    }
+    match /rooms/{code} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    match /instances/{instanceId} {
+      allow read:   if request.auth != null;
+      allow create: if false;
+      allow delete: if false;
+      allow update: if request.auth != null
+                    && request.auth.uid == resource.data.buyerUid
+                    && request.resource.data.diff(resource.data)
+                         .affectedKeys().hasOnly(['customization','language'])
+                    && resource.data.get('playedAt', null) == null;
+      match /invites/{token} {
+        function instance() {
+          return get(/databases/$(database)/documents/instances/$(instanceId)).data;
+        }
+        function isDirector() {
+          return request.auth != null && request.auth.uid == instance().buyerUid;
+        }
+        allow read: if request.auth != null;
+        allow create: if isDirector()
+                      && request.resource.data.keys().hasAll(['name','email','status'])
+                      && request.resource.data.status == 'pending';
+        allow delete: if isDirector();
+        allow update: if isDirector()
+                      || (request.auth != null
+                          && request.resource.data.diff(resource.data)
+                               .affectedKeys().hasOnly(['status','uid','acceptedAt'])
+                          && request.resource.data.status == 'accepted'
+                          && request.resource.data.uid == request.auth.uid);
+      }
+    }
+    match /admins/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false;
+    }
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+    match /events/{eventId} { allow read, write: if false; }
+  }
+}
