@@ -70,6 +70,11 @@ body{margin:0;background:#050506;color:var(--tt-text);font-family:-apple-system,
 .lb{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:20px;cursor:zoom-out;}
 .lb.open{display:flex;}
 .lb img{max-width:96vw;max-height:96vh;object-fit:contain;border-radius:8px;background:#fff;}
+.wdg{text-align:center;}
+.wdg .readout{font-size:44px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:1px;background:#0a0a0c;border:1px solid var(--tt-border);border-radius:12px;padding:10px 0;margin:8px 0 10px;}
+.wdg .readout.done{color:var(--tt-accent);border-color:rgba(200,238,91,.4);}
+.wdg .row{display:flex;gap:10px;justify-content:center;}
+.wdg .row .cta{flex:1;min-height:44px;margin:0;box-shadow:none;font-size:15px;}
 </style>
 </head>
 <body>
@@ -91,9 +96,11 @@ const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
 const judge = httpsCallable(getFunctions(fbApp), "judge");
 const auth = getAuth(fbApp);
+const QS = new URLSearchParams(location.search);
+const GAME_ID = QS.get("game") || "kidnapped-il";
+const DEVFLAG = QS.get("dev") === "1";
 window.__judge = (data) => judge({ gameId: GAME_ID, roomCode: ROOM_CODE, ...data }).then(r => (console.log(r.data), r.data));
-const GAME_ID = "kidnapped-il";
-const ROOM_CODE = new URLSearchParams(location.search).get("room") || new URLSearchParams(location.search).get("code") || "dev";
+const ROOM_CODE = QS.get("room") || QS.get("code") || "dev";
 let SEAT_ID = null;
 let CUST = {}, CUST_LOADED = false;
 function cz(str){
@@ -111,9 +118,10 @@ function applyCustImages(){
   }
 }
 let MY_NAME = "";
-const S = { game:null, loc:{}, mode:"player", lang:"he", player:1, step:0, popup:null, elapsed:0, running:false, countdown:3, points:100, phase:null, seats:{}, dismissed:null, popupId:null };
+const S = { game:null, loc:{}, mode:"player", lang:"he", player:1, step:0, popup:null, elapsed:0, running:false, countdown:3, points:100, phase:null, seats:{}, flags:{}, dismissed:null, popupId:null };
 const app = document.getElementById("app");
 const lb = document.getElementById("lightbox");
+const W = {};
 let pausedVideo = null;
 const t = (k)=>{
   const def = (S.game && S.game.defaultLanguage) || "he";
@@ -123,6 +131,10 @@ const t = (k)=>{
   return d===undefined ? "" : d;
 };
 const vis = (c,n)=> c.visibleTo==="all" || (Array.isArray(c.visibleTo)&&c.visibleTo.includes(n));
+function findComp(id){
+  for(const st of (S.game && S.game.steps)||[]) for(const c of st.components||[]) if(c.id===id) return c;
+  return null;
+}
 async function boot(){
   const g = await getDoc(doc(db,"games",GAME_ID));
   if(!g.exists()){ app.innerHTML="<p style='padding:2rem'>לא נמצא משחק. הריצו את סקריפט הזריעה תחילה.</p>"; return; }
@@ -161,6 +173,27 @@ function comp(c,inter){
     const _need=(c.hints||[]).length, _used=(S.hintsUsed&&S.hintsUsed[String(S.step)])||0;
     const skipBtn=(_need>0&&_used>=_need)?`<button class="chip" data-skip ${dis}>${t("popup.skip")}</button>`:"";
     return `<div class="hints">${hints}${skipBtn}</div><input class="input" id="answer" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" name="a-${Math.random().toString(36).slice(2)}" placeholder="${t(c.placeholder_key)}" ${dis}/><button class="cta" data-submit data-outcome="${c.outcome_key}" ${dis}>${submit}</button>`;
+  }
+  if(c.type==="widget"){
+    if(c.widget==="stepper"){
+      const p=c.params||{};
+      if(!(c.id in W)) W[c.id]=(p.start??p.min??0);
+      const done=!!(S.flags&&S.flags[c.id]);
+      const unit=p.unitKey?t(p.unitKey):"";
+      return `<div class="card wdg">
+        <p class="c-sub">${t(c.name_key)}</p>
+        <div class="readout ${done?'done':''}">${W[c.id]}<span style="font-size:14px;color:var(--tt-muted)"> ${unit}</span></div>
+        ${done
+          ? `<span class="badge" style="margin:0 auto">✓</span>`
+          : `<div class="row">
+               <button class="chip" data-wstep="-1" data-el="${c.id}" ${dis}>−</button>
+               <button class="chip" data-wstep="1" data-el="${c.id}" ${dis}>+</button>
+               <button class="cta" data-wcommit data-el="${c.id}" ${dis}>ON</button>
+             </div>`}
+        <p class="c-sub" style="margin-top:10px">${t(c.caption_key)}</p>
+      </div>`;
+    }
+    return "";
   }
   return "";
 }
@@ -232,7 +265,22 @@ app.addEventListener("click",(e)=>{
   if(pv){ pv.pause(); pausedVideo=pv; document.getElementById("lbimg").src=pv.getAttribute("data-reveal"); lb.classList.add("open"); return; }
   const img=e.target.closest("img.c-img");
   if(img){ document.getElementById("lbimg").src=img.getAttribute("src"); lb.classList.add("open"); return; }
-  const el=e.target.closest("[data-action],[data-skip],[data-hint],[data-submit],[data-popcta],[data-close],[data-join],[data-ready],[data-forcestart]"); if(!el)return;
+  const el=e.target.closest("[data-action],[data-skip],[data-hint],[data-submit],[data-popcta],[data-close],[data-join],[data-ready],[data-forcestart],[data-wstep],[data-wcommit]"); if(!el)return;
+  if(el.hasAttribute("data-wstep")){
+    const id=el.dataset.el, c=findComp(id), p=(c&&c.params)||{};
+    const delta=(p.step??1)*Number(el.dataset.wstep);
+    W[id]=Math.min(p.max??Infinity,Math.max(p.min??-Infinity,(W[id]??0)+delta));
+    render(); return;
+  }
+  if(el.hasAttribute("data-wcommit")){
+    const id=el.dataset.el;
+    el.disabled=true;
+    judge({ action:"submitElement", gameId:GAME_ID, roomCode:ROOM_CODE, elementId:id, value:W[id] })
+      .then((res)=>{ if(!res.data.correct){ el.disabled=false; } })
+      .catch((err)=>{ console.error("submitElement failed",err); el.disabled=false; })
+      .finally(()=>render());
+    return;
+  }
   if(el.hasAttribute("data-join")){ const nm=((document.getElementById("joinName")||{}).value||"").trim(); if(!nm) return; judge({action:"join", gameId:GAME_ID, roomCode:ROOM_CODE, seatId:SEAT_ID, name:nm}).catch(err=>console.error("join failed",err)); return; }
   if(el.hasAttribute("data-ready")){ const me=S.seats[SEAT_ID]; judge({action:"ready", gameId:GAME_ID, roomCode:ROOM_CODE, seatId:SEAT_ID, ready:!(me&&me.ready)}).catch(err=>console.error("ready failed",err)); return; }
   if(el.hasAttribute("data-forcestart")){ judge({action:"forceStart", gameId:GAME_ID, roomCode:ROOM_CODE}).catch(err=>console.error("forceStart failed",err)); return; }
@@ -277,7 +325,7 @@ function floatPoints(d){
   setTimeout(()=>el.remove(),1700);
 }
 let lastRoomStep = null, prevPoints = null;
-const LANG_PARAM = new URLSearchParams(location.search).get("lang");
+const LANG_PARAM = QS.get("lang");
 if (LANG_PARAM === "he" || LANG_PARAM === "en") S.lang = LANG_PARAM;
 let appStarted = false;
 function startApp(){
@@ -288,6 +336,7 @@ onSnapshot(doc(db, "rooms", ROOM_CODE), (snap) => {
   S.points = r.points;
   S.phase = r.phase || "play";
   S.seats = r.seats || {};
+  S.flags = r.flags || {};
   S.buyerUid = r.buyerUid || null;
   if (r.instanceId && !CUST_LOADED) {
     CUST_LOADED = true;
@@ -303,9 +352,11 @@ onSnapshot(doc(db, "rooms", ROOM_CODE), (snap) => {
   if (r.popup && r.popup.id !== S.dismissed) {
     S.popupId = r.popup.id;
     const p = r.popup;
-    S.popup = p.kind === "win" ? { kind:"win", title:t("win.title"), body:p.bodyKey?cz(t(p.bodyKey)):"", cta:t("win.cta") }
+    const solver = p.solver || (S.lang==='he'?'חבר צוות':'a teammate');
+    const pbody = (k)=> (k?cz(t(k)):"").split("{player_name}").join(solver);
+    S.popup = p.kind === "win" ? { kind:"win", title:t("win.title"), body:pbody(p.bodyKey), cta:t("win.cta") }
             : p.kind === "lose" ? { kind:"lose", title:t("lose.title"), body:t("lose.body"), cta:t("lose.cta") }
-            : p.kind==="skip" ? { kind:"hint", title:t("popup.skipped"), body:p.bodyKey?cz(t(p.bodyKey)):"", cta:t("popup.close") } : { kind:"hint", title:t("popup.hint"), body:p.bodyKey?cz(t(p.bodyKey)):"", cta:t("popup.close") };
+            : p.kind==="skip" ? { kind:"hint", title:t("popup.skipped"), body:pbody(p.bodyKey), cta:t("popup.close") } : { kind:"hint", title:t("popup.hint"), body:pbody(p.bodyKey), cta:t("popup.close") };
   } else if (r.popup && r.popup.id === S.dismissed) { S.popup = null; }
   render();
 });
@@ -346,6 +397,7 @@ onAuthStateChanged(auth, async (user) => {
     const a = await getDoc(doc(db, "admins", user.uid));
     if (a.exists()){ S.isAdmin = true; document.querySelector(".dev").style.display = ""; }
   } catch(e){}
+  if (DEVFLAG) document.querySelector(".dev").style.display = "";
   startApp();
 });
 </script>
