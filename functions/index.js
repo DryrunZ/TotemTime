@@ -15,6 +15,10 @@ const matchers = {
 };
 const playerNum = (joinIndex, N) => ((joinIndex - 1) % N) + 1;
 const isAdmin = async (uid) => (await db.doc(`admins/${uid}`).get()).exists;
+const findComp = (game, id) => {
+  for (const st of game.steps || []) for (const c of st.components || []) if (c.id === id) return c;
+  return null;
+};
 
 exports.judge = onCall(async (req) => {
   const { action = "submit", gameId, roomCode, stepId, submission, hintIndex, seatId, name, ready, hintKey, outcomeKey } = req.data || {};
@@ -39,7 +43,7 @@ exports.judge = onCall(async (req) => {
     }
     await db.doc(`rooms/${code}`).set({
       gameId, phase: "lobby", step: 0, points: scoring.start ?? 100,
-      startedAt: null, solved: {}, hintsUsed: {}, seats: {},
+      startedAt: null, solved: {}, hintsUsed: {}, seats: {}, flags: {}, prog: {},
     });
     return { roomCode: code };
   }
@@ -72,7 +76,7 @@ exports.judge = onCall(async (req) => {
     for (const k of Object.keys(seats)) seats[k].ready = false;
     await roomRef.set({
       gameId, phase: "lobby", step: 0, points: scoring.start ?? 100,
-      startedAt: null, solved: {}, hintsUsed: {}, seats,
+      startedAt: null, solved: {}, hintsUsed: {}, seats, flags: {}, prog: {},
     });
     return { reset: true };
   }
@@ -148,13 +152,16 @@ exports.judge = onCall(async (req) => {
     });
   }
 
+  // ---- hint: per-step (kidnAPPed) or per-element (board) via elementId ----
   if (action === "hint") {
-    if (typeof hintIndex !== "number" || stepId === undefined)
-      throw new HttpsError("invalid-argument", "stepId and hintIndex required");
+    const elementId = req.data && req.data.elementId;
+    const hkey = elementId || stepId;
+    if (typeof hintIndex !== "number" || hkey === undefined)
+      throw new HttpsError("invalid-argument", "stepId or elementId, and hintIndex required");
     return await db.runTransaction(async (tx) => {
       const room = (await tx.get(roomRef)).data();
       if (!room) throw new HttpsError("not-found", "room not found");
-      const used = (room.hintsUsed && room.hintsUsed[stepId]) || 0;
+      const used = (room.hintsUsed && room.hintsUsed[hkey]) || 0;
       let points = room.points;
       let charged = false;
       const canShow = hintIndex < used || (hintIndex === used && hintIndex < (scoring.hints || []).length);
@@ -164,7 +171,7 @@ exports.judge = onCall(async (req) => {
         points += scoring.hints[hintIndex];
         charged = true;
         upd.points = points;
-        upd[`hintsUsed.${stepId}`] = used + 1;
+        upd[`hintsUsed.${hkey}`] = used + 1;
       }
       tx.update(roomRef, upd);
       return { points, charged };
@@ -192,44 +199,88 @@ exports.judge = onCall(async (req) => {
     });
   }
 
-  // ---- submitElement: board widgets commit here (Vault.exe) ----
-  // Checks games/{gameId}/answers/{elementId}, flips flags.{elementId},
-  // credits the solver by name. Wrong value = no penalty, no popup (a
-  // widget you haven't finished isn't a mistake). Never advances step.
+  // ---- skipElement: board version — flag flips, zero points ----
+  if (action === "skipElement") {
+    const elementId = req.data && req.data.elementId;
+    if (!elementId) throw new HttpsError("invalid-argument", "elementId required");
+    const comp = findComp(game, elementId);
+    const need = ((comp && comp.hints) || []).length;
+    if (!need) throw new HttpsError("failed-precondition", "this element cannot be skipped");
+    return await db.runTransaction(async (tx) => {
+      const room = (await tx.get(roomRef)).data();
+      if (!room) throw new HttpsError("not-found", "room not found");
+      if (room.flags && room.flags[elementId]) return { skipped: false };
+      const used = (room.hintsUsed && room.hintsUsed[elementId]) || 0;
+      if (used < need) throw new HttpsError("failed-precondition", "skip unlocks after all hints are used");
+      tx.update(roomRef, {
+        [`flags.${elementId}`]: true,
+        [`prog.${elementId}`]: [],
+        popup: { id: Date.now(), kind: "skip", bodyKey: "popup.skippedBody" },
+      });
+      return { skipped: true };
+    });
+  }
+
+  // ---- submitElement: board widgets. Types: equals | action | sequence ----
+  // sequence = one press per call; progress lives in room.prog, the expected
+  // order never leaves the server. Element ids must stay dot-free (FieldPath).
   if (action === "submitElement") {
     const { elementId, value } = req.data || {};
     if (!elementId) throw new HttpsError("invalid-argument", "elementId required");
     const aSnap = await db.doc(`games/${gameId}/answers/${elementId}`).get();
     if (!aSnap.exists) throw new HttpsError("not-found", `no answer for element ${elementId}`);
     const a = aSnap.data();
+    const comp = findComp(game, elementId) || {};
+    const pts = comp.points || 0;
+    const popupKey = comp.popup_key || null;
+    const wrongPenalty = comp.wrongPenalty || 0;
     const norm = (x) => String(x).trim().toLowerCase();
-    let correct = false;
-    if ((a.type || "equals") === "equals") {
-      correct = norm(value) === norm(a.value);
-    } else {
-      throw new HttpsError("failed-precondition", `answer type not implemented yet: ${a.type}`);
-    }
-
-    let pts = 0, popupKey = null;
-    for (const st of game.steps || []) for (const c of st.components || []) {
-      if (c.id === elementId) { pts = c.points || 0; popupKey = c.popup_key || null; }
-    }
+    const type = a.type || "equals";
 
     return await db.runTransaction(async (tx) => {
       const room = (await tx.get(roomRef)).data();
       if (!room) throw new HttpsError("not-found", "room not found");
-      if (room.flags && room.flags[elementId]) {
+      if (room.flags && room.flags[elementId])
         return { correct: true, already: true, points: room.points };
-      }
-      if (!correct) return { correct: false, points: room.points };
-      const points = room.points + pts;
+      if (a.requires && !(room.flags && room.flags[a.requires]))
+        throw new HttpsError("failed-precondition", "not available yet");
       const solver = (room.seats && room.seats[callerUid] && room.seats[callerUid].name) || "";
-      tx.update(roomRef, {
-        points,
-        [`flags.${elementId}`]: true,
-        popup: { id: Date.now(), kind: "win", bodyKey: popupKey, solver },
-      });
-      return { correct: true, points };
+      const solve = () => {
+        tx.update(roomRef, {
+          points: room.points + pts,
+          [`flags.${elementId}`]: true,
+          [`prog.${elementId}`]: [],
+          popup: { id: Date.now(), kind: "win", bodyKey: popupKey, solver },
+        });
+        return { correct: true, complete: true, points: room.points + pts };
+      };
+
+      if (type === "equals") {
+        if (norm(value) === norm(a.value)) return solve();
+        if (wrongPenalty) {
+          tx.update(roomRef, { points: room.points + wrongPenalty });
+          return { correct: false, points: room.points + wrongPenalty };
+        }
+        return { correct: false, points: room.points };
+      }
+
+      if (type === "action") return solve();
+
+      if (type === "sequence") {
+        const expected = a.value || [];
+        const prog = (room.prog && room.prog[elementId]) || [];
+        const idx = prog.length;
+        if (idx < expected.length && norm(value) === norm(expected[idx])) {
+          const next = [...prog, expected[idx]];
+          if (next.length >= expected.length) return solve();
+          tx.update(roomRef, { [`prog.${elementId}`]: next });
+          return { correct: true, progress: next.length, total: expected.length, points: room.points };
+        }
+        tx.update(roomRef, { [`prog.${elementId}`]: [] });
+        return { correct: false, miss: true, progress: 0, total: expected.length, points: room.points };
+      }
+
+      throw new HttpsError("failed-precondition", `unknown answer type: ${type}`);
     });
   }
 
@@ -317,7 +368,7 @@ exports.claimGame = onCall(async (req) => {
   const scoring = game.scoring || {};
   await db.doc(`rooms/${code}`).set({
     gameId, phase: "lobby", step: 0, points: scoring.start ?? 100, buyerUid: uid,
-    startedAt: null, solved: {}, hintsUsed: {}, seats: {},
+    startedAt: null, solved: {}, hintsUsed: {}, seats: {}, flags: {}, prog: {},
   });
 
   const instRef = db.collection("instances").doc();
