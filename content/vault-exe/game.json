@@ -1,0 +1,252 @@
+{
+  "id": "vault-exe",
+  "title_key": "meta.title",
+  "version": 1,
+  "published": false,
+  "cycleN": 3,
+  "recommendedSeats": 3,
+
+  "difficulty": {
+    "levels": ["easy"],
+    "default": "easy",
+    "planned": ["hard"],
+    "_note": "Any numeric param may be a {easy, hard} map (same resolution pattern as per-language answer values). A scalar applies to all levels. Ship 'easy' only; enable 'hard' after live-run tuning by adding it to levels."
+  },
+
+  "hintPolicy": {
+    "sequentialUnlock": true,
+    "chargeOnFirstUnlockOnly": true,
+    "rereadFree": true,
+    "teamCost": 50,
+    "cooldownSec": { "easy": 90, "hard": 150 },
+    "skip": {
+      "enabled": true,
+      "afterAllHintsUsedOnBlocker": true,
+      "points": 0,
+      "scope": "room",
+      "_note": "Same server-enforced semantics as kidnAPPed: skip targets the current chain beat, awards zero points, advances the whole room."
+    }
+  },
+
+  "flow": ["instructions", "story", "board", "finale"],
+
+  "screens": {
+    "instructions": {
+      "kind": "static",
+      "title_key": "screens.instructions.title",
+      "body_key": "screens.instructions.body",
+      "gate": { "mode": "latching", "threshold": "all", "cta_key": "screens.instructions.ready" }
+    },
+    "story": {
+      "kind": "static",
+      "title_key": "screens.story.title",
+      "body_key": "screens.story.body",
+      "image": { "custom": "owner_photo" },
+      "gate": { "mode": "latching", "threshold": "all", "cta_key": "screens.story.ready" }
+    },
+    "board": {
+      "kind": "scene",
+      "chain": ["radio", "train", "calc", "uv", "fish", "clock", "laptop"],
+      "_note": "chain = the scored beat order. It drives the step pointer, outcome popups, and the skip target. Info elements (die, test, calendars, notebook, book) are not beats."
+    },
+    "finale": {
+      "kind": "static",
+      "title_key": "screens.finale.title",
+      "body_key": "screens.finale.body",
+      "treasure": { "image_custom": "treasure_image", "caption_custom": "treasure_caption" },
+      "coupon": { "grant": true, "templateId": "TODO", "perPlayer": true,
+        "_note": "Completion Cloud Function writes the coupon to users/{uid}.coupons and records score/history." }
+    }
+  },
+
+  "elements": [
+    {
+      "id": "die", "player": 2, "zone": 1, "type": "roller",
+      "name_key": "el.die.name", "caption_key": "el.die.caption",
+      "params": { "faces": 6, "fixedSequence": [1, 1, 2, 5], "historyLen": 4 },
+      "visibleWhen": "always",
+      "_note": "Local-only state. The history strip is the tell that the sequence is fixed."
+    },
+    {
+      "id": "test", "player": 3, "zone": 1, "type": "static_media",
+      "name_key": "el.test.name", "caption_key": "el.test.caption",
+      "assets": { "test_card": { "src_key": "test_card" }, "m_card": { "src_key": "m_card" } },
+      "visibleWhen": "always",
+      "_note": "Per-locale image via src_key (the F grade is baked into the image)."
+    },
+    {
+      "id": "radio", "player": 1, "zone": 1, "type": "stepper",
+      "name_key": "el.radio.name", "caption_key": "el.radio.caption",
+      "params": {
+        "min": 875, "max": 1300,
+        "step": { "easy": 25, "hard": 5 },
+        "startValue": 950, "unit_key": "el.radio.unit", "commit": "power_button"
+      },
+      "visibleWhen": "always",
+      "solve": { "answerRef": "radio", "points": 500, "popup_key": "popups.radio" },
+      "onSolve": ["flags.radio"],
+      "hints": ["hints.radio.1", "hints.radio.2"]
+    },
+    {
+      "id": "audio", "player": 1, "zone": 1, "type": "audio",
+      "name_key": "el.audio.name", "caption_key": "el.audio.caption",
+      "assets": { "voice": { "src_key": "voice_mp3" } },
+      "params": { "replayable": true },
+      "visibleWhen": "radio.solved",
+      "_note": "Train sounds under a voice reading B — G — 7 — F — 3. Recorded per locale; letters stay Latin on the track."
+    },
+    {
+      "id": "train", "player": 2, "zone": 2, "type": "timing_sequence",
+      "name_key": "el.train.name", "caption_key": "el.train.caption",
+      "params": {
+        "trackChars": ["B", "3", "G", "7", "F"],
+        "lapSec": { "easy": 9, "hard": 6.5 },
+        "hitWindowMs": { "easy": 450, "hard": 300 },
+        "mercySlowdownPctPerMiss": { "easy": 10, "hard": 0 },
+        "mercySlowdownCap": 30,
+        "missFeedbackMs": 600,
+        "progressPips": 5
+      },
+      "visibleWhen": "always",
+      "solve": { "answerRef": "train", "points": 800, "popup_key": "popups.train" },
+      "onSolve": ["flags.train"],
+      "hints": ["hints.train.1", "hints.train.2"],
+      "_note": "Client reports the character under the train at each press; the judge validates the character sequence, never milliseconds. TUNE lapSec/hitWindowMs on-device."
+    },
+    {
+      "id": "cal_small", "player": 2, "zone": 2, "type": "reveal",
+      "name_key": "el.cal_small.name", "caption_key": "el.cal_small.caption",
+      "assets": { "face": { "src_key": "cal_small_face" } },
+      "visibleWhen": "train.solved",
+      "_note": "CREATIVE TODO: the face must send players to the big calendar and must NOT show a date of its own."
+    },
+    {
+      "id": "cal_big", "player": 1, "zone": 2, "type": "gallery_dates",
+      "name_key": "el.cal_big.name", "caption_key": "el.cal_big.caption",
+      "params": {
+        "slots": [
+          { "photo_src_key": "cal_photo_1", "date_key": "el.cal_big.date1" },
+          { "photo_src_key": "cal_photo_2", "date_key": "el.cal_big.date2" },
+          { "photo_src_key": "cal_photo_3", "date_key": "el.cal_big.date3" },
+          { "photo_src_key": "cal_photo_4", "date_key": "el.cal_big.date4", "hiddenUntil": "train.solved" }
+        ]
+      },
+      "visibleWhen": "always",
+      "_note": "Slot 4 reveals 39/5/4607. CREATIVE TODO: the four photos."
+    },
+    {
+      "id": "calc", "player": 3, "zone": 2, "type": "digit_buffer",
+      "name_key": "el.calc.name", "caption_key": "el.calc.caption",
+      "params": { "maxLen": 9, "commit": "equals" },
+      "visibleWhen": "always",
+      "solve": { "answerRef": "calc", "points": 500, "popup_key": "popups.calc" },
+      "onSolve": ["flags.calc"],
+      "hints": ["hints.calc.1", "hints.calc.2"]
+    },
+    {
+      "id": "bulb", "player": 3, "zone": 2, "type": "reveal",
+      "name_key": "el.bulb.name", "caption_key": "el.bulb.caption",
+      "params": { "fadeInMs": 500 },
+      "visibleWhen": "calc.solved"
+    },
+    {
+      "id": "lamp", "player": 1, "zone": 3, "type": "cycle",
+      "name_key": "el.lamp.name", "caption_key": "el.lamp.caption",
+      "params": {
+        "states": ["off", "small", "big"],
+        "extraState": { "id": "uv", "when": "calc.solved" },
+        "slider": { "enabledWhen": "calc.solved", "action": "latch_uv" },
+        "globalTint": "uv"
+      },
+      "visibleWhen": "always",
+      "solve": { "answerRef": "uv", "points": 100, "popup_key": "popups.uv" },
+      "onSolve": ["flags.uv"],
+      "hints": ["hints.uv.1", "hints.uv.2"],
+      "_note": "UV is the game's only global state change: every screen tints at once. Latched on once pressed."
+    },
+    {
+      "id": "notebook", "player": 3, "zone": 3, "type": "reveal_uv",
+      "name_key": "el.notebook.name", "caption_key": "el.notebook.caption",
+      "assets": { "drawing": { "src_key": "notebook_drawing" } },
+      "params": { "revealWhen": "uv" },
+      "visibleWhen": "always",
+      "_note": "Blank until UV; then the drawing: black heart, blue square, yellow triangle. Language-free asset."
+    },
+    {
+      "id": "fish", "player": 2, "zone": 3, "type": "pair_sequence",
+      "name_key": "el.fish.name", "caption_key": "el.fish.caption",
+      "params": {
+        "formations": ["heart", "square", "triangle"],
+        "formationCycleButton": true,
+        "buttons": ["black", "blue", "yellow"],
+        "wrongPressReset": true,
+        "wrongFeedbackMs": 600,
+        "digitsOnSolve": "0810",
+        "digitTrailMs": { "easy": 1400, "hard": 1000 }
+      },
+      "visibleWhen": "always",
+      "solve": { "answerRef": "fish", "points": 700, "popup_key": "popups.fish" },
+      "onSolve": ["flags.fish"],
+      "hints": ["hints.fish.1", "hints.fish.2"],
+      "_note": "Judge receives (button, formation) pairs in press order."
+    },
+    {
+      "id": "clock", "player": 3, "zone": 4, "type": "time_set",
+      "name_key": "el.clock.name", "caption_key": "el.clock.caption",
+      "params": { "commit": "set_button", "retry": true, "wrongPenaltyPoints": -25, "startTime": "03:47" },
+      "visibleWhen": "always",
+      "solve": { "answerRef": "clock", "points": 400, "popup_key": "popups.clock" },
+      "onSolve": ["flags.clock"],
+      "hints": ["hints.clock.1", "hints.clock.2"]
+    },
+    {
+      "id": "book", "player": 2, "zone": 4, "type": "book",
+      "name_key": "el.book.name", "caption_key": "el.book.caption",
+      "params": {
+        "openWhen": "clock.solved",
+        "clue": { "src_key": "book_clue" },
+        "photoSlot": { "custom": "book_photo" }
+      },
+      "visibleWhen": "always",
+      "_note": "CREATIVE TODO: the clue asset must teach the laptop's 6-symbol order. Clue slot and customization photo slot are separate."
+    },
+    {
+      "id": "laptop", "player": 1, "zone": 4, "type": "symbol_sequence",
+      "name_key": "el.laptop.name", "caption_key": "el.laptop.caption",
+      "params": {
+        "keys": ["s1", "s2", "s3", "s4", "s5", "s6"],
+        "keyAssets_src_key": "laptop_symbols",
+        "wrongOrderReset": true,
+        "lidOpensWhen": "big_light",
+        "_lid_note": "Design: the big lamp light wakes the lid; keys become pressable then. Confirm or drop."
+      },
+      "visibleWhen": "always",
+      "solve": { "answerRef": "laptop", "points": 1000, "popup_key": "popups.laptop" },
+      "onSolve": ["flags.laptop"],
+      "hints": ["hints.laptop.1", "hints.laptop.2"],
+      "_note": "Solving runs Vault.exe → finale screen. CREATIVE TODO: the six symbol glyphs."
+    }
+  ],
+
+  "artifacts": {
+    "maxPerDesk": 2,
+    "interactive": false,
+    "tapQuips": true,
+    "options": [
+      { "id": "framed_photo", "player": 1, "photo": { "custom": "owner_photo" }, "quip_key": "quips.framed_photo" },
+      { "id": "teddy", "player": 2, "src_key": "art_teddy", "quip_key": "quips.teddy" },
+      { "id": "water_glass", "player": 3, "src_key": "art_glass", "quip_key": "quips.glass" },
+      { "id": "desk_toy", "player": 1, "src_key": "art_desktoy", "quip_key": "quips.desktoy" }
+    ],
+    "_note": "Never rendered amber; props must not read as actionable. Tap gives a one-line owner quip, nothing mechanical."
+  },
+
+  "customizable": [
+    { "key": "owner_name", "label_key": "custom.owner_name", "type": "text", "maxLen": 30, "default_key": "custom.owner_name.default" },
+    { "key": "owner_photo", "label_key": "custom.owner_photo", "type": "image", "default": "assets/defaults/owner.jpg" },
+    { "key": "treasure_image", "label_key": "custom.treasure_image", "type": "image", "default": "assets/defaults/treasure.jpg" },
+    { "key": "treasure_caption", "label_key": "custom.treasure_caption", "type": "text", "maxLen": 80, "default_key": "custom.treasure_caption.default" },
+    { "key": "book_photo", "label_key": "custom.book_photo", "type": "image", "default": "assets/defaults/book_photo.jpg" },
+    { "key": "artifact_pick", "label_key": "custom.artifact_pick", "type": "multi_select", "optionsFrom": "artifacts.options", "maxPerDesk": 2, "default": ["framed_photo", "teddy", "water_glass"] }
+  ]
+}

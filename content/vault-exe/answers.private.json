@@ -1,0 +1,35 @@
+{
+  "_rules_note": "Seed to games/vault-exe/private/answers. firestore.rules must DENY all client reads on games/{gameId}/private/** — only the judge Cloud Function reads it. Keep this file in git (lesson learned), but it never ships inside the client-cached game doc.",
+  "_language_note": "All answers in this game are language-free (digits, colors, symbols), so no per-language values maps are needed. The judge's existing {he, en} support is simply unused here.",
+
+  "radio": { "type": "equals", "value": 1125 },
+
+  "train": {
+    "type": "sequence",
+    "value": ["B", "G", "7", "F", "3"],
+    "resetOnMiss": "currentRun"
+  },
+
+  "calc": { "type": "equals", "value": "3954607" },
+
+  "uv": { "type": "action", "_note": "Slider press while enabled; no value to check." },
+
+  "fish": {
+    "type": "pair_sequence",
+    "value": [
+      { "button": "black", "formation": "heart" },
+      { "button": "blue", "formation": "square" },
+      { "button": "yellow", "formation": "triangle" }
+    ],
+    "resetOnMiss": "all"
+  },
+
+  "clock": { "type": "equals", "value": "08:10" },
+
+  "laptop": {
+    "type": "sequence",
+    "value": ["TODO", "TODO", "TODO", "TODO", "TODO", "TODO"],
+    "resetOnMiss": "all",
+    "_note": "CREATIVE TODO: the symbol order. Must match whatever the book clue teaches. Fill with s1..s6 ids in the correct order."
+  }
+}

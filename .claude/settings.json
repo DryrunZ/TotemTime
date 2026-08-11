@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(//home/codespace/.config/gcloud/**)",
+      "Read(.firebase/**)"
+    ]
+  }
+}
