@@ -192,6 +192,47 @@ exports.judge = onCall(async (req) => {
     });
   }
 
+  // ---- submitElement: board widgets commit here (Vault.exe) ----
+  // Checks games/{gameId}/answers/{elementId}, flips flags.{elementId},
+  // credits the solver by name. Wrong value = no penalty, no popup (a
+  // widget you haven't finished isn't a mistake). Never advances step.
+  if (action === "submitElement") {
+    const { elementId, value } = req.data || {};
+    if (!elementId) throw new HttpsError("invalid-argument", "elementId required");
+    const aSnap = await db.doc(`games/${gameId}/answers/${elementId}`).get();
+    if (!aSnap.exists) throw new HttpsError("not-found", `no answer for element ${elementId}`);
+    const a = aSnap.data();
+    const norm = (x) => String(x).trim().toLowerCase();
+    let correct = false;
+    if ((a.type || "equals") === "equals") {
+      correct = norm(value) === norm(a.value);
+    } else {
+      throw new HttpsError("failed-precondition", `answer type not implemented yet: ${a.type}`);
+    }
+
+    let pts = 0, popupKey = null;
+    for (const st of game.steps || []) for (const c of st.components || []) {
+      if (c.id === elementId) { pts = c.points || 0; popupKey = c.popup_key || null; }
+    }
+
+    return await db.runTransaction(async (tx) => {
+      const room = (await tx.get(roomRef)).data();
+      if (!room) throw new HttpsError("not-found", "room not found");
+      if (room.flags && room.flags[elementId]) {
+        return { correct: true, already: true, points: room.points };
+      }
+      if (!correct) return { correct: false, points: room.points };
+      const points = room.points + pts;
+      const solver = (room.seats && room.seats[callerUid] && room.seats[callerUid].name) || "";
+      tx.update(roomRef, {
+        points,
+        [`flags.${elementId}`]: true,
+        popup: { id: Date.now(), kind: "win", bodyKey: popupKey, solver },
+      });
+      return { correct: true, points };
+    });
+  }
+
   if (action === "submit") {
     if (typeof submission !== "string" || stepId === undefined)
       throw new HttpsError("invalid-argument", "stepId and submission required");
