@@ -1,0 +1,865 @@
+{
+  "gameId": "kidnapped-il",
+  "defaultLanguage": "he",
+  "title_key": "game.title",
+  "stepCount": 13,
+  "N": 3,
+  "scoring": {
+    "start": 100,
+    "mistake": -5,
+    "hints": [
+      -10,
+      -15
+    ],
+    "solve": 100,
+    "timeBonus": [
+      {
+        "underMin": 30,
+        "bonus": 100
+      },
+      {
+        "underMin": 60,
+        "bonus": 50
+      }
+    ]
+  },
+  "lastAnswerStep": 11,
+  "published": true,
+  "store": {
+    "price": 1000,
+    "currency": "usd",
+    "freeLaunch": true,
+    "seatOptions": [
+      3,
+      6,
+      9
+    ],
+    "perSeat": 0,
+    "cover": "https://totemtime-357a2.web.app/assets/games/kidnapped-il/cover.jpg",
+    "blurb_key": "store.blurb",
+    "claimCode": "boomers"
+  },
+  "customizable": [
+    {
+      "default": "פיטר",
+      "key": "victimName",
+      "label_key": "cust.victimName",
+      "type": "text",
+      "default_key": "cust.def.victimName"
+    },
+    {
+      "key": "victimGone",
+      "type": "text",
+      "default": "פיטר נעלם",
+      "label_key": "cust.victimGone",
+      "default_key": "cust.def.victimGone"
+    },
+    {
+      "default": "abandoned-broken-detective-bureau-room.jpg",
+      "key": "photo_opening",
+      "label_key": "cust.photo_opening",
+      "type": "image"
+    },
+    {
+      "label_key": "cust.photo_step3",
+      "key": "photo_step3",
+      "type": "image",
+      "default": "smiling-shark-cartoon-character.jpg"
+    },
+    {
+      "default": "haunted-house-gothic-style.jpg",
+      "type": "image",
+      "key": "photo_step9",
+      "label_key": "cust.photo_step9"
+    },
+    {
+      "default": "party-crowd-background-with-glittery-lights.jpg",
+      "label_key": "cust.photo_final",
+      "key": "photo_final",
+      "type": "image"
+    }
+  ],
+  "steps": [
+    {
+      "components": [
+        {
+          "type": "title",
+          "visibleTo": "all",
+          "id": "s1.t",
+          "text_key": "s1.t"
+        },
+        {
+          "id": "s1.s",
+          "visibleTo": "all",
+          "type": "subtitle",
+          "text_key": "s1.s"
+        },
+        {
+          "visibleTo": "all",
+          "type": "text",
+          "id": "s1.b",
+          "text_key": "s1.b"
+        },
+        {
+          "type": "image",
+          "visibleTo": "all",
+          "id": "img.photo_opening",
+          "src": "assets/games/kidnapped-il/abandoned-broken-detective-bureau-room.jpg",
+          "cust_key": "photo_opening"
+        },
+        {
+          "type": "cta",
+          "action": "advance",
+          "label_key": "common.continue",
+          "id": "c2",
+          "visibleTo": "all"
+        }
+      ],
+      "kind": "screen",
+      "id": "step_1"
+    },
+    {
+      "components": [
+        {
+          "visibleTo": [
+            1,
+            2
+          ],
+          "id": "s2.g12.t",
+          "text_key": "s2.g12.t",
+          "type": "title"
+        },
+        {
+          "id": "s2.g12.s",
+          "text_key": "s2.g12.s",
+          "type": "subtitle",
+          "visibleTo": [
+            1,
+            2
+          ]
+        },
+        {
+          "type": "text",
+          "id": "s2.g12.b",
+          "text_key": "s2.g12.b",
+          "visibleTo": [
+            1,
+            2
+          ]
+        },
+        {
+          "visibleTo": [
+            3
+          ],
+          "id": "s2.g3.t",
+          "text_key": "s2.g3.t",
+          "type": "title"
+        },
+        {
+          "visibleTo": [
+            3
+          ],
+          "type": "subtitle",
+          "text_key": "s2.g3.s",
+          "id": "s2.g3.s"
+        },
+        {
+          "type": "text",
+          "text_key": "s2.g3.b",
+          "visibleTo": [
+            3
+          ],
+          "id": "s2.g3.b"
+        },
+        {
+          "src": "https://totemtime-357a2.web.app/assets/games/kidnapped-il/workstation.png",
+          "visibleTo": [
+            1,
+            2
+          ],
+          "type": "image",
+          "id": "c1"
+        },
+        {
+          "hints": [
+            "s2.h1",
+            "s2.h2"
+          ],
+          "visibleTo": [
+            3
+          ],
+          "id": "c3",
+          "placeholder_key": "common.answer",
+          "type": "input",
+          "outcome_key": "s2.out"
+        }
+      ],
+      "kind": "puzzle",
+      "id": "step_2",
+      "advanceOnSolve": true
+    },
+    {
+      "kind": "screen",
+      "components": [
+        {
+          "id": "s3.t",
+          "text_key": "s3.t",
+          "visibleTo": "all",
+          "type": "title"
+        },
+        {
+          "type": "subtitle",
+          "id": "s3.s",
+          "visibleTo": "all",
+          "text_key": "s3.s"
+        },
+        {
+          "text_key": "s3.b",
+          "id": "s3.b",
+          "visibleTo": "all",
+          "type": "text"
+        },
+        {
+          "cust_key": "photo_step3",
+          "src": "assets/games/kidnapped-il/smiling-shark-cartoon-character.jpg",
+          "type": "image",
+          "id": "img.photo_step3",
+          "visibleTo": "all"
+        },
+        {
+          "type": "cta",
+          "visibleTo": "all",
+          "action": "advance",
+          "id": "c2",
+          "label_key": "common.continue"
+        }
+      ],
+      "id": "step_3"
+    },
+    {
+      "id": "step_4",
+      "kind": "puzzle",
+      "advanceOnSolve": true,
+      "components": [
+        {
+          "text_key": "s4.g1.t",
+          "id": "s4.g1.t",
+          "visibleTo": [
+            1
+          ],
+          "type": "title"
+        },
+        {
+          "visibleTo": [
+            1
+          ],
+          "text_key": "s4.g1.s",
+          "id": "s4.g1.s",
+          "type": "subtitle"
+        },
+        {
+          "visibleTo": [
+            1
+          ],
+          "id": "s4.g1.b",
+          "text_key": "s4.g1.b",
+          "type": "text"
+        },
+        {
+          "id": "s4.g2.t",
+          "type": "title",
+          "text_key": "s4.g2.t",
+          "visibleTo": [
+            2
+          ]
+        },
+        {
+          "text_key": "s4.g2.s",
+          "id": "s4.g2.s",
+          "type": "subtitle",
+          "visibleTo": [
+            2
+          ]
+        },
+        {
+          "visibleTo": [
+            2
+          ],
+          "id": "s4.g2.b",
+          "text_key": "s4.g2.b",
+          "type": "text"
+        },
+        {
+          "type": "title",
+          "visibleTo": [
+            3
+          ],
+          "id": "s4.g3.t",
+          "text_key": "s4.g3.t"
+        },
+        {
+          "visibleTo": [
+            3
+          ],
+          "text_key": "s4.g3.s",
+          "id": "s4.g3.s",
+          "type": "subtitle"
+        },
+        {
+          "id": "s4.g3.b",
+          "type": "text",
+          "visibleTo": [
+            3
+          ],
+          "text_key": "s4.g3.b"
+        },
+        {
+          "type": "video",
+          "id": "c1",
+          "visibleTo": [
+            1
+          ],
+          "pauseImage": "https://totemtime-357a2.web.app/assets/games/kidnapped-il/riddle2-reveal.png",
+          "src": "https://totemtime-357a2.web.app/assets/games/kidnapped-il/riddle2-p1.mp4"
+        },
+        {
+          "id": "c2",
+          "outcome_key": "s4.out",
+          "hints": [
+            "s4.h1",
+            "s4.h2"
+          ],
+          "placeholder_key": "common.answer",
+          "visibleTo": [
+            1
+          ],
+          "type": "input"
+        },
+        {
+          "visibleTo": [
+            2
+          ],
+          "src": "https://totemtime-357a2.web.app/assets/games/kidnapped-il/riddle2-p2.png",
+          "type": "image",
+          "id": "c3"
+        },
+        {
+          "src": "https://totemtime-357a2.web.app/assets/games/kidnapped-il/riddle2-p3.png",
+          "visibleTo": [
+            3
+          ],
+          "type": "image",
+          "id": "c5"
+        }
+      ]
+    },
+    {
+      "id": "step_5",
+      "kind": "screen",
+      "components": [
+        {
+          "id": "s5.t",
+          "visibleTo": "all",
+          "type": "title",
+          "text_key": "s5.t"
+        },
+        {
+          "text_key": "s5.s",
+          "id": "s5.s",
+          "type": "subtitle",
+          "visibleTo": "all"
+        },
+        {
+          "visibleTo": "all",
+          "text_key": "s5.b",
+          "type": "text",
+          "id": "s5.b"
+        },
+        {
+          "type": "cta",
+          "label_key": "common.continue",
+          "id": "c2",
+          "visibleTo": "all",
+          "action": "advance"
+        }
+      ]
+    },
+    {
+      "id": "step_6",
+      "advanceOnSolve": true,
+      "components": [
+        {
+          "id": "s6.g13.t",
+          "text_key": "s6.g13.t",
+          "visibleTo": [
+            1,
+            3
+          ],
+          "type": "title"
+        },
+        {
+          "type": "subtitle",
+          "visibleTo": [
+            1,
+            3
+          ],
+          "text_key": "s6.g13.s",
+          "id": "s6.g13.s"
+        },
+        {
+          "id": "s6.g13.b",
+          "type": "text",
+          "visibleTo": [
+            1,
+            3
+          ],
+          "text_key": "s6.g13.b"
+        },
+        {
+          "type": "title",
+          "id": "s6.g2.t",
+          "text_key": "s6.g2.t",
+          "visibleTo": [
+            2
+          ]
+        },
+        {
+          "visibleTo": [
+            2
+          ],
+          "text_key": "s6.g2.s",
+          "id": "s6.g2.s",
+          "type": "subtitle"
+        },
+        {
+          "visibleTo": [
+            2
+          ],
+          "id": "s6.g2.b",
+          "text_key": "s6.g2.b",
+          "type": "text"
+        },
+        {
+          "id": "c1",
+          "type": "image",
+          "visibleTo": [
+            1
+          ],
+          "src": "https://totemtime-357a2.web.app/assets/games/kidnapped-il/maze1.png"
+        },
+        {
+          "visibleTo": [
+            3
+          ],
+          "type": "image",
+          "id": "c2",
+          "src": "https://totemtime-357a2.web.app/assets/games/kidnapped-il/maze2.png"
+        },
+        {
+          "src": "https://totemtime-357a2.web.app/assets/games/kidnapped-il/maze3.png",
+          "type": "image",
+          "id": "c3",
+          "visibleTo": [
+            2
+          ]
+        },
+        {
+          "visibleTo": [
+            2
+          ],
+          "hints": [
+            "m.h1",
+            "m.h2"
+          ],
+          "type": "input",
+          "placeholder_key": "common.answer",
+          "outcome_key": "m.out",
+          "id": "c4"
+        }
+      ],
+      "kind": "puzzle"
+    },
+    {
+      "id": "step_7",
+      "kind": "screen",
+      "components": [
+        {
+          "id": "s7.t",
+          "type": "title",
+          "text_key": "s7.t",
+          "visibleTo": "all"
+        },
+        {
+          "type": "subtitle",
+          "visibleTo": "all",
+          "id": "s7.s",
+          "text_key": "s7.s"
+        },
+        {
+          "visibleTo": "all",
+          "text_key": "s7.b",
+          "type": "text",
+          "id": "s7.b"
+        },
+        {
+          "label_key": "common.continue",
+          "type": "cta",
+          "action": "advance",
+          "visibleTo": "all",
+          "id": "c2"
+        }
+      ]
+    },
+    {
+      "id": "step_8",
+      "advanceOnSolve": true,
+      "components": [
+        {
+          "type": "title",
+          "id": "s8.g12.t",
+          "visibleTo": [
+            1,
+            2
+          ],
+          "text_key": "s8.g12.t"
+        },
+        {
+          "id": "s8.g12.s",
+          "text_key": "s8.g12.s",
+          "visibleTo": [
+            1,
+            2
+          ],
+          "type": "subtitle"
+        },
+        {
+          "text_key": "s8.g12.b",
+          "visibleTo": [
+            1,
+            2
+          ],
+          "type": "text",
+          "id": "s8.g12.b"
+        },
+        {
+          "type": "title",
+          "id": "s8.g3.t",
+          "visibleTo": [
+            3
+          ],
+          "text_key": "s8.g3.t"
+        },
+        {
+          "id": "s8.g3.s",
+          "text_key": "s8.g3.s",
+          "type": "subtitle",
+          "visibleTo": [
+            3
+          ]
+        },
+        {
+          "text_key": "s8.g3.b",
+          "visibleTo": [
+            3
+          ],
+          "type": "text",
+          "id": "s8.g3.b"
+        },
+        {
+          "type": "audio",
+          "id": "c1",
+          "visibleTo": [
+            1
+          ],
+          "src_key": "a.audio"
+        },
+        {
+          "type": "audio",
+          "visibleTo": [
+            2
+          ],
+          "id": "c2",
+          "src_key": "a.audio"
+        },
+        {
+          "hints": [
+            "a.h1",
+            "a.h2"
+          ],
+          "placeholder_key": "common.answer",
+          "visibleTo": [
+            3
+          ],
+          "id": "c3",
+          "type": "input",
+          "outcome_key": "a.out"
+        }
+      ],
+      "kind": "puzzle"
+    },
+    {
+      "components": [
+        {
+          "id": "s9.t",
+          "type": "title",
+          "visibleTo": "all",
+          "text_key": "s9.t"
+        },
+        {
+          "type": "subtitle",
+          "visibleTo": "all",
+          "text_key": "s9.s",
+          "id": "s9.s"
+        },
+        {
+          "type": "text",
+          "text_key": "s9.b",
+          "id": "s9.b",
+          "visibleTo": "all"
+        },
+        {
+          "type": "image",
+          "cust_key": "photo_step9",
+          "src": "assets/games/kidnapped-il/haunted-house-gothic-style.jpg",
+          "id": "img.photo_step9",
+          "visibleTo": "all"
+        },
+        {
+          "action": "advance",
+          "label_key": "common.continue",
+          "visibleTo": "all",
+          "id": "c2",
+          "type": "cta"
+        }
+      ],
+      "id": "step_9",
+      "kind": "screen"
+    },
+    {
+      "components": [
+        {
+          "text_key": "s10.t",
+          "id": "s10.t",
+          "type": "title",
+          "visibleTo": "all"
+        },
+        {
+          "id": "s10.s",
+          "visibleTo": "all",
+          "type": "subtitle",
+          "text_key": "s10.s"
+        },
+        {
+          "id": "s10.b",
+          "text_key": "s10.b",
+          "visibleTo": "all",
+          "type": "text"
+        },
+        {
+          "id": "c1",
+          "visibleTo": [
+            1
+          ],
+          "type": "pano",
+          "src": "https://totemtime-357a2.web.app/assets/games/kidnapped-il/pano-plain.jpg"
+        },
+        {
+          "type": "input",
+          "outcome_key": "p.out",
+          "placeholder_key": "common.answer",
+          "hints": [
+            "p.h1",
+            "p.h2"
+          ],
+          "visibleTo": [
+            1
+          ],
+          "id": "c2"
+        },
+        {
+          "id": "c3",
+          "src": "https://totemtime-357a2.web.app/assets/games/kidnapped-il/pano-guitar.jpg",
+          "visibleTo": [
+            2
+          ],
+          "type": "pano"
+        },
+        {
+          "visibleTo": [
+            3
+          ],
+          "type": "pano",
+          "id": "c4",
+          "src": "https://totemtime-357a2.web.app/assets/games/kidnapped-il/pano-plain.jpg"
+        }
+      ],
+      "id": "step_10",
+      "advanceOnSolve": true,
+      "kind": "puzzle"
+    },
+    {
+      "kind": "screen",
+      "id": "step_11",
+      "components": [
+        {
+          "id": "s11.t",
+          "type": "title",
+          "text_key": "s11.t",
+          "visibleTo": "all"
+        },
+        {
+          "id": "s11.s",
+          "visibleTo": "all",
+          "type": "subtitle",
+          "text_key": "s11.s"
+        },
+        {
+          "id": "s11.b",
+          "visibleTo": "all",
+          "type": "text",
+          "text_key": "s11.b"
+        },
+        {
+          "visibleTo": "all",
+          "id": "c2",
+          "type": "cta",
+          "action": "advance",
+          "label_key": "common.continue"
+        }
+      ]
+    },
+    {
+      "id": "step_12",
+      "advanceOnSolve": true,
+      "kind": "puzzle",
+      "components": [
+        {
+          "text_key": "s12.g12.t",
+          "type": "title",
+          "id": "s12.g12.t",
+          "visibleTo": [
+            1,
+            2
+          ]
+        },
+        {
+          "type": "subtitle",
+          "visibleTo": [
+            1,
+            2
+          ],
+          "text_key": "s12.g12.s",
+          "id": "s12.g12.s"
+        },
+        {
+          "visibleTo": [
+            1,
+            2
+          ],
+          "text_key": "s12.g12.b",
+          "type": "text",
+          "id": "s12.g12.b"
+        },
+        {
+          "id": "s12.g3.t",
+          "text_key": "s12.g3.t",
+          "type": "title",
+          "visibleTo": [
+            3
+          ]
+        },
+        {
+          "id": "s12.g3.s",
+          "type": "subtitle",
+          "visibleTo": [
+            3
+          ],
+          "text_key": "s12.g3.s"
+        },
+        {
+          "type": "text",
+          "text_key": "s12.g3.b",
+          "visibleTo": [
+            3
+          ],
+          "id": "s12.g3.b"
+        },
+        {
+          "id": "c1",
+          "visibleTo": [
+            1
+          ],
+          "src": "https://totemtime-357a2.web.app/assets/games/kidnapped-il/final1.png",
+          "type": "image"
+        },
+        {
+          "src": "https://totemtime-357a2.web.app/assets/games/kidnapped-il/final2.png",
+          "type": "image",
+          "visibleTo": [
+            2
+          ],
+          "id": "c2"
+        },
+        {
+          "type": "input",
+          "visibleTo": [
+            2
+          ],
+          "id": "c3",
+          "hints": [
+            "f.h1",
+            "f.h2"
+          ],
+          "placeholder_key": "common.answer",
+          "outcome_key": "f.out"
+        },
+        {
+          "id": "c4",
+          "type": "image",
+          "visibleTo": [
+            3
+          ],
+          "src": "https://totemtime-357a2.web.app/assets/games/kidnapped-il/final3.png"
+        }
+      ]
+    },
+    {
+      "kind": "screen",
+      "id": "step_13",
+      "components": [
+        {
+          "type": "title",
+          "visibleTo": "all",
+          "text_key": "s13.t",
+          "id": "s13.t"
+        },
+        {
+          "visibleTo": "all",
+          "id": "s13.s",
+          "type": "subtitle",
+          "text_key": "s13.s"
+        },
+        {
+          "visibleTo": "all",
+          "id": "s13.b",
+          "type": "text",
+          "text_key": "s13.b"
+        },
+        {
+          "visibleTo": "all",
+          "src": "assets/games/kidnapped-il/party-crowd-background-with-glittery-lights.jpg",
+          "id": "img.photo_final",
+          "cust_key": "photo_final",
+          "type": "image"
+        },
+        {
+          "type": "cta",
+          "label_key": "coupon.cta",
+          "id": "c2",
+          "action": "coupon",
+          "visibleTo": "all"
+        }
+      ]
+    }
+  ]
+}
