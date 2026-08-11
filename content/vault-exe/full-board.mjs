@@ -1,0 +1,121 @@
+// Full board seed: 3 screens, 12 devices, 3 sides, chain + answers. Rerunnable.
+import { initializeApp, applicationDefault } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+initializeApp({ credential: applicationDefault(), projectId: 'totemtime-357a2' });
+const db = getFirestore();
+
+const GLYPHS = { s1:'✳', s2:'☾', s3:'⌘', s4:'✦', s5:'◆', s6:'⚙' };
+
+const board = {
+  id: 'board', kind: 'board',
+  chain: ['radio','train','calc','uv','fish','clock','laptop'],
+  components: [
+    // ---- side 1: the quiet side ----
+    { id:'side1', type:'subtitle', visibleTo:[1], text_key:'side.1' },
+    { id:'radio', type:'widget', widget:'stepper', visibleTo:[1], points:100,
+      popup_key:'popups.radio', name_key:'el.radio.name', caption_key:'el.radio.caption',
+      hints:['hints.radio.1','hints.radio.2'],
+      params:{ min:875, max:1300, step:25, start:950, unitKey:'el.radio.unit' } },
+    { id:'audio', type:'widget', widget:'voice', visibleTo:[1], showWhen:'radio',
+      name_key:'el.audio.name', caption_key:'el.audio.caption',
+      params:{ say:'B. G. 7. F. 3.' } },
+    { id:'cal_big', type:'widget', widget:'gallery', visibleTo:[1],
+      name_key:'el.cal_big.name', caption_key:'el.cal_big.caption',
+      params:{ dates:['03/1968','14/2003','21/1987'], hidden4:'39/5/4607', show4When:'train' } },
+    { id:'lamp', type:'widget', widget:'lamp', visibleTo:[1], points:25,
+      popup_key:'popups.uv', name_key:'el.lamp.name', caption_key:'el.lamp.caption',
+      hints:['hints.uv.1','hints.uv.2'], elementId:'uv', enabledWhen:'calc' },
+    { id:'laptop', type:'widget', widget:'symbols', visibleTo:[1], points:250,
+      popup_key:'popups.laptop', name_key:'el.laptop.name', caption_key:'el.laptop.caption',
+      hints:['hints.laptop.1','hints.laptop.2'], enabledWhen:'clock',
+      params:{ glyphs:GLYPHS, total:6 } },
+    { id:'art1', type:'widget', widget:'artifact', visibleTo:[1],
+      params:{ emoji:'🖼' }, quip_key:'quips.framed_photo' },
+    // ---- side 2: the toy side ----
+    { id:'side2', type:'subtitle', visibleTo:[2], text_key:'side.2' },
+    { id:'die', type:'widget', widget:'roller', visibleTo:[2],
+      name_key:'el.die.name', caption_key:'el.die.caption',
+      params:{ fixedSequence:[1,1,2,5], historyLen:4 } },
+    { id:'train', type:'widget', widget:'train', visibleTo:[2], points:150,
+      popup_key:'popups.train', name_key:'el.train.name', caption_key:'el.train.caption',
+      hints:['hints.train.1','hints.train.2'],
+      params:{ trackChars:['B','3','G','7','F'], lapSec:9 } },
+    { id:'cal_small', type:'widget', widget:'reveal', visibleTo:[2], showWhen:'train',
+      name_key:'el.cal_small.name', caption_key:'el.cal_small.caption',
+      params:{ emoji:'📅' } },
+    { id:'fish', type:'widget', widget:'fish', visibleTo:[2], points:150,
+      popup_key:'popups.fish', name_key:'el.fish.name', caption_key:'el.fish.caption',
+      hints:['hints.fish.1','hints.fish.2'],
+      params:{ formations:['heart','square','triangle'], buttons:['black','blue','yellow'], digits:'0 8 1 0' } },
+    { id:'book', type:'widget', widget:'book', visibleTo:[2], showOpenWhen:'clock',
+      name_key:'el.book.name', caption_key:'el.book.caption',
+      params:{ order:['s3','s1','s5','s2','s6','s4'], glyphs:GLYPHS } },
+    { id:'art2', type:'widget', widget:'artifact', visibleTo:[2],
+      params:{ emoji:'🧸' }, quip_key:'quips.teddy' },
+    // ---- side 3: the paperwork side ----
+    { id:'side3', type:'subtitle', visibleTo:[3], text_key:'side.3' },
+    { id:'test', type:'widget', widget:'testcard', visibleTo:[3],
+      name_key:'el.test.name', caption_key:'el.test.caption' },
+    { id:'calc', type:'widget', widget:'digits', visibleTo:[3], points:100,
+      popup_key:'popups.calc', name_key:'el.calc.name', caption_key:'el.calc.caption',
+      hints:['hints.calc.1','hints.calc.2'], enabledWhen:'train',
+      params:{ maxLen:9 } },
+    { id:'bulb', type:'widget', widget:'reveal', visibleTo:[3], showWhen:'calc',
+      name_key:'el.bulb.name', caption_key:'el.bulb.caption', params:{ emoji:'💡' } },
+    { id:'notebook', type:'widget', widget:'notebook', visibleTo:[3],
+      name_key:'el.notebook.name', caption_key:'el.notebook.caption',
+      params:{ revealWhen:'uv' } },
+    { id:'clock', type:'widget', widget:'clock', visibleTo:[3], points:100,
+      wrongPenalty:-25, popup_key:'popups.clock', name_key:'el.clock.name',
+      caption_key:'el.clock.caption', hints:['hints.clock.1','hints.clock.2'],
+      enabledWhen:'fish', params:{ start:'03:47' } },
+    { id:'art3', type:'widget', widget:'artifact', visibleTo:[3],
+      params:{ emoji:'🥛' }, quip_key:'quips.glass' },
+  ]
+};
+
+await db.doc('games/vault-exe').set({
+  gameId:'vault-exe', title_key:'meta.title', N:3, defaultLanguage:'he', published:false,
+  scoring:{ start:100, solve:0, mistake:0, hints:[-10,-15] },
+  customizable:[
+    { key:'owner_name', label_key:'custom.owner_name', type:'text', default_key:'custom.owner_name.default', maxLength:30 },
+    { key:'treasure_caption', label_key:'custom.treasure_caption', type:'text', default_key:'custom.treasure_caption.default', maxLength:80 },
+  ],
+  steps:[
+    { id:'story', kind:'screen', components:[
+      { id:'st.t', type:'title', visibleTo:'all', text_key:'screens.story.title' },
+      { id:'st.b', type:'text', visibleTo:'all', text_key:'screens.story.body' },
+      { id:'st.c', type:'cta', visibleTo:'all', action:'advance', label_key:'screens.story.ready' } ] },
+    { id:'instructions', kind:'screen', components:[
+      { id:'in.t', type:'title', visibleTo:'all', text_key:'screens.instructions.title' },
+      { id:'in.b', type:'text', visibleTo:'all', text_key:'screens.instructions.body' },
+      { id:'in.c', type:'cta', visibleTo:'all', action:'advance', label_key:'screens.instructions.ready' } ] },
+    board,
+  ],
+});
+
+const answers = {
+  radio:{ type:'equals', value:1125 },
+  train:{ type:'sequence', value:['B','G','7','F','3'], requires:'radio' },
+  calc:{ type:'equals', value:'3954607', requires:'train' },
+  uv:{ type:'action', requires:'calc' },
+  fish:{ type:'sequence', value:['black@heart','blue@square','yellow@triangle'], requires:'uv' },
+  clock:{ type:'equals', value:'08:10', requires:'fish' },
+  laptop:{ type:'sequence', value:['s3','s1','s5','s2','s6','s4'], requires:'clock' },
+};
+for (const [id, a] of Object.entries(answers)) await db.doc(`games/vault-exe/answers/${id}`).set(a);
+
+const heX = { 'el.book.clueLabel':'הסדר שחרטתי:', 'el.audio.play':'▶ נגן שידור', 'screens.finale.title':'‏Vault.exe רץ…' };
+const enX = { 'el.book.clueLabel':'The order I carved:', 'el.audio.play':'▶ Play broadcast', 'screens.finale.title':'Vault.exe is running…' };
+await db.doc('games/vault-exe/locales/he').set(heX, { merge:true });
+await db.doc('games/vault-exe/locales/en').set(enX, { merge:true });
+
+await db.doc('rooms/VAULT1').set({ gameId:'vault-exe', phase:'play', step:0, points:100,
+  startedAt:Date.now(), solved:{}, hintsUsed:{}, flags:{}, prog:{}, seats:{} });
+
+const g = (await db.doc('games/vault-exe').get()).data();
+const b = g.steps[2];
+for (const n of [1,2,3]) console.log(`✓ player ${n}: ${b.components.filter(c=>c.visibleTo.includes&&c.visibleTo.includes(n)).length} components`);
+console.log(`✓ steps=${g.steps.length} chain=${b.chain.join('→')}`);
+console.log(`✓ answers: ${(await db.collection('games/vault-exe/answers').get()).docs.map(d=>d.id).join(', ')}`);
+console.log('✓ room VAULT1 reset');
