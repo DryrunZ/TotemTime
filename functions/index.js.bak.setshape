@@ -90,53 +90,6 @@ exports.judge = onCall(async (req) => {
     return { step };
   }
 
-  // ---- setShape: broadcast a widget's transient shape into shared prog (fish bowl) ----
-  if (action === "clearProg") {
-    const { elementId } = req.data || {};
-    if (!elementId) throw new HttpsError("invalid-argument", "elementId required");
-    await roomRef.update({ [`prog.${elementId}`]: [] });
-    return { cleared: elementId };
-  }
-
-  if (action === "setShape") {
-    const { elementId, shape } = req.data || {};
-    if (!elementId || !shape) throw new HttpsError("invalid-argument", "elementId and shape required");
-    const ok = ["heart","square","triangle"];
-    if (!ok.includes(shape)) throw new HttpsError("invalid-argument", "bad shape");
-    await roomRef.update({ [`prog.${elementId}_shape`]: shape });
-    return { shape };
-  }
-
-  // ---- fixFishAnswer: one-time admin. Update fish answer to new shape labels. ----
-  if (action === "fixFishAnswer") {
-    if (!(await isAdmin(callerUid))) throw new HttpsError("permission-denied", "admins only");
-    await db.doc(`games/${gameId}/answers/fish`).set({
-      type: "sequence",
-      value: ["black@line", "blue@square", "yellow@triangle"],
-      requires: "uv"
-    });
-    return { ok: true, value: ["black@line","blue@square","yellow@triangle"] };
-  }
-
-  // ---- setupFish: one-time admin. Adds the P2 colored-buttons component to the board. ----
-  if (action === "setupFish") {
-    if (!(await isAdmin(callerUid))) throw new HttpsError("permission-denied", "admins only");
-    const gref = db.doc(`games/${gameId}`);
-    const g = (await gref.get()).data();
-    if (!g) throw new HttpsError("not-found", "game not found");
-    const board = g.steps.find(st => st.kind === "board");
-    if (!board) throw new HttpsError("not-found", "board step not found");
-    board.components = board.components.filter(c => c.id !== "fishbtns");
-    board.components.push({
-      id: "fishbtns", x: 50, y: 62, w: 26, type: "widget", widget: "fishbtns",
-      visibleTo: [2], showWhen: "uv", elementId: "fish",
-      name_key: "el.fishbtns.name", caption_key: "el.fishbtns.caption",
-      params: { colors: ["black","blue","yellow"], shapeFrom: "fish" }
-    });
-    await gref.update({ steps: g.steps });
-    return { ok: true, components: board.components.length };
-  }
-
   if (action === "join") {
     if (!seatId || !name) throw new HttpsError("invalid-argument", "seatId and name required");
     return await db.runTransaction(async (tx) => {
@@ -315,19 +268,15 @@ exports.judge = onCall(async (req) => {
 
       if (type === "sequence") {
         const expected = a.value || [];
-        const att = (req.data && req.data.attemptId) || null;
-        const storedAtt = (room.prog && room.prog[elementId + "_att"]) || null;
-        let prog = (room.prog && room.prog[elementId]) || [];
-        if (att && att !== storedAtt) prog = [];
+        const prog = (room.prog && room.prog[elementId]) || [];
         const idx = prog.length;
-        const attWrite = att ? { [`prog.${elementId}_att`]: att } : {};
         if (idx < expected.length && norm(value) === norm(expected[idx])) {
           const next = [...prog, expected[idx]];
           if (next.length >= expected.length) return solve();
-          tx.update(roomRef, Object.assign({ [`prog.${elementId}`]: next }, attWrite));
+          tx.update(roomRef, { [`prog.${elementId}`]: next });
           return { correct: true, progress: next.length, total: expected.length, points: room.points };
         }
-        tx.update(roomRef, Object.assign({ [`prog.${elementId}`]: [] }, attWrite));
+        tx.update(roomRef, { [`prog.${elementId}`]: [] });
         return { correct: false, miss: true, progress: 0, total: expected.length, points: room.points };
       }
 

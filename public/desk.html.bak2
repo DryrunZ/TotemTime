@@ -1,0 +1,329 @@
+<!doctype html><html lang="he" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Vault.exe — Desk</title>
+<style>
+:root{
+  --wood1:#3a2a1c; --wood2:#2c1f14; --wood3:#4a3625;
+  --amber:#ffb347; --violet:#7b5cff; --ink:#efe6d8; --dim:#8a7c6a;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#171009;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink)}
+#desk{position:relative;width:100%;height:100%;max-width:480px;margin:0 auto;overflow:hidden;
+  background:
+    radial-gradient(120% 60% at 50% -10%, rgba(255,179,71,.08), transparent 60%),
+    repeating-linear-gradient(4deg, var(--wood1) 0 46px, var(--wood3) 46px 49px, var(--wood2) 49px 96px);
+  transition:box-shadow .5s}
+
+#felt{position:absolute;left:6%;right:6%;bottom:0;height:86px;border-radius:10px 10px 0 0;z-index:1;
+  background:linear-gradient(180deg, rgba(20,16,12,.55), rgba(14,11,8,.72));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
+#ring{position:absolute;left:14%;bottom:54px;width:36px;height:36px;border-radius:50%;z-index:1;
+  border:2px solid rgba(120,90,60,.26)}
+#worn{position:absolute;right:9%;bottom:18px;width:120px;height:48px;border-radius:50%;z-index:1;
+  background:radial-gradient(ellipse, rgba(255,235,210,.045), transparent 70%)}
+.pen{position:absolute;width:3px;height:56px;border-radius:2px;z-index:1;background:linear-gradient(180deg,#5b5148,#332c24)}
+#pen1{left:33%;bottom:28px;transform:rotate(17deg)}
+#pen2{left:37%;bottom:22px;transform:rotate(-9deg)}
+#crumb{position:absolute;left:52%;bottom:38px;width:3px;height:3px;border-radius:50%;z-index:1;background:#3a2f22}
+
+#lampglow{position:absolute;width:480px;height:480px;border-radius:50%;pointer-events:none;z-index:1;
+  background:radial-gradient(circle, rgba(255,217,160,.5) 0%, rgba(255,217,160,.24) 44%, rgba(255,217,160,.07) 74%, transparent 100%);
+  mix-blend-mode:screen;opacity:0;transition:opacity .5s}
+#lampsoft{position:absolute;width:480px;height:480px;border-radius:50%;pointer-events:none;z-index:1;
+  background:radial-gradient(circle, rgba(232,180,100,.45) 0%, transparent 70%);
+  mix-blend-mode:soft-light;opacity:0;transition:opacity .5s}
+.mote{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(255,225,180,.55);
+  opacity:0;transition:opacity .6s;z-index:2;animation:drift 7s ease-in-out infinite}
+.mote:nth-child(2){animation-duration:8.4s}
+.mote:nth-child(3){animation-duration:6.3s}
+.mote:nth-child(4){animation-duration:9s}
+@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(7px,-16px)}}
+
+#uvcolor{position:absolute;inset:0;pointer-events:none;z-index:2;mix-blend-mode:color;background:#7b5cff;opacity:0;transition:opacity .5s}
+#uvbloom{position:absolute;inset:0;pointer-events:none;z-index:2;mix-blend-mode:screen;
+  background:radial-gradient(120% 90% at 50% 40%, rgba(145,132,217,.18), rgba(145,132,217,.07) 60%, transparent 100%);
+  opacity:0;transition:opacity .5s}
+#desk.uv{box-shadow:inset 0 0 90px rgba(123,92,255,.22)}
+#desk.uv #uvcolor,#desk.uv #uvbloom{opacity:1}
+
+.obj{position:absolute;display:flex;flex-direction:column;align-items:center;gap:4px;
+  transition:opacity .6s ease, transform .3s ease;z-index:3;cursor:pointer;user-select:none;touch-action:manipulation}
+.obj:active{transform:scale(.94)}
+.obj .glyph{font-size:44px;line-height:1;filter:drop-shadow(0 6px 8px rgba(0,0,0,.55));transition:filter .24s ease-out}
+.obj .tag{font-size:11px;color:var(--dim);background:rgba(0,0,0,.35);padding:2px 8px;border-radius:10px;white-space:nowrap}
+.obj.hidden{opacity:0;pointer-events:none;transform:translateY(8px)}
+.obj.solved .glyph{filter:drop-shadow(0 6px 8px rgba(0,0,0,.55)) drop-shadow(0 0 14px rgba(140,255,170,.5))}
+.obj.solved::after{content:"✓";position:absolute;top:-10px;right:-14px;width:22px;height:22px;border-radius:50%;
+  background:#16321f;color:#8dffa9;font-size:12px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 8px rgba(140,255,170,.4);opacity:0;animation:fadein .6s ease-in-out forwards}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.obj.hot .glyph{animation:hotpulse 2.8s ease-in-out infinite}
+.obj.hot .tag{color:var(--amber);border:1px solid rgba(255,179,71,.5)}
+@keyframes hotpulse{0%,100%{filter:drop-shadow(0 6px 8px rgba(0,0,0,.55)) drop-shadow(0 0 6px rgba(255,179,71,.3))}
+  50%{filter:drop-shadow(0 6px 8px rgba(0,0,0,.55)) drop-shadow(0 0 22px rgba(255,179,71,.85))}}
+
+#header{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;background:linear-gradient(rgba(0,0,0,.55),transparent)}
+#header .who{font-size:13px;color:var(--amber)}
+#bottombar{position:absolute;bottom:0;left:0;right:0;z-index:5;display:flex;justify-content:space-between;align-items:center;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.7))}
+#bottombar .pill{font-size:13px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.12);padding:7px 14px;border-radius:20px;min-height:30px}
+#bottombar .hint{border-color:rgba(255,179,71,.5);color:var(--amber)}
+
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .3s;z-index:8}
+#scrim.open{opacity:1;pointer-events:auto}
+#sheet{position:fixed;left:0;right:0;bottom:0;max-width:480px;margin:0 auto;z-index:9;
+  background:#221709;border:1px solid rgba(255,179,71,.25);border-bottom:none;border-radius:20px 20px 0 0;
+  transform:translateY(105%);transition:transform .42s cubic-bezier(.22,.7,.2,1);
+  max-height:78vh;display:flex;flex-direction:column}
+#sheet.open{transform:translateY(0);transition-delay:.04s}
+#sheet.closing{transition:transform .32s cubic-bezier(.22,.7,.2,1)}
+#sheet .grip{width:44px;height:4px;border-radius:2px;background:rgba(255,255,255,.25);margin:10px auto 2px;touch-action:none}
+#sheet .shead{display:flex;justify-content:space-between;align-items:center;padding:8px 18px 4px}
+#sheet .shead .nm{font-size:16px;color:var(--amber)}
+#sheet .shead .x{font-size:22px;color:var(--dim);padding:4px 10px;cursor:pointer;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+#sheet .stage{padding:14px 18px calc(20px + env(safe-area-inset-bottom));overflow:auto;text-align:center;
+  opacity:0;transform:translateY(10px);transition:opacity .44s ease-out .12s, transform .44s ease-out .12s}
+#sheet.open .stage{opacity:1;transform:translateY(0)}
+.big{font-size:76px;line-height:1.1;margin:8px 0}
+.cap{font-size:13px;color:var(--dim);margin-bottom:14px}
+.btnrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+button.k{font-size:20px;min-width:56px;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,179,71,.4);
+  background:#2e2010;color:var(--ink);cursor:pointer}
+button.k:active{background:#3d2a12}
+.disp{font-size:30px;letter-spacing:3px;background:#120b04;border:1px solid rgba(255,255,255,.15);
+  border-radius:10px;padding:10px;margin:8px auto;min-height:56px;min-width:200px;font-variant-numeric:tabular-nums}
+#track{position:relative;width:240px;height:240px;margin:10px auto;border:3px dashed rgba(255,179,71,.4);border-radius:50%}
+#track .st{position:absolute;font-size:20px;color:var(--ink);transform:translate(-50%,-50%)}
+#loco{position:absolute;font-size:26px;top:50%;left:50%;transform-origin:0 0;animation:lap 9s linear infinite}
+@keyframes lap{from{transform:rotate(0) translate(120px) rotate(0)}to{transform:rotate(360deg) translate(120px) rotate(-360deg)}}
+#dbg{position:absolute;top:44px;left:8px;z-index:7;font-size:11px}
+#dbg .tgl{background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);color:var(--dim);border-radius:8px;padding:4px 8px;cursor:pointer}
+#dbg .chips{display:none;flex-direction:column;gap:4px;margin-top:6px}
+#dbg.open .chips{display:flex}
+#dbg .c{background:rgba(0,0,0,.65);border:1px solid rgba(255,255,255,.15);color:var(--dim);border-radius:8px;padding:4px 8px;cursor:pointer}
+#dbg .c.on{color:#8dffa9;border-color:rgba(140,255,170,.5)}
+#dbg .lg{display:flex;gap:4px;margin-top:6px}
+#dbg .lg a{background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2);color:var(--dim);border-radius:6px;padding:3px 7px;font-size:10px;text-decoration:none}
+#dbg .lg a.on{color:var(--amber);border-color:rgba(255,179,71,.5)}
+</style></head><body>
+<div id="desk">
+  <div id="felt"></div><div id="ring"></div><div id="worn"></div>
+  <div class="pen" id="pen1"></div><div class="pen" id="pen2"></div><div id="crumb"></div>
+  <div id="lampglow"></div><div id="lampsoft"></div>
+  <div class="mote"></div><div class="mote"></div><div class="mote"></div><div class="mote"></div>
+  <div id="uvcolor"></div><div id="uvbloom"></div>
+  <div id="header"><div class="who" id="who"></div><div style="font-size:12px;color:var(--dim)">Vault.exe</div></div>
+  <div id="objs"></div>
+  <div id="bottombar"><div class="pill hint" id="hintlbl">💡 רמז</div><div class="pill" id="score">נקודות: 100</div><div class="pill" id="badge"></div></div>
+  <div id="dbg"><div class="tgl" onclick="this.parentNode.classList.toggle('open')">⚙ debug</div>
+    <div class="chips" id="chips"></div>
+    <div class="lg" id="langtoggle"></div>
+  </div>
+</div>
+<div id="scrim" onclick="closeSheet()"></div>
+<div id="sheet"><div class="grip" id="grip"></div>
+  <div class="shead"><div class="nm" id="snm"></div><div class="x" onclick="closeSheet()">✕</div></div>
+  <div class="stage" id="sbody"></div>
+</div>
+<script>
+'use strict';
+const qs = new URLSearchParams(location.search);
+const P = Math.max(1, Math.min(3, parseInt(qs.get('player')||'1',10)));
+let LANG = qs.get('lang')==='en' ? 'en' : 'he';
+document.documentElement.lang = LANG;
+document.documentElement.dir = LANG==='he' ? 'rtl' : 'ltr';
+
+const STR = {
+  he:{ who:'הצד שלך בשולחן — שחקן ', hint:'💡 רמז', score:'נקודות: ', badge:'שחקן ' },
+  en:{ who:'Your side of the desk — Player ', hint:'💡 Hint', score:'Score: ', badge:'Player ' }
+};
+function applyLang(){
+  const s = STR[LANG];
+  document.getElementById('who').textContent = s.who + P;
+  document.getElementById('hintlbl').textContent = s.hint;
+  document.getElementById('score').textContent = s.score + '100';
+  document.getElementById('badge').textContent = s.badge + P;
+  document.getElementById('langtoggle').innerHTML =
+    '<a href="?player='+P+'&lang=he" class="'+(LANG==='he'?'on':'')+'">HE</a>'+
+    '<a href="?player='+P+'&lang=en" class="'+(LANG==='en'?'on':'')+'">EN</a>';
+}
+
+const CHAIN = ['radio','train','calc','uv','fish','clock','laptop'];
+const GLYPHS = { s1:'✳', s2:'☾', s3:'⌘', s4:'✦', s5:'◆', s6:'⚙' };
+const flags = {};
+let lampMode = 0;
+
+const L = {
+ 1:[
+  {id:'radio',   e:'📻', n:'רדיו',        x:24,y:20, fx:'sheet'},
+  {id:'audio',   e:'🔊', n:'שידור',       x:44,y:27, fx:'sheet', showWhen:'radio'},
+  {id:'cal_big', e:'🗓', n:'לוח שנה',     x:76,y:16, fx:'sheet'},
+  {id:'lamp',    e:'🛋️', n:'מנורה',       x:80,y:44, fx:'table', el:'uv', enabledWhen:'calc'},
+  {id:'laptop',  e:'💻', n:'לפטופ',       x:44,y:62, fx:'sheet', el:'laptop', enabledWhen:'clock'},
+  {id:'art1',    e:'🖼', n:'',            x:14,y:48, fx:'quip', quip:'תמונה ממוסגרת. דוד מני נראה צעיר.'},
+ ],
+ 2:[
+  {id:'die',     e:'🎲', n:'קובייה',      x:20,y:22, fx:'sheet'},
+  {id:'train',   e:'🚂', n:'רכבת',        x:52,y:40, fx:'sheet', el:'train'},
+  {id:'cal_small',e:'📅',n:'לוח קטן',     x:80,y:20, fx:'sheet', showWhen:'train'},
+  {id:'fish',    e:'🐠', n:'אקווריום',    x:78,y:58, fx:'sheet', el:'fish', enabledWhen:'uv'},
+  {id:'book',    e:'📕', n:'ספר',         x:26,y:66, fx:'sheet'},
+  {id:'art2',    e:'🧸', n:'',            x:60,y:74, fx:'quip', quip:'דובי ישן. תפור ביד. אל תשפטו.'},
+ ],
+ 3:[
+  {id:'test',    e:'📄', n:'מבחן',        x:22,y:18, fx:'sheet'},
+  {id:'clock',   e:'⏰', n:'שעון',        x:76,y:18, fx:'sheet', el:'clock', enabledWhen:'fish'},
+  {id:'calc',    e:'🧮', n:'מחשבון',      x:50,y:42, fx:'sheet', el:'calc', enabledWhen:'train'},
+  {id:'bulb',    e:'💡', n:'נורה',        x:74,y:44, fx:'sheet', showWhen:'calc'},
+  {id:'notebook',e:'📓', n:'מחברת',       x:24,y:62, fx:'sheet'},
+  {id:'art3',    e:'🥛', n:'',            x:62,y:70, fx:'quip', quip:'כוס מים. עדיין קרה. הוא היה כאן לא מזמן.'},
+ ]
+};
+const blockerDesk = { radio:1, train:2, calc:3, uv:1, fish:2, clock:3, laptop:1 };
+
+const chips = document.getElementById('chips');
+CHAIN.forEach(id=>{
+  const c = document.createElement('div'); c.className='c'; c.textContent=id;
+  c.onclick=()=>{ flags[id]=!flags[id]; c.classList.toggle('on',!!flags[id]); render(); };
+  chips.appendChild(c);
+});
+
+function blocker(){ return CHAIN.find(id=>!flags[id]) || null; }
+
+function render(){
+  const host = document.getElementById('objs'); host.innerHTML='';
+  const hot = blocker();
+  L[P].forEach(o=>{
+    const d = document.createElement('div'); d.className='obj'; d.id='o_'+o.id;
+    d.style.left=o.x+'%'; d.style.top=o.y+'%'; d.style.transform='translate(-50%,-50%)';
+    d.innerHTML = '<div class="glyph">'+o.e+'</div>'+(o.n?'<div class="tag">'+o.n+'</div>':'');
+    if(o.showWhen && !flags[o.showWhen]) d.classList.add('hidden');
+    if(o.el && flags[o.el]) d.classList.add('solved');
+    if(o.el && o.el===hot && blockerDesk[hot]===P) d.classList.add('hot');
+    d.onclick=()=>tap(o,d);
+    host.appendChild(d);
+  });
+  const g=document.getElementById('lampglow'), gs=document.getElementById('lampsoft');
+  if(P===1){ [g,gs].forEach(el=>{el.style.left='calc(80% - 240px)'; el.style.top='calc(44% - 240px)';}); }
+  const warm = (P===1 && lampMode===1);
+  g.style.opacity = warm ? 1 : 0; gs.style.opacity = warm ? 1 : 0;
+  document.querySelectorAll('.mote').forEach((m,i)=>{
+    m.style.opacity = warm ? .8 : 0;
+    if(P===1){ m.style.left=(72+i*3)+'%'; m.style.top=(30+i*4)+'%'; }
+  });
+  document.getElementById('desk').classList.toggle('uv', P===1 && lampMode===2);
+}
+
+function tap(o,d){
+  if(o.fx==='quip'){ quip(o,d); return; }
+  if(o.fx==='table' && o.id==='lamp'){ lampMode=(lampMode+1)%3; render(); return; }
+  openSheet(o);
+}
+
+let quipEl=null;
+function quip(o,d){
+  if(quipEl) quipEl.remove();
+  quipEl=document.createElement('div'); quipEl.style.cssText='position:absolute;z-index:6;max-width:200px;'+
+    'background:rgba(20,14,8,.94);border:1px solid rgba(255,179,71,.35);color:var(--ink);font-size:13px;'+
+    'line-height:1.45;padding:8px 12px;border-radius:12px;transform:translate(-50%,-110%);opacity:0;transition:opacity .3s;pointer-events:none';
+  quipEl.textContent=o.quip;
+  quipEl.style.left=o.x+'%'; quipEl.style.top=o.y+'%';
+  document.getElementById('desk').appendChild(quipEl);
+  requestAnimationFrame(()=>quipEl.style.opacity=1);
+  setTimeout(()=>{ if(quipEl){ quipEl.style.opacity=0; setTimeout(()=>quipEl&&quipEl.remove(),300);} },2600);
+}
+
+function openSheet(o){
+  document.getElementById('snm').textContent=o.n||'';
+  document.getElementById('sbody').innerHTML=widget(o);
+  document.getElementById('scrim').classList.add('open');
+  const sh=document.getElementById('sheet'); sh.classList.remove('closing'); sh.classList.add('open');
+  wire(o);
+}
+function closeSheet(){
+  const sh=document.getElementById('sheet');
+  sh.classList.add('closing'); sh.classList.remove('open');
+  document.getElementById('scrim').classList.remove('open');
+}
+
+(function(){
+  const grip=document.getElementById('grip'), sh=document.getElementById('sheet');
+  let startY=0, dragging=false, h=0;
+  grip.addEventListener('pointerdown',e=>{ dragging=true; startY=e.clientY; h=sh.getBoundingClientRect().height; sh.style.transition='none'; });
+  window.addEventListener('pointermove',e=>{
+    if(!dragging) return;
+    const dy=Math.max(0, e.clientY-startY);
+    sh.style.transform='translateY('+dy+'px)';
+  });
+  window.addEventListener('pointerup',e=>{
+    if(!dragging) return; dragging=false;
+    sh.style.transition='';
+    const dy=Math.max(0, e.clientY-startY);
+    if(dy > h*0.3){ sh.style.transform=''; closeSheet(); }
+    else { sh.style.transform=''; }
+  });
+})();
+
+let freq=950, digits='', clkH=3, clkM=47, presses=[], dieIdx=-1, dieHist=[];
+const DIE=[1,1,2,5];
+function widget(o){
+  switch(o.id){
+    case 'radio': return '<div class="big">📻</div><div class="disp"><span id="fq">'+freq+'</span> kHz</div>'+
+      '<div class="btnrow"><button class="k" id="fdn">−</button><button class="k" id="fup">+</button><button class="k" id="fon">ON</button></div>'+
+      '<div class="cap">מצא את התדר הנכון</div>';
+    case 'audio': return '<div class="big">🔊</div><div class="btnrow"><button class="k" id="say">▶ נגן שידור</button></div>';
+    case 'cal_big': { const four = flags.train?'<div class="disp">39/5/4607</div>':'';
+      return '<div class="big">🗓</div><div class="disp">03/1968</div><div class="disp">14/2003</div><div class="disp">21/1987</div>'+four+
+      '<div class="cap">תאריכים על הקיר</div>'; }
+    case 'laptop': { const keys=Object.entries(GLYPHS).map(([k,g])=>'<button class="k gk" data-k="'+k+'">'+g+'</button>').join('');
+      return '<div class="big">💻</div><div class="disp" id="seq"></div><div class="btnrow">'+keys+'</div>'+
+      '<div class="btnrow"><button class="k" id="clr">נקה</button></div>'; }
+    case 'die': return '<div class="big" id="face">🎲</div><div class="disp" id="hist">—</div>'+
+      '<div class="btnrow"><button class="k" id="roll">הטל</button></div>';
+    case 'train': { const chars=['B','3','G','7','F'];
+      const stops=chars.map((c,i)=>{const a=i/chars.length*2*Math.PI;
+        return '<div class="st" style="left:'+(50+46*Math.cos(a))+'%;top:'+(50+46*Math.sin(a))+'%">'+c+'</div>';}).join('');
+      return '<div id="track">'+stops+'<div id="loco">🚂</div></div>'+
+      '<div class="btnrow"><button class="k" id="red" style="border-color:#ff5c5c;color:#ff8a8a">● עצור</button></div>'; }
+    case 'cal_small': return '<div class="big">📅</div><div class="cap">לוח שנה קטן. משהו מסומן.</div>';
+    case 'fish': return '<div class="big">🐠🐟🐡🐠</div><div class="disp" id="form">♥</div>'+
+      '<div class="btnrow"><button class="k" style="background:#111">⬤</button><button class="k" style="color:#7ab8ff">⬤</button><button class="k" style="color:#ffe27a">⬤</button></div>'+
+      '<div class="cap">הדגים מסתדרים בצורות</div>';
+    case 'book': return flags.clock
+      ? '<div class="big">📖</div><div class="disp">'+['s3','s1','s5','s2','s6','s4'].map(k=>GLYPHS[k]).join(' ')+'</div><div class="cap">הסדר שחרטתי</div>'
+      : '<div class="big">📕</div><div class="cap">הספר סגור. משהו נעול בתוכו.</div>';
+    case 'test': return '<div class="big" id="card">📄</div><div class="disp" id="grade" style="color:#ff5c5c">F</div>'+
+      '<div class="btnrow"><button class="k" id="flip">הפוך</button></div>';
+    case 'calc': return '<div class="big">🧮</div><div class="disp" id="cd">&nbsp;</div>'+
+      '<div class="btnrow">'+[1,2,3,4,5,6,7,8,9,0].map(n=>'<button class="k ck" data-n="'+n+'">'+n+'</button>').join('')+'</div>'+
+      '<div class="btnrow"><button class="k" id="cclr">נקה</button></div>';
+    case 'bulb': return '<div class="big">💡</div><div class="cap">נורה. כתוב עליה משהו קטן.</div>';
+    case 'notebook': { const uv = (lampMode===2);
+      return '<div class="big">'+(uv?'📓✨':'📓')+'</div><div class="cap">'+(uv?'תחת האור הסגול: שרטוט של שעון… 08:10?':'דפים ריקים. או שלא.')+'</div>'; }
+    case 'clock': return '<div class="big">⏰</div><div class="disp" id="tm"></div>'+
+      '<div class="btnrow"><button class="k" id="hup">שעה +</button><button class="k" id="mup">דקות +</button></div>';
+    default: return '<div class="big">'+o.e+'</div>';
+  }
+}
+function wire(o){
+  const $=id=>document.getElementById(id);
+  if(o.id==='radio'){ $('fup').onclick=()=>{freq=Math.min(1300,freq+25);$('fq').textContent=freq;};
+    $('fdn').onclick=()=>{freq=Math.max(875,freq-25);$('fq').textContent=freq;};
+    $('fon').onclick=e=>e.target.classList.toggle('k'); }
+  if(o.id==='audio'){ $('say').onclick=()=>{const u=new SpeechSynthesisUtterance('B. G. 7. F. 3.');speechSynthesis.speak(u);}; }
+  if(o.id==='laptop'){ document.querySelectorAll('.gk').forEach(b=>b.onclick=()=>{presses.push(b.textContent);$('seq').textContent=presses.join(' ');});
+    $('clr').onclick=()=>{presses=[];$('seq').textContent='';}; }
+  if(o.id==='die'){ $('roll').onclick=()=>{dieIdx=(dieIdx+1)%DIE.length;dieHist.push(DIE[dieIdx]);if(dieHist.length>4)dieHist.shift();
+    $('face').textContent=['','⚀','⚁','⚂','⚃','⚄','⚅'][DIE[dieIdx]];$('hist').textContent=dieHist.join(' · ');}; }
+  if(o.id==='train'){ $('red').onclick=e=>{e.target.style.background='#552';setTimeout(()=>e.target.style.background='',150);}; }
+  if(o.id==='fish'){ const forms=['♥','■','▲'];let i=0;o._t=setInterval(()=>{i=(i+1)%3;const f=$('form');if(f)f.textContent=forms[i];else clearInterval(o._t);},2500); }
+  if(o.id==='test'){ let f=false; $('flip').onclick=()=>{f=!f;$('card').textContent=f?'🖤':'📄';$('grade').textContent=f?'M':'F';$('grade').style.color=f?'#ccc':'#ff5c5c';}; }
+  if(o.id==='calc'){ document.querySelectorAll('.ck').forEach(b=>b.onclick=()=>{if(digits.length<9){digits+=b.dataset.n;$('cd').textContent=digits;}});
+    $('cclr').onclick=()=>{digits='';$('cd').innerHTML='&nbsp;';}; }
+  if(o.id==='clock'){ const p=()=>$('tm').textContent=String(clkH).padStart(2,'0')+':'+String(clkM).padStart(2,'0');
+    $('hup').onclick=()=>{clkH=(clkH+1)%24;p();}; $('mup').onclick=()=>{clkM=(clkM+5)%60;p();}; p(); }
+}
+applyLang();
+render();
+</script></body></html>

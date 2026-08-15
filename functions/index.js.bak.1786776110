@@ -315,19 +315,15 @@ exports.judge = onCall(async (req) => {
 
       if (type === "sequence") {
         const expected = a.value || [];
-        const att = (req.data && req.data.attemptId) || null;
-        const storedAtt = (room.prog && room.prog[elementId + "_att"]) || null;
-        let prog = (room.prog && room.prog[elementId]) || [];
-        if (att && att !== storedAtt) prog = [];
+        const prog = (room.prog && room.prog[elementId]) || [];
         const idx = prog.length;
-        const attWrite = att ? { [`prog.${elementId}_att`]: att } : {};
         if (idx < expected.length && norm(value) === norm(expected[idx])) {
           const next = [...prog, expected[idx]];
           if (next.length >= expected.length) return solve();
-          tx.update(roomRef, Object.assign({ [`prog.${elementId}`]: next }, attWrite));
+          tx.update(roomRef, { [`prog.${elementId}`]: next });
           return { correct: true, progress: next.length, total: expected.length, points: room.points };
         }
-        tx.update(roomRef, Object.assign({ [`prog.${elementId}`]: [] }, attWrite));
+        tx.update(roomRef, { [`prog.${elementId}`]: [] });
         return { correct: false, miss: true, progress: 0, total: expected.length, points: room.points };
       }
 

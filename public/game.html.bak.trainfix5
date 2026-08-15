@@ -299,7 +299,6 @@ function applyCustImages(){
 }
 let MY_NAME = "";
 const S = { game:null, loc:{}, mode:"player", lang:"he", player:1, step:0, popup:null, elapsed:0, running:false, countdown:3, points:100, phase:null, seats:{}, flags:{}, prog:{}, hintsUsed:{}, hintOpen:false, dismissed:null, popupId:null };
-if(new URLSearchParams(location.search).get("dev")==="1"){ window.S=S; }
 const app = document.getElementById("app");
 const lb = document.getElementById("lightbox");
 const W = {};
@@ -762,12 +761,12 @@ app.addEventListener("click",(e)=>{
   if(el.hasAttribute("data-tstation")){
     e.stopPropagation(); e.preventDefault();
     const id=el.dataset.el, ci=Number(el.dataset.ci);
-    if(trainPausedAt(id)!==ci) return;
+    console.log("TSTATION tap. pausedAt:",trainPausedAt(id),"ci:",ci,"match:",trainPausedAt(id)===ci);
+    if(trainPausedAt(id)!==ci){ console.log("  -> IGNORED (not paused at this station)"); return; }
     const tr=TRAINS[id]; if(!tr) return;
     el.classList.add('tapped'); setTimeout(()=>el.classList.remove('tapped'),260);
-    if(!W[id+"_att"]) W[id+"_att"]=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
-    judge({ action:"submitElement", gameId:GAME_ID, roomCode:ROOM_CODE, elementId:id, value:tr.chars[ci], attemptId:W[id+"_att"] })
-      .then(res=>{ if(res.data && res.data.complete){ render(); } })
+    judge({ action:"submitElement", gameId:GAME_ID, roomCode:ROOM_CODE, elementId:id, value:tr.chars[ci] })
+      .then(res=>{ console.log("  -> res:",JSON.stringify(res.data),"| popup still:",S.popup?S.popupId:"CLOSED"); if(res.data && res.data.complete){ render(); } })
       .catch(err=>console.error("train tap ERR",err&&err.code));
     return;
   }
@@ -812,7 +811,7 @@ app.addEventListener("click",(e)=>{
     return; }
   if(el.hasAttribute("data-calcgo")){ const id=el.dataset.el; submitEl(id, W[id+"_disp"]||"", el); return; }
   if(el.hasAttribute("data-artifact")){ S.popup={kind:"hint",title:"", body:cz(t(el.dataset.artifact)), cta:t("popup.close")}; S.popupId="local"+Date.now(); render(); return; }
-  if(el.hasAttribute("data-deskobj")){ const step=S.game.steps[S.step]; const c=(step.components||[]).find(x=>x.id===el.dataset.deskobj); if(c){ const bare=(c.widget==='roller'); if(bare && c.params){ W[elid(c)]=1; W["_autoroll_"+elid(c)]=true; } if(c.widget==='stepper'){ W["_sweep_"+elid(c)]=true; } if(c.widget==='fish'){ W[elid(c)+"_tapped"]=false; W[elid(c)+"_f"]=0; } if(c.widget==='train'){ W[elid(c)+"_att"]=Date.now().toString(36)+Math.random().toString(36).slice(2,8); } const noT=(bare||c.widget==='stepper'||c.widget==='train'||c.widget==='digits'||c.widget==='fish'||c.widget==='fishbtns'||c.widget==='lamp'||c.widget==='clock'||c.widget==='symbols'||c.widget==='gallery'||c.widget==='notebook'||c.widget==='book'); S.popup={kind:"hint",title:t(c.name_key),comp:c,cta:t("popup.close"),noTitle:noT}; S.popupId="desk"+c.id; render(); } return; }
+  if(el.hasAttribute("data-deskobj")){ const step=S.game.steps[S.step]; const c=(step.components||[]).find(x=>x.id===el.dataset.deskobj); if(c){ const bare=(c.widget==='roller'); if(bare && c.params){ W[elid(c)]=1; W["_autoroll_"+elid(c)]=true; } if(c.widget==='stepper'){ W["_sweep_"+elid(c)]=true; } if(c.widget==='fish'){ W[elid(c)+"_tapped"]=false; W[elid(c)+"_f"]=0; } const noT=(bare||c.widget==='stepper'||c.widget==='train'||c.widget==='digits'||c.widget==='fish'||c.widget==='fishbtns'||c.widget==='lamp'||c.widget==='clock'||c.widget==='symbols'||c.widget==='gallery'||c.widget==='notebook'||c.widget==='book'); S.popup={kind:"hint",title:t(c.name_key),comp:c,cta:t("popup.close"),noTitle:noT}; S.popupId="desk"+c.id; render(); } return; }
   if(el.hasAttribute("data-hintboard")){ S.hintOpen=true; render(); return; }
   if(el.hasAttribute("data-hintclose")){ if(e.target===el){ S.hintOpen=false; render(); } return; }
   if(el.hasAttribute("data-elhint")){
@@ -851,8 +850,8 @@ app.addEventListener("click",(e)=>{
       S.popup = {kind:"lose",title:"!",body:"connection error — try again",cta:t("lose.cta")};
     }).finally(()=>{ el.disabled=false; render(); });
   }
-  else if(el.hasAttribute("data-popcta")){ if(!String(S.popupId).startsWith("desk")) S.dismissed=S.popupId; S.popup=null; render(); }
-  else if(el.hasAttribute("data-close")){ if(e.target===el){ if(!String(S.popupId).startsWith("desk")) S.dismissed=S.popupId; S.popup=null; render(); } }
+  else if(el.hasAttribute("data-popcta")){ S.dismissed=S.popupId; S.popup=null; render(); }
+  else if(el.hasAttribute("data-close")){ if(e.target===el){ S.dismissed=S.popupId; S.popup=null; render(); } }
 });
 lb.addEventListener("click",()=>{
   lb.classList.remove("open"); document.getElementById("lbimg").src="";
@@ -906,8 +905,7 @@ onSnapshot(doc(db, "rooms", ROOM_CODE), (snap) => {
     S.popup = p.kind === "win" ? { kind:"win", title:t("win.title"), body:pbody(p.bodyKey), cta:t("win.cta") }
             : p.kind === "lose" ? { kind:"lose", title:t("lose.title"), body:t("lose.body"), cta:t("lose.cta") }
             : p.kind==="skip" ? { kind:"hint", title:t("popup.skipped"), body:pbody(p.bodyKey), cta:t("popup.close") } : { kind:"hint", title:t("popup.hint"), body:pbody(p.bodyKey), cta:t("popup.close") };
-  } else if (r.popup && r.popup.id === S.dismissed) { if(!String(S.popupId||"").startsWith("desk")) S.popup = null; }
-  else if (!r.popup && S.popupId && String(S.popupId).indexOf("desk")===0) { /* keep local desk popup alive across prog-only snapshots */ }
+  } else if (r.popup && r.popup.id === S.dismissed) { S.popup = null; }
   // buzz guard: if a popup is open and the ONLY change is a fish-shape broadcast
   // (prog.*_shape), skip the full re-render so the open widget isn't torn down.
   const shapeSig = JSON.stringify(Object.keys(S.prog||{}).filter(k=>k.endsWith("_shape")).map(k=>k+":"+S.prog[k]));

@@ -9,40 +9,7 @@
 <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="/assets/games/kidnapped-il/logo.png"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
-<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js">
-
-// hold-to-repeat for radio tune: apply the frequency step directly, no .click()
-(function(){
-  let iv=null, to=null;
-  function stepOnce(id, dir){
-    const c=findComp(id), p=(c&&c.params)||{};
-    const delta=(p.step??1)*dir;
-    W[id]=Math.min(p.max??Infinity, Math.max(p.min??-Infinity,(W[id]??0)+delta));
-    const rf=document.getElementById('rf_'+id);
-    if(rf) rf.textContent=W[id];
-  }
-  function down(e){
-    const btn=e.target.closest("[data-wstep]"); if(!btn) return;
-    e.preventDefault();                       // stop text-selection / callout on hold
-    const id=btn.dataset.el, dir=Number(btn.dataset.wstep);
-    if(!id) return;
-    to=setTimeout(()=>{ iv=setInterval(()=>stepOnce(id,dir),60); },300);
-  }
-  function up(){ if(to){clearTimeout(to);to=null;} if(iv){clearInterval(iv);iv=null;} }
-  document.addEventListener("pointerdown",down,true);
-  document.addEventListener("pointerup",up,true);
-  document.addEventListener("pointercancel",up,true);
-})();
-
-// wstep contextmenu guard: block the native long-press menu on tune buttons
-document.addEventListener("contextmenu",function(e){ if(e.target.closest("[data-wstep]")) e.preventDefault(); });
-
-// forcetouch guard: block macOS Force Touch "Look Up" on controls so hold-to-repeat works
-["webkitmouseforcewillbegin","webkitmouseforcedown","webkitmouseforceup","webkitmouseforcechanged"].forEach(function(ev){
-  document.addEventListener(ev,function(e){ if(e.target.closest && e.target.closest("[data-wstep],[data-tstation],.chip,.gkey")) e.preventDefault(); });
-});
-window.__holdWired2=true;
-</script>
+<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
 <style>
 :root{--tt-bg:#0c0c0e;--tt-sheet:#18181b;--tt-text:#f6f6f4;--tt-muted:#8c8c93;--tt-accent:#c8ee5b;--tt-accent-ink:#14160c;--tt-border:rgba(255,255,255,.08);--tt-uv:#8b5cf6;color-scheme:dark;}
 *{box-sizing:border-box;}
@@ -227,35 +194,7 @@ body{margin:0;background:#050506;color:var(--tt-text);font-family:-apple-system,
 .ttrack2 .tstation.tapped{transform:translate(-50%,-50%) scale(1.55)}
 .tloco2{position:absolute;width:78px;height:auto;z-index:2;transform-origin:center;
   transition:transform .05s linear;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6));pointer-events:none}
-.calc-w .numpad4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.calc-w .gkey{min-height:48px;font-size:18px}.calc-w .gkey.op{background:#2a2410;color:#ffb347}.calc-w .gkey.clr{background:#2a1414;color:#ff8a8a}.calc-enter{width:100%;margin-top:10px}
-.fish-w{padding:6px 0;display:flex;justify-content:center}
-.bowl2{position:relative;width:260px;height:200px;border-radius:50%/46%;background:radial-gradient(ellipse at 50% 40%,rgba(120,180,210,.18),rgba(40,70,90,.28));border:3px solid rgba(150,200,220,.28);overflow:hidden;cursor:pointer}
-.bowl2.done{display:flex;align-items:center;justify-content:center}
-.fishsprite{position:absolute;width:64px;height:auto;transition:left .5s cubic-bezier(.3,.7,.3,1),top .5s cubic-bezier(.3,.7,.3,1),transform .5s cubic-bezier(.3,.7,.3,1);pointer-events:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
-.fdigits{font-size:40px;font-weight:800;letter-spacing:6px;color:var(--tt-accent,#ffb347)}
-
-.fishbtns-w{padding:10px 0;display:flex;flex-direction:column;align-items:center;gap:12px}
-.fb-shape{font-size:20px;font-weight:800;color:var(--tt-text);text-transform:capitalize;letter-spacing:1px}
-.fb-shape.dim{color:var(--tt-muted,#777)}
-.fb-row{display:flex;gap:16px}
-.fishbtns-w .cbtn{width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.25);cursor:pointer;-webkit-tap-highlight-color:transparent}
-.fishbtns-w .cbtn:active{transform:scale(.92)}
-.cbtn.black{background:#1a1a1a}.cbtn.blue{background:#2563eb}.cbtn.yellow{background:#eab308}
-.fb-done{font-size:44px;color:var(--tt-accent,#ffb347)}
-
-.fishsprite.drift{transition:none;animation:fishdrift 6s ease-in-out infinite}
-.fishsprite.d0{animation-duration:5.5s;animation-delay:0s}
-.fishsprite.d1{animation-duration:7s;animation-delay:-2s}
-.fishsprite.d2{animation-duration:6.3s;animation-delay:-4s}
-.fishsprite.d3{animation-duration:7.5s;animation-delay:-1s}
-@keyframes fishdrift{
-  0%{transform:translate(-50%,-50%) rotate(-8deg)}
-  25%{transform:translate(-38%,-58%) rotate(6deg)}
-  50%{transform:translate(-52%,-42%) rotate(-4deg)}
-  75%{transform:translate(-62%,-55%) rotate(8deg)}
-  100%{transform:translate(-50%,-50%) rotate(-8deg)}
-}
-.clock-w{padding:6px 0}.clock-w .clockrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.clock-w .clockrow .chip{min-height:46px}.clock-w .clockgo{width:100%;margin-top:10px}.laptop-w{padding:8px 0}.laptop-w .glyphgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.laptop-w .symkey{min-height:56px;font-size:24px;transition:transform .12s,background .12s}.laptop-w .symkey.pressed{transform:scale(.9);background:var(--tt-accent);color:#111}.cal-w{padding:6px 0;display:flex;flex-direction:column;align-items:center;gap:12px}.cal-page{width:220px;border-radius:12px;overflow:hidden;background:#0a0a0c;border:1px solid var(--tt-border)}.cal-photo{width:100%;height:180px;object-fit:cover;display:block}.cal-date{text-align:center;font-size:20px;font-weight:800;letter-spacing:2px;padding:10px 0}.cal-date.special{color:#c9a4ff}.cal-nav{display:flex;align-items:center;gap:16px}.cal-nav .chip{min-width:52px;font-size:22px}.cal-count{font-size:13px;color:var(--tt-muted);min-width:44px;text-align:center}.nb-w{padding:10px 0;display:flex;justify-content:center}.nbpaper2{background:#efe9d8;border-radius:8px;padding:20px 30px;display:flex;flex-direction:column;gap:16px;box-shadow:0 4px 12px rgba(0,0,0,.4)}.nbpaper2.blank{color:#b0a890;font-size:22px;letter-spacing:6px;padding:34px}.nbrow{display:flex;justify-content:center}.nbline{width:60px;height:12px;border-radius:3px;background:#111}.nbsq{width:44px;height:44px;border-radius:4px;background:#2563eb}.nbtri{width:0;height:0;border-left:26px solid transparent;border-right:26px solid transparent;border-bottom:44px solid #eab308}.book-w{padding:12px 0;display:flex;justify-content:center}.bookclosed{width:70px;height:90px;background:linear-gradient(135deg,#6b3410,#8a4518);border-radius:4px 8px 8px 4px;border-left:6px solid #4a2409;box-shadow:0 4px 12px rgba(0,0,0,.5)}.bookopen{background:#f3ead2;border-radius:8px;padding:24px 30px;box-shadow:0 4px 14px rgba(0,0,0,.4)}.bookorder{font-size:32px;letter-spacing:8px;color:#2a2a2a}.chip,[data-wstep],.gkey,.cbtn,.deskspot{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}</style>
+</style>
 </head>
 <body>
 <div class="dev">
@@ -299,7 +238,6 @@ function applyCustImages(){
 }
 let MY_NAME = "";
 const S = { game:null, loc:{}, mode:"player", lang:"he", player:1, step:0, popup:null, elapsed:0, running:false, countdown:3, points:100, phase:null, seats:{}, flags:{}, prog:{}, hintsUsed:{}, hintOpen:false, dismissed:null, popupId:null };
-if(new URLSearchParams(location.search).get("dev")==="1"){ window.S=S; }
 const app = document.getElementById("app");
 const lb = document.getElementById("lightbox");
 const W = {};
@@ -315,7 +253,6 @@ const t = (k)=>{
 const vis = (c,n)=> c.visibleTo==="all" || (Array.isArray(c.visibleTo)&&c.visibleTo.includes(n));
 const flag = (x)=> !!(S.flags && S.flags[x]);
 const elid = (c)=> c.elementId || c.id;
-function calcApply(a,b,op){ a=(a==null?0:a); if(op=='+')return a+b; if(op=='-')return a-b; if(op=='*')return a*b; if(op=='/')return (b==0?0:a/b); return b; }
 function findComp(id){
   for(const st of (S.game && S.game.steps)||[]) for(const c of st.components||[]) if(c.id===id||c.elementId===id) return c;
   return null;
@@ -371,7 +308,7 @@ function wcomp(c, inter){
 
   if(c.widget==="stepper"){
     const p=c.params||{};
-    if(!(id in W)) W[id]=(c.id==="radio"?1124:(p.start??p.min??950));
+    if(!(id in W)) W[id]=(p.start??p.min??950);
     if(!(id+"_band" in W)) W[id+"_band"]="FM";
     if(W["_sweep_"+id]){ W["_sweep_"+id]=false; const target=W[id];
       setTimeout(()=>{ const rf=document.getElementById('rf_'+id); if(!rf) return;
@@ -399,17 +336,10 @@ function wcomp(c, inter){
   if(c.widget==="gallery"){
     const p=c.params||{};
     const four=flag(p.show4When);
-    const base='assets/games/vault-exe/';
-    const pages=[
-      {img:base+'cal-1.png', date:(p.dates||[])[0]||'', special:false},
-      {img:base+'cal-2.png', date:(p.dates||[])[1]||'', special:false},
-      {img:base+'cal-3.png', date:(p.dates||[])[2]||'', special:false},
-    ];
-    if(four) pages.push({img:base+'cal-4.png', date:p.hidden4||'', special:true});
-    if(!(id+"_pg" in W)) W[id+"_pg"]=0;
-    if(W[id+"_pg"]>=pages.length) W[id+"_pg"]=0;
-    const pg=pages[W[id+"_pg"]];
-    return `<div class="cal-w"><div class="cal-page"><img class="cal-photo" id="calimg_${id}" src="${pg.img}" alt="" draggable="false"><div class="cal-date ${pg.special?'special':''}" id="caldate_${id}">${pg.date}</div></div><div class="cal-nav"><button class="chip" data-calflip="-1" data-el="${id}" ${dis}>‹</button><span class="cal-count" id="calcount_${id}">${W[id+"_pg"]+1} / ${pages.length}</span><button class="chip" data-calflip="1" data-el="${id}" ${dis}>›</button></div></div>`;
+    const cells=(p.dates||[]).map(d=>`<div class="readout" style="font-size:17px">${d}</div>`).join("");
+    const c4=four?`<div class="readout" style="font-size:17px;color:var(--tt-uv);border-color:rgba(139,92,246,.5)">${p.hidden4}</div>`
+                 :`<div class="readout" style="font-size:17px;color:#3a3a44">· · ·</div>`;
+    return shell(`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${cells}${c4}</div>`);
   }
   if(c.widget==="lamp"){
     if(!(id+"_st" in W)) W[id+"_st"]=0;
@@ -424,8 +354,8 @@ function wcomp(c, inter){
   }
   if(c.widget==="symbols"){
     const p=c.params||{}, g=p.glyphs||{};
-    const keys=Object.keys(g).map(k=>`<button class="gkey symkey" data-symkey data-el="${id}" data-val="${k}" ${dis}>${g[k]}</button>`).join("");
-    return `<div class="laptop-w"><div class="glyphgrid">${keys}</div></div>`;
+    const keys=Object.keys(g).map(k=>`<button class="gkey" data-wsubmit data-el="${id}" data-val="${k}" ${locked?"disabled":dis}>${g[k]}</button>`).join("");
+    return shell(`${pips(p.total||6)}<div class="glyphgrid">${keys}</div>`);
   }
   if(c.widget==="artifact"){
     const p=c.params||{};
@@ -467,83 +397,64 @@ function wcomp(c, inter){
     }).join("");
     return `<div class="train-w"><div class="ttrack2" data-train="${id}" style="width:320px;height:280px">
       ${rail}${stations}
-      <img class="tloco2" id="loco_${id}" src="assets/games/vault-exe/loco.png?v=2" alt="" draggable="false">
+      <img class="tloco2" id="loco_${id}" src="assets/games/vault-exe/loco.png" alt="" draggable="false">
     </div></div>`;
   }
   if(c.widget==="reveal"){
     const p=c.params||{};
     return shell(`<div style="font-size:44px">${p.emoji||"✨"}</div>`);
   }
-  if(c.widget==="fishbtns"){
-    const p=c.params||{}, colors=p.colors||["black","blue","yellow"];
-    const from=(p.shapeFrom||"fish")+"_shape";
-    const shape=(S.prog&&S.prog[from])||null;
-    if(done) return `<div class="fishbtns-w"><div class="fb-done">✓</div></div>`;
-    const btns=colors.map(col=>`<button class="cbtn ${col}" data-fishbtn data-el="${elid(c)}" data-col="${col}"></button>`).join("");
-    const label=shape?`<div class="fb-shape" id="fbshape_${elid(c)}">${shape}</div>`:`<div class="fb-shape dim" id="fbshape_${elid(c)}">—</div>`;
-    return `<div class="fishbtns-w">${label}<div class="fb-row">${btns}</div></div>`;
-  }
   if(c.widget==="fish"){
-    const p=c.params||{}, forms=p.formations||["line","square","triangle"];
+    const p=c.params||{}, forms=p.formations||[];
     if(!(id+"_f" in W)) W[id+"_f"]=0;
     const form=forms[W[id+"_f"]];
-    // 4 fish positions + facing angle per shape (x%,y%,deg)
-    const POS={
-      line:[[16,50,0],[38,50,0],[62,50,0],[84,50,0]],
-      square:[[36,36,0],[64,36,90],[36,64,-90],[64,64,180]],
-      triangle:[[50,16,0],[20,80,130],[80,80,-130],[50,80,180]]
-    };
-    const fishimg='assets/games/vault-exe/fish.png';
-    const tapped = W[id+"_tapped"];
-    // before first tap: idle drift (each fish its own scatter spot + drift animation).
-    // after: snap to shape positions.
-    const IDLE=[[30,38],[62,34],[38,64],[68,60]];
-    const fish=[0,1,2,3].map(i=>{
-      if(tapped){ const pp=(POS[form]||[])[i]||[50,50,0];
-        return `<img class="fishsprite" src="${fishimg}" style="left:${pp[0]}%;top:${pp[1]}%;transform:translate(-50%,-50%) rotate(${pp[2]}deg)" draggable="false">`; }
-      const ip=IDLE[i];
-      return `<img class="fishsprite drift d${i}" src="${fishimg}" style="left:${ip[0]}%;top:${ip[1]}%" draggable="false">`;
-    }).join("");
-    if(done) return `<div class="fish-w"><div class="bowl2 done"><span class="fdigits">${p.digits||"0 8 1 0"}</span></div></div>`;
-    return `<div class="fish-w"><div class="bowl2" id="bowl_${id}" data-fishcycle data-el="${id}">${fish}</div></div>`;
+    const POS={heart:[[32,32],[64,32],[48,48],[48,70]],square:[[30,32],[66,32],[30,66],[66,66]],triangle:[[48,26],[28,68],[68,68],[48,50]]};
+    const dots=(POS[form]||[]).map(([x,y])=>`<div class="fishy" style="left:${x}%;top:${y}%"></div>`).join("");
+    const inner=done
+      ? `<div class="bowl" style="display:flex;align-items:center;justify-content:center"><span class="fdigits">${p.digits||""}</span></div>`
+      : `<div class="bowl">${dots}</div>
+         <div class="row" style="margin-top:10px">
+           <button class="chip" data-form data-el="${id}" ${dis}>⟳ ${form}</button>
+           ${(p.buttons||[]).map(b=>`<button class="cbtn ${b}" data-wsubmit data-el="${id}" data-val="${b}@${form}" ${dis}></button>`).join("")}
+         </div>${pips(3)}`;
+    return shell(inner);
   }
   if(c.widget==="book"){
-    const p=c.params||{}, isopen=flag(c.showOpenWhen);
-    const order=(p.order||[]).map(k=>(p.glyphs||{})[k]||"?").join(" ");
-    const openhtml='<div class="bookopen"><div class="bookorder">'+order+'</div></div>';
-    const closedhtml='<div class="bookclosed"></div>';
-    return '<div class="book-w">'+(isopen?openhtml:closedhtml)+'</div>';
+    const p=c.params||{}, open=flag(c.showOpenWhen);
+    const inner=open
+      ? `<div class="bookbox open"><span style="font-size:12px">${t("el.book.clueLabel")}</span><span class="order">${(p.order||[]).map(k=>(p.glyphs||{})[k]||"?").join(" ")}</span></div>`
+      : `<div class="bookbox">📕</div>`;
+    return shell(inner);
   }
   if(c.widget==="testcard"){
     return shell(`<div class="paper"><span class="fgrade">F</span><div class="lines">7 × 8 = ____<br>12 + 29 = ____<br>90 ÷ 6 = ____</div></div><div class="mcard">M</div>`);
   }
   if(c.widget==="notebook"){
     const p=c.params||{}, on=flag(p.revealWhen);
-    const shapes='<div class="nbrow"><span class="nbshape nbline"></span></div><div class="nbrow"><span class="nbshape nbsq"></span></div><div class="nbrow"><span class="nbshape nbtri"></span></div>';
-    const blank='<div class="nbpaper2 blank">— — —</div>';
-    return '<div class="nb-w">'+(on?('<div class="nbpaper2">'+shapes+'</div>'):blank)+'</div>';
+    return shell(on
+      ? `<div class="nbpaper"><span class="s1">♥</span><span class="s2">■</span><span class="s3">▲</span></div>`
+      : `<div class="nbpaper blank">— — —</div>`);
   }
   if(c.widget==="clock"){
     const p=c.params||{};
     if(!(id+"_h" in W)){ const [h,m]=(p.start||"00:00").split(":").map(Number); W[id+"_h"]=h; W[id+"_m"]=m; }
     const pad=n=>String(n).padStart(2,"0");
     const shown=done?"08:10":pad(W[id+"_h"])+":"+pad(W[id+"_m"]);
-    return `<div class="clock-w"><div class="readout ${done?'done':''}" id="clk_${id}">${shown}</div>
-      ${done?"":`<div class="clockrow">
-        <button class="chip" data-clk="h" data-d="1" data-el="${id}" ${dis}>H +</button>
-        <button class="chip" data-clk="m" data-d="10" data-el="${id}" ${dis}>M +10</button>
-        <button class="chip" data-clk="m" data-d="1" data-el="${id}" ${dis}>M +1</button>
-      </div>
-      <button class="cta clockgo" data-clockset data-el="${id}" ${dis}>✓</button>`}</div>`;
+    return shell(`<div class="readout ${done?'done':''}">${shown}</div>
+      ${done?"":`<div class="row">
+        <button class="chip" data-clk="h" data-d="1" data-el="${id}" ${locked?"disabled":dis}>H+</button>
+        <button class="chip" data-clk="m" data-d="10" data-el="${id}" ${locked?"disabled":dis}>M+10</button>
+        <button class="chip" data-clk="m" data-d="1" data-el="${id}" ${locked?"disabled":dis}>M+1</button>
+        <button class="cta" data-clockset data-el="${id}" ${locked?"disabled":dis}>✓</button></div>`}`);
   }
   if(c.widget==="digits"){
-    if(!(id+"_disp" in W)){ W[id+"_disp"]="0"; W[id+"_acc"]=null; W[id+"_op"]=null; W[id+"_fresh"]=true; }
-    const rows=[["C","/","*","-"],["7","8","9","+"],["4","5","6","="],["1","2","3","0"]];
-    const btns=rows.map(r=>r.map(k=>{
-      const cls=("+-*/=".indexOf(k)>=0)?"gkey op":(k==="C"?"gkey clr":"gkey");
-      return `<button class="${cls}" data-calckey="${k}" data-el="${id}">${k}</button>`;
-    }).join("")).join("");
-    return `<div class="calc-w"><div class="readout ${done?'done':''}" id="cd_${id}" style="text-align:end;padding-inline:12px">${done?"3954607":(W[id+"_disp"]||"0")}</div>${done?"":`<div class="numpad4">${btns}</div><button class="cta calc-enter" data-calcgo data-el="${id}">ENTER</button>`}</div>`;
+    const p=c.params||{};
+    if(!(id+"_b" in W)) W[id+"_b"]="";
+    const keys=["7","8","9","4","5","6","1","2","3","C","0","="].map(k=>{
+      const act=k==="C"?`data-calc="C"`:k==="="?`data-calcgo`:`data-calc="${k}"`;
+      return `<button class="gkey" ${act} data-el="${id}" ${locked?"disabled":dis}>${k}</button>`;}).join("");
+    return shell(`<div class="readout ${done?'done':''}" style="text-align:end;padding-inline:12px">${done?"3954607":(W[id+"_b"]||"0")}</div>
+      ${done?"":`<div class="numpad">${keys}</div>`}`);
   }
   return "";
 }
@@ -633,7 +544,6 @@ function playerView(){
       const spots=mine.filter(c=>c.type==='widget').map(c=>{
         const id=elid(c);
         if(c.showWhen && !flag(c.showWhen)) return "";   // hidden = truly absent until trigger
-        if(c.widget==="book" && c.showOpenWhen && !flag(c.showOpenWhen)) return "";  // book inert until ready
         if(c.x==null||c.y==null) return "";              // no coords = decoy/dressing, no hotspot
         const done=flag(id), locked=c.enabledWhen && !flag(c.enabledWhen);
         // reveal objects aren't in the base photo — their art rides on top as a PNG
@@ -669,7 +579,7 @@ setInterval(()=>{
   const now=Date.now();
   for(const id of Object.keys(TRAINS)){
     const tr=TRAINS[id];
-    const box=document.querySelector(`.ttrack2[data-train="${id}"]`);
+    const box=document.querySelector(`.ttrack[data-train="${id}"]`);
     const loco=document.getElementById('loco_'+id);
     const el=now-tr.phaseStart;
     if(tr.phase==='pause' && el>=tr.pauseMs){ tr.phase='move'; tr.phaseStart=now; }
@@ -719,7 +629,7 @@ app.addEventListener("click",(e)=>{
   if(pv){ pv.pause(); pausedVideo=pv; document.getElementById("lbimg").src=pv.getAttribute("data-reveal"); lb.classList.add("open"); return; }
   const img=e.target.closest("img.c-img");
   if(img){ document.getElementById("lbimg").src=img.getAttribute("src"); lb.classList.add("open"); return; }
-  const el=e.target.closest("[data-action],[data-skip],[data-hint],[data-submit],[data-popcta],[data-close],[data-join],[data-ready],[data-forcestart],[data-wstep],[data-band],[data-wcommit],[data-wsubmit],[data-symkey],[data-voice],[data-calflip],[data-lampcycle],[data-slider],[data-roll],[data-trainstop],[data-tstation],[data-form],[data-fishcycle],[data-fishbtn],[data-clk],[data-clockset],[data-calc],[data-calckey],[data-calcgo],[data-artifact],[data-deskobj],[data-hintboard],[data-hintclose],[data-elhint],[data-elskip]"); if(!el)return;
+  const el=e.target.closest("[data-action],[data-skip],[data-hint],[data-submit],[data-popcta],[data-close],[data-join],[data-ready],[data-forcestart],[data-wstep],[data-band],[data-wcommit],[data-wsubmit],[data-voice],[data-lampcycle],[data-slider],[data-roll],[data-trainstop],[data-tstation],[data-form],[data-clk],[data-clockset],[data-calc],[data-calcgo],[data-artifact],[data-deskobj],[data-hintboard],[data-hintclose],[data-elhint],[data-elskip]"); if(!el)return;
   /* --- widget interactions --- */
   if(el.hasAttribute("data-wstep")){
     const id=el.dataset.el, c=findComp(id), p=(c&&c.params)||{};
@@ -733,24 +643,8 @@ app.addEventListener("click",(e)=>{
   if(el.hasAttribute("data-wcommit")){ const id=el.dataset.el;
     if(W[id+"_band"] && W[id+"_band"]!=="FM"){ W["_flash_"+id]=Date.now(); render(); return; }  // wrong band = no submit
     submitEl(id, W[id], el); return; }
-  if(el.hasAttribute("data-symkey")){ const id=el.dataset.el, val=el.dataset.val;
-    el.classList.add("pressed"); setTimeout(()=>el.classList.remove("pressed"),180);
-    judge({ action:"submitElement", gameId:GAME_ID, roomCode:ROOM_CODE, elementId:id, value:val })
-      .then(res=>{ if(res.data && (res.data.solved||res.data.complete)){ render(); } })
-      .catch(err=>console.error("symkey",err));
-    return; }
   if(el.hasAttribute("data-wsubmit")){ submitEl(el.dataset.el, el.dataset.val, el); return; }
   if(el.hasAttribute("data-voice")){ try{ const u=new SpeechSynthesisUtterance(el.dataset.voice); u.rate=.8; speechSynthesis.speak(u);}catch(err){} return; }
-  if(el.hasAttribute("data-calflip")){ const id=el.dataset.el, dir=Number(el.dataset.calflip);
-    const comp=findComp(id)||{}, pr=comp.params||{}, four=flag(pr.show4When);
-    const base="assets/games/vault-exe/";
-    const pages=[{img:base+"cal-1.png",date:(pr.dates||[])[0]||"",special:false},{img:base+"cal-2.png",date:(pr.dates||[])[1]||"",special:false},{img:base+"cal-3.png",date:(pr.dates||[])[2]||"",special:false}];
-    if(four) pages.push({img:base+"cal-4.png",date:pr.hidden4||"",special:true});
-    W[id+"_pg"]=((W[id+"_pg"]||0)+dir+pages.length)%pages.length;
-    const pg=pages[W[id+"_pg"]];
-    const im=document.getElementById("calimg_"+id), dt=document.getElementById("caldate_"+id), ct=document.getElementById("calcount_"+id);
-    if(im){ im.src=pg.img; dt.textContent=pg.date; dt.classList.toggle("special",pg.special); ct.textContent=(W[id+"_pg"]+1)+" / "+pages.length; } else render();
-    return; }
   if(el.hasAttribute("data-lampcycle")){ const c=findComp(el.dataset.el)||{}; const k=elid(c)+"_st"; W[k]=((W[k]||0)+1)%3; render(); return; }
   if(el.hasAttribute("data-slider")){ submitEl(el.dataset.el, "press", el); return; }
   if(el.hasAttribute("data-roll")){ const id=el.dataset.el; const comp=findComp(id); const seq=(comp&&comp.params&&comp.params.fixedSequence)||[1,1,2,5];
@@ -760,59 +654,35 @@ app.addEventListener("click",(e)=>{
       setTimeout(()=>{ cube.style.transition='none'; cube.style.transform='rotateX('+t.x+'deg) rotateY('+t.y+'deg)'; }, 900); }
     return; }
   if(el.hasAttribute("data-tstation")){
-    e.stopPropagation(); e.preventDefault();
     const id=el.dataset.el, ci=Number(el.dataset.ci);
     if(trainPausedAt(id)!==ci) return;
     const tr=TRAINS[id]; if(!tr) return;
+    W[id+"_taps"]=(W[id+"_taps"]||[]); W[id+"_taps"].push(tr.chars[ci]);
     el.classList.add('tapped'); setTimeout(()=>el.classList.remove('tapped'),260);
-    if(!W[id+"_att"]) W[id+"_att"]=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
-    judge({ action:"submitElement", gameId:GAME_ID, roomCode:ROOM_CODE, elementId:id, value:tr.chars[ci], attemptId:W[id+"_att"] })
-      .then(res=>{ if(res.data && res.data.complete){ render(); } })
-      .catch(err=>console.error("train tap ERR",err&&err.code));
+    if(W[id+"_taps"].length>=5){
+      const taps=W[id+"_taps"].slice(0,5); W[id+"_taps"]=[];
+      judge({ action:"submitElement", gameId:GAME_ID, roomCode:ROOM_CODE, elementId:id, value:taps })
+        .then(res=>{ if(res.data && res.data.solved){ render(); } })
+        .catch(err=>console.error("train submit",err));
+    }
     return;
   }
   if(el.hasAttribute("data-form")){ const id=el.dataset.el; W[id+"_f"]=((W[id+"_f"]||0)+1)%3; render(); return; }
-  if(el.hasAttribute("data-fishbtn")){ const id=el.dataset.el, col=el.dataset.col;
-    const comp=findComp(id)||{}, from=((comp.params&&comp.params.shapeFrom)||"fish")+"_shape";
-    const shape=(S.prog&&S.prog[from])||null;
-    if(!shape) return;                       // no shape set by P1 yet = nothing to pair
-    submitEl(id, col+"@"+shape, el); return;
-  }
-  if(el.hasAttribute("data-fishcycle")){ const id=el.dataset.el;
-    const first=!W[id+"_tapped"]; W[id+"_tapped"]=true;
-    if(first){ W[id+"_f"]=0; } else { W[id+"_f"]=((W[id+"_f"]||0)+1)%3; }
-    const forms=["line","square","triangle"], form=forms[W[id+"_f"]];
-    if(first){ const bowl0=document.getElementById("bowl_"+id); if(bowl0){ bowl0.querySelectorAll(".fishsprite").forEach(im=>im.classList.remove("drift","d0","d1","d2","d3")); } }
-    const POS={line:[[16,50,0],[38,50,0],[62,50,0],[84,50,0]],square:[[36,36,0],[64,36,90],[36,64,-90],[64,64,180]],triangle:[[50,16,0],[20,80,130],[80,80,-130],[50,80,180]]};
-    const bowl=document.getElementById("bowl_"+id);
-    if(bowl){ const imgs=bowl.querySelectorAll(".fishsprite"); (POS[form]||[]).forEach((pp,i)=>{ if(imgs[i]){ imgs[i].style.left=pp[0]+"%"; imgs[i].style.top=pp[1]+"%"; imgs[i].style.transform="translate(-50%,-50%) rotate("+pp[2]+"deg)"; } }); }
-    judge({ action:"setShape", gameId:GAME_ID, roomCode:ROOM_CODE, elementId:id, shape:form }).catch(e=>console.error("setShape",e));
-    return; }
   if(el.hasAttribute("data-clk")){
     const id=el.dataset.el, d=Number(el.dataset.d);
     if(el.dataset.clk==="h") W[id+"_h"]=((W[id+"_h"]||0)+d)%24;
     else W[id+"_m"]=((W[id+"_m"]||0)+d)%60;
-    const pad=x=>String(x).padStart(2,"0");
-    const cl=document.getElementById("clk_"+id);
-    if(cl) cl.textContent=pad(W[id+"_h"]||0)+":"+pad(W[id+"_m"]||0); else render();
-    return;
+    render(); return;
   }
   if(el.hasAttribute("data-clockset")){
     const id=el.dataset.el, pad=n=>String(n).padStart(2,"0");
     submitEl(id, pad(W[id+"_h"]||0)+":"+pad(W[id+"_m"]||0), el); return;
   }
-  if(el.hasAttribute("data-calckey")){ const id=el.dataset.el, k=el.dataset.calckey;
-    const setD=()=>{ const cd=document.getElementById("cd_"+id); if(cd) cd.textContent=W[id+"_disp"]; };
-    if(k=="C"){ W[id+"_disp"]="0"; W[id+"_acc"]=null; W[id+"_op"]=null; W[id+"_fresh"]=true; setD(); return; }
-    if(k>="0"&&k<="9"){ if(W[id+"_fresh"]){ W[id+"_disp"]=k; W[id+"_fresh"]=false; } else { W[id+"_disp"]=(W[id+"_disp"]=="0"?k:W[id+"_disp"]+k).slice(0,12); } setD(); return; }
-    if(k=="+"||k=="-"||k=="*"||k=="/"){ const cur=parseFloat(W[id+"_disp"]);
-      if(W[id+"_op"]&&!W[id+"_fresh"]){ W[id+"_acc"]=calcApply(W[id+"_acc"],cur,W[id+"_op"]); W[id+"_disp"]=String(W[id+"_acc"]); } else { W[id+"_acc"]=cur; }
-      W[id+"_op"]=k; W[id+"_fresh"]=true; setD(); return; }
-    if(k=="="){ const cur=parseFloat(W[id+"_disp"]); if(W[id+"_op"]!=null){ W[id+"_acc"]=calcApply(W[id+"_acc"],cur,W[id+"_op"]); W[id+"_disp"]=String(W[id+"_acc"]); W[id+"_op"]=null; W[id+"_fresh"]=true; setD(); } return; }
-    return; }
-  if(el.hasAttribute("data-calcgo")){ const id=el.dataset.el; submitEl(id, W[id+"_disp"]||"", el); return; }
+  if(el.hasAttribute("data-calc")){ const id=el.dataset.el, k=el.dataset.calc;
+    W[id+"_b"]=k==="C"?"":((W[id+"_b"]||"")+k).slice(0,9); render(); return; }
+  if(el.hasAttribute("data-calcgo")){ const id=el.dataset.el; submitEl(id, W[id+"_b"]||"", el); return; }
   if(el.hasAttribute("data-artifact")){ S.popup={kind:"hint",title:"", body:cz(t(el.dataset.artifact)), cta:t("popup.close")}; S.popupId="local"+Date.now(); render(); return; }
-  if(el.hasAttribute("data-deskobj")){ const step=S.game.steps[S.step]; const c=(step.components||[]).find(x=>x.id===el.dataset.deskobj); if(c){ const bare=(c.widget==='roller'); if(bare && c.params){ W[elid(c)]=1; W["_autoroll_"+elid(c)]=true; } if(c.widget==='stepper'){ W["_sweep_"+elid(c)]=true; } if(c.widget==='fish'){ W[elid(c)+"_tapped"]=false; W[elid(c)+"_f"]=0; } if(c.widget==='train'){ W[elid(c)+"_att"]=Date.now().toString(36)+Math.random().toString(36).slice(2,8); } const noT=(bare||c.widget==='stepper'||c.widget==='train'||c.widget==='digits'||c.widget==='fish'||c.widget==='fishbtns'||c.widget==='lamp'||c.widget==='clock'||c.widget==='symbols'||c.widget==='gallery'||c.widget==='notebook'||c.widget==='book'); S.popup={kind:"hint",title:t(c.name_key),comp:c,cta:t("popup.close"),noTitle:noT}; S.popupId="desk"+c.id; render(); } return; }
+  if(el.hasAttribute("data-deskobj")){ const step=S.game.steps[S.step]; const c=(step.components||[]).find(x=>x.id===el.dataset.deskobj); if(c){ const bare=(c.widget==='roller'); if(bare && c.params){ W[elid(c)]=1; W["_autoroll_"+elid(c)]=true; } if(c.widget==='stepper'){ W["_sweep_"+elid(c)]=true; } const noT=(bare||c.widget==='stepper'); S.popup={kind:"hint",title:t(c.name_key),comp:c,cta:t("popup.close"),noTitle:noT}; S.popupId="desk"+c.id; render(); } return; }
   if(el.hasAttribute("data-hintboard")){ S.hintOpen=true; render(); return; }
   if(el.hasAttribute("data-hintclose")){ if(e.target===el){ S.hintOpen=false; render(); } return; }
   if(el.hasAttribute("data-elhint")){
@@ -851,8 +721,8 @@ app.addEventListener("click",(e)=>{
       S.popup = {kind:"lose",title:"!",body:"connection error — try again",cta:t("lose.cta")};
     }).finally(()=>{ el.disabled=false; render(); });
   }
-  else if(el.hasAttribute("data-popcta")){ if(!String(S.popupId).startsWith("desk")) S.dismissed=S.popupId; S.popup=null; render(); }
-  else if(el.hasAttribute("data-close")){ if(e.target===el){ if(!String(S.popupId).startsWith("desk")) S.dismissed=S.popupId; S.popup=null; render(); } }
+  else if(el.hasAttribute("data-popcta")){ S.dismissed=S.popupId; S.popup=null; render(); }
+  else if(el.hasAttribute("data-close")){ if(e.target===el){ S.dismissed=S.popupId; S.popup=null; render(); } }
 });
 lb.addEventListener("click",()=>{
   lb.classList.remove("open"); document.getElementById("lbimg").src="";
@@ -864,7 +734,7 @@ document.head.insertAdjacentHTML("beforeend", `<style>
 .ptfloat{position:fixed;top:70px;left:50%;transform:translateX(-50%);font-size:28px;font-weight:800;z-index:9999;pointer-events:none;animation:ptfl 1.6s ease-out forwards;}
 .ptfloat.up{color:#2ecc71}.ptfloat.dn{color:#e74c3c}
 @keyframes ptfl{0%{opacity:0;transform:translate(-50%,10px)}15%{opacity:1}100%{opacity:0;transform:translate(-50%,-50px)}}
-.calc-w .numpad4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.calc-w .gkey{min-height:48px;font-size:18px}.calc-w .gkey.op{background:#2a2410;color:#ffb347}.calc-w .gkey.clr{background:#2a1414;color:#ff8a8a}.calc-enter{width:100%;margin-top:10px}</style>`);
+</style>`);
 function floatPoints(d){
   const el=document.createElement("div");
   el.className="ptfloat "+(d>0?"up":"dn");
@@ -906,25 +776,14 @@ onSnapshot(doc(db, "rooms", ROOM_CODE), (snap) => {
     S.popup = p.kind === "win" ? { kind:"win", title:t("win.title"), body:pbody(p.bodyKey), cta:t("win.cta") }
             : p.kind === "lose" ? { kind:"lose", title:t("lose.title"), body:t("lose.body"), cta:t("lose.cta") }
             : p.kind==="skip" ? { kind:"hint", title:t("popup.skipped"), body:pbody(p.bodyKey), cta:t("popup.close") } : { kind:"hint", title:t("popup.hint"), body:pbody(p.bodyKey), cta:t("popup.close") };
-  } else if (r.popup && r.popup.id === S.dismissed) { if(!String(S.popupId||"").startsWith("desk")) S.popup = null; }
-  else if (!r.popup && S.popupId && String(S.popupId).indexOf("desk")===0) { /* keep local desk popup alive across prog-only snapshots */ }
-  // buzz guard: if a popup is open and the ONLY change is a fish-shape broadcast
-  // (prog.*_shape), skip the full re-render so the open widget isn't torn down.
-  const shapeSig = JSON.stringify(Object.keys(S.prog||{}).filter(k=>k.endsWith("_shape")).map(k=>k+":"+S.prog[k]));
-  const nonShapeSig = JSON.stringify({p:S.points,st:S.step,ph:S.phase,fl:S.flags,pop:(r.popup&&r.popup.id)||null});
-  const incomingWin = r.popup && r.popup.id !== S.dismissed;
-  const fishPopupOpen = S.popup && S.popup.comp && S.popup.comp.widget === "fish";
-  if (!incomingWin && fishPopupOpen && window.__lastNonShapeSig === nonShapeSig && window.__lastShapeSig !== shapeSig) {
-    window.__lastShapeSig = shapeSig; return;   // fish shape-only change -> no rebuild
-  }
-  window.__lastShapeSig = shapeSig; window.__lastNonShapeSig = nonShapeSig;
+  } else if (r.popup && r.popup.id === S.dismissed) { S.popup = null; }
   render();
 });
 setInterval(() => {
   S.elapsed = roomStarted ? Math.floor((Date.now() - roomStarted) / 1000) : 0;
   const el = document.getElementById("timer");
   if (el) el.textContent = fmt(S.elapsed);
-  if (roomStarted && !DEVFLAG && Date.now() - roomStarted > 3*3600*1000 && !window.__expired){
+  if (roomStarted && Date.now() - roomStarted > 3*3600*1000 && !window.__expired){
     window.__expired = true; location.href = "/portal.html";
   }
 }, 1000);

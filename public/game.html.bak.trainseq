@@ -9,40 +9,7 @@
 <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png">
 <link rel="icon" type="image/png" href="/assets/games/kidnapped-il/logo.png"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
-<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js">
-
-// hold-to-repeat for radio tune: apply the frequency step directly, no .click()
-(function(){
-  let iv=null, to=null;
-  function stepOnce(id, dir){
-    const c=findComp(id), p=(c&&c.params)||{};
-    const delta=(p.step??1)*dir;
-    W[id]=Math.min(p.max??Infinity, Math.max(p.min??-Infinity,(W[id]??0)+delta));
-    const rf=document.getElementById('rf_'+id);
-    if(rf) rf.textContent=W[id];
-  }
-  function down(e){
-    const btn=e.target.closest("[data-wstep]"); if(!btn) return;
-    e.preventDefault();                       // stop text-selection / callout on hold
-    const id=btn.dataset.el, dir=Number(btn.dataset.wstep);
-    if(!id) return;
-    to=setTimeout(()=>{ iv=setInterval(()=>stepOnce(id,dir),60); },300);
-  }
-  function up(){ if(to){clearTimeout(to);to=null;} if(iv){clearInterval(iv);iv=null;} }
-  document.addEventListener("pointerdown",down,true);
-  document.addEventListener("pointerup",up,true);
-  document.addEventListener("pointercancel",up,true);
-})();
-
-// wstep contextmenu guard: block the native long-press menu on tune buttons
-document.addEventListener("contextmenu",function(e){ if(e.target.closest("[data-wstep]")) e.preventDefault(); });
-
-// forcetouch guard: block macOS Force Touch "Look Up" on controls so hold-to-repeat works
-["webkitmouseforcewillbegin","webkitmouseforcedown","webkitmouseforceup","webkitmouseforcechanged"].forEach(function(ev){
-  document.addEventListener(ev,function(e){ if(e.target.closest && e.target.closest("[data-wstep],[data-tstation],.chip,.gkey")) e.preventDefault(); });
-});
-window.__holdWired2=true;
-</script>
+<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
 <style>
 :root{--tt-bg:#0c0c0e;--tt-sheet:#18181b;--tt-text:#f6f6f4;--tt-muted:#8c8c93;--tt-accent:#c8ee5b;--tt-accent-ink:#14160c;--tt-border:rgba(255,255,255,.08);--tt-uv:#8b5cf6;color-scheme:dark;}
 *{box-sizing:border-box;}
@@ -255,7 +222,7 @@ body{margin:0;background:#050506;color:var(--tt-text);font-family:-apple-system,
   75%{transform:translate(-62%,-55%) rotate(8deg)}
   100%{transform:translate(-50%,-50%) rotate(-8deg)}
 }
-.clock-w{padding:6px 0}.clock-w .clockrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.clock-w .clockrow .chip{min-height:46px}.clock-w .clockgo{width:100%;margin-top:10px}.laptop-w{padding:8px 0}.laptop-w .glyphgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.laptop-w .symkey{min-height:56px;font-size:24px;transition:transform .12s,background .12s}.laptop-w .symkey.pressed{transform:scale(.9);background:var(--tt-accent);color:#111}.cal-w{padding:6px 0;display:flex;flex-direction:column;align-items:center;gap:12px}.cal-page{width:220px;border-radius:12px;overflow:hidden;background:#0a0a0c;border:1px solid var(--tt-border)}.cal-photo{width:100%;height:180px;object-fit:cover;display:block}.cal-date{text-align:center;font-size:20px;font-weight:800;letter-spacing:2px;padding:10px 0}.cal-date.special{color:#c9a4ff}.cal-nav{display:flex;align-items:center;gap:16px}.cal-nav .chip{min-width:52px;font-size:22px}.cal-count{font-size:13px;color:var(--tt-muted);min-width:44px;text-align:center}.nb-w{padding:10px 0;display:flex;justify-content:center}.nbpaper2{background:#efe9d8;border-radius:8px;padding:20px 30px;display:flex;flex-direction:column;gap:16px;box-shadow:0 4px 12px rgba(0,0,0,.4)}.nbpaper2.blank{color:#b0a890;font-size:22px;letter-spacing:6px;padding:34px}.nbrow{display:flex;justify-content:center}.nbline{width:60px;height:12px;border-radius:3px;background:#111}.nbsq{width:44px;height:44px;border-radius:4px;background:#2563eb}.nbtri{width:0;height:0;border-left:26px solid transparent;border-right:26px solid transparent;border-bottom:44px solid #eab308}.book-w{padding:12px 0;display:flex;justify-content:center}.bookclosed{width:70px;height:90px;background:linear-gradient(135deg,#6b3410,#8a4518);border-radius:4px 8px 8px 4px;border-left:6px solid #4a2409;box-shadow:0 4px 12px rgba(0,0,0,.5)}.bookopen{background:#f3ead2;border-radius:8px;padding:24px 30px;box-shadow:0 4px 14px rgba(0,0,0,.4)}.bookorder{font-size:32px;letter-spacing:8px;color:#2a2a2a}.chip,[data-wstep],.gkey,.cbtn,.deskspot{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}</style>
+.clock-w{padding:6px 0}.clock-w .clockrow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}.clock-w .clockrow .chip{min-height:46px}.clock-w .clockgo{width:100%;margin-top:10px}.laptop-w{padding:8px 0}.laptop-w .glyphgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.laptop-w .symkey{min-height:56px;font-size:24px;transition:transform .12s,background .12s}.laptop-w .symkey.pressed{transform:scale(.9);background:var(--tt-accent);color:#111}.cal-w{padding:6px 0;display:flex;flex-direction:column;align-items:center;gap:12px}.cal-page{width:220px;border-radius:12px;overflow:hidden;background:#0a0a0c;border:1px solid var(--tt-border)}.cal-photo{width:100%;height:180px;object-fit:cover;display:block}.cal-date{text-align:center;font-size:20px;font-weight:800;letter-spacing:2px;padding:10px 0}.cal-date.special{color:#c9a4ff}.cal-nav{display:flex;align-items:center;gap:16px}.cal-nav .chip{min-width:52px;font-size:22px}.cal-count{font-size:13px;color:var(--tt-muted);min-width:44px;text-align:center}.nb-w{padding:10px 0;display:flex;justify-content:center}.nbpaper2{background:#efe9d8;border-radius:8px;padding:20px 30px;display:flex;flex-direction:column;gap:16px;box-shadow:0 4px 12px rgba(0,0,0,.4)}.nbpaper2.blank{color:#b0a890;font-size:22px;letter-spacing:6px;padding:34px}.nbrow{display:flex;justify-content:center}.nbline{width:60px;height:12px;border-radius:3px;background:#111}.nbsq{width:44px;height:44px;border-radius:4px;background:#2563eb}.nbtri{width:0;height:0;border-left:26px solid transparent;border-right:26px solid transparent;border-bottom:44px solid #eab308}.book-w{padding:12px 0;display:flex;justify-content:center}.bookclosed{width:70px;height:90px;background:linear-gradient(135deg,#6b3410,#8a4518);border-radius:4px 8px 8px 4px;border-left:6px solid #4a2409;box-shadow:0 4px 12px rgba(0,0,0,.5)}.bookopen{background:#f3ead2;border-radius:8px;padding:24px 30px;box-shadow:0 4px 14px rgba(0,0,0,.4)}.bookorder{font-size:32px;letter-spacing:8px;color:#2a2a2a}</style>
 </head>
 <body>
 <div class="dev">
@@ -299,7 +266,6 @@ function applyCustImages(){
 }
 let MY_NAME = "";
 const S = { game:null, loc:{}, mode:"player", lang:"he", player:1, step:0, popup:null, elapsed:0, running:false, countdown:3, points:100, phase:null, seats:{}, flags:{}, prog:{}, hintsUsed:{}, hintOpen:false, dismissed:null, popupId:null };
-if(new URLSearchParams(location.search).get("dev")==="1"){ window.S=S; }
 const app = document.getElementById("app");
 const lb = document.getElementById("lightbox");
 const W = {};
@@ -371,7 +337,7 @@ function wcomp(c, inter){
 
   if(c.widget==="stepper"){
     const p=c.params||{};
-    if(!(id in W)) W[id]=(c.id==="radio"?1124:(p.start??p.min??950));
+    if(!(id in W)) W[id]=(p.start??p.min??950);
     if(!(id+"_band" in W)) W[id+"_band"]="FM";
     if(W["_sweep_"+id]){ W["_sweep_"+id]=false; const target=W[id];
       setTimeout(()=>{ const rf=document.getElementById('rf_'+id); if(!rf) return;
@@ -760,15 +726,17 @@ app.addEventListener("click",(e)=>{
       setTimeout(()=>{ cube.style.transition='none'; cube.style.transform='rotateX('+t.x+'deg) rotateY('+t.y+'deg)'; }, 900); }
     return; }
   if(el.hasAttribute("data-tstation")){
-    e.stopPropagation(); e.preventDefault();
     const id=el.dataset.el, ci=Number(el.dataset.ci);
     if(trainPausedAt(id)!==ci) return;
     const tr=TRAINS[id]; if(!tr) return;
+    W[id+"_taps"]=(W[id+"_taps"]||[]); W[id+"_taps"].push(tr.chars[ci]);
     el.classList.add('tapped'); setTimeout(()=>el.classList.remove('tapped'),260);
-    if(!W[id+"_att"]) W[id+"_att"]=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
-    judge({ action:"submitElement", gameId:GAME_ID, roomCode:ROOM_CODE, elementId:id, value:tr.chars[ci], attemptId:W[id+"_att"] })
-      .then(res=>{ if(res.data && res.data.complete){ render(); } })
-      .catch(err=>console.error("train tap ERR",err&&err.code));
+    if(W[id+"_taps"].length>=5){
+      const taps=W[id+"_taps"].slice(0,5); W[id+"_taps"]=[];
+      judge({ action:"submitElement", gameId:GAME_ID, roomCode:ROOM_CODE, elementId:id, value:taps })
+        .then(res=>{ console.log("TRAIN SUBMIT taps:",taps,"-> res:",JSON.stringify(res.data)); if(res.data && (res.data.complete||res.data.correct)){ render(); } })
+        .catch(err=>console.error("train submit ERROR",err));
+    }
     return;
   }
   if(el.hasAttribute("data-form")){ const id=el.dataset.el; W[id+"_f"]=((W[id+"_f"]||0)+1)%3; render(); return; }
@@ -812,7 +780,7 @@ app.addEventListener("click",(e)=>{
     return; }
   if(el.hasAttribute("data-calcgo")){ const id=el.dataset.el; submitEl(id, W[id+"_disp"]||"", el); return; }
   if(el.hasAttribute("data-artifact")){ S.popup={kind:"hint",title:"", body:cz(t(el.dataset.artifact)), cta:t("popup.close")}; S.popupId="local"+Date.now(); render(); return; }
-  if(el.hasAttribute("data-deskobj")){ const step=S.game.steps[S.step]; const c=(step.components||[]).find(x=>x.id===el.dataset.deskobj); if(c){ const bare=(c.widget==='roller'); if(bare && c.params){ W[elid(c)]=1; W["_autoroll_"+elid(c)]=true; } if(c.widget==='stepper'){ W["_sweep_"+elid(c)]=true; } if(c.widget==='fish'){ W[elid(c)+"_tapped"]=false; W[elid(c)+"_f"]=0; } if(c.widget==='train'){ W[elid(c)+"_att"]=Date.now().toString(36)+Math.random().toString(36).slice(2,8); } const noT=(bare||c.widget==='stepper'||c.widget==='train'||c.widget==='digits'||c.widget==='fish'||c.widget==='fishbtns'||c.widget==='lamp'||c.widget==='clock'||c.widget==='symbols'||c.widget==='gallery'||c.widget==='notebook'||c.widget==='book'); S.popup={kind:"hint",title:t(c.name_key),comp:c,cta:t("popup.close"),noTitle:noT}; S.popupId="desk"+c.id; render(); } return; }
+  if(el.hasAttribute("data-deskobj")){ const step=S.game.steps[S.step]; const c=(step.components||[]).find(x=>x.id===el.dataset.deskobj); if(c){ const bare=(c.widget==='roller'); if(bare && c.params){ W[elid(c)]=1; W["_autoroll_"+elid(c)]=true; } if(c.widget==='stepper'){ W["_sweep_"+elid(c)]=true; } if(c.widget==='fish'){ W[elid(c)+"_tapped"]=false; W[elid(c)+"_f"]=0; } const noT=(bare||c.widget==='stepper'||c.widget==='train'||c.widget==='digits'||c.widget==='fish'||c.widget==='fishbtns'||c.widget==='lamp'||c.widget==='clock'||c.widget==='symbols'||c.widget==='gallery'||c.widget==='notebook'||c.widget==='book'); S.popup={kind:"hint",title:t(c.name_key),comp:c,cta:t("popup.close"),noTitle:noT}; S.popupId="desk"+c.id; render(); } return; }
   if(el.hasAttribute("data-hintboard")){ S.hintOpen=true; render(); return; }
   if(el.hasAttribute("data-hintclose")){ if(e.target===el){ S.hintOpen=false; render(); } return; }
   if(el.hasAttribute("data-elhint")){
@@ -851,8 +819,8 @@ app.addEventListener("click",(e)=>{
       S.popup = {kind:"lose",title:"!",body:"connection error — try again",cta:t("lose.cta")};
     }).finally(()=>{ el.disabled=false; render(); });
   }
-  else if(el.hasAttribute("data-popcta")){ if(!String(S.popupId).startsWith("desk")) S.dismissed=S.popupId; S.popup=null; render(); }
-  else if(el.hasAttribute("data-close")){ if(e.target===el){ if(!String(S.popupId).startsWith("desk")) S.dismissed=S.popupId; S.popup=null; render(); } }
+  else if(el.hasAttribute("data-popcta")){ S.dismissed=S.popupId; S.popup=null; render(); }
+  else if(el.hasAttribute("data-close")){ if(e.target===el){ S.dismissed=S.popupId; S.popup=null; render(); } }
 });
 lb.addEventListener("click",()=>{
   lb.classList.remove("open"); document.getElementById("lbimg").src="";
@@ -906,8 +874,7 @@ onSnapshot(doc(db, "rooms", ROOM_CODE), (snap) => {
     S.popup = p.kind === "win" ? { kind:"win", title:t("win.title"), body:pbody(p.bodyKey), cta:t("win.cta") }
             : p.kind === "lose" ? { kind:"lose", title:t("lose.title"), body:t("lose.body"), cta:t("lose.cta") }
             : p.kind==="skip" ? { kind:"hint", title:t("popup.skipped"), body:pbody(p.bodyKey), cta:t("popup.close") } : { kind:"hint", title:t("popup.hint"), body:pbody(p.bodyKey), cta:t("popup.close") };
-  } else if (r.popup && r.popup.id === S.dismissed) { if(!String(S.popupId||"").startsWith("desk")) S.popup = null; }
-  else if (!r.popup && S.popupId && String(S.popupId).indexOf("desk")===0) { /* keep local desk popup alive across prog-only snapshots */ }
+  } else if (r.popup && r.popup.id === S.dismissed) { S.popup = null; }
   // buzz guard: if a popup is open and the ONLY change is a fish-shape broadcast
   // (prog.*_shape), skip the full re-render so the open widget isn't torn down.
   const shapeSig = JSON.stringify(Object.keys(S.prog||{}).filter(k=>k.endsWith("_shape")).map(k=>k+":"+S.prog[k]));

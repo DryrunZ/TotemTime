@@ -906,7 +906,7 @@ onSnapshot(doc(db, "rooms", ROOM_CODE), (snap) => {
     S.popup = p.kind === "win" ? { kind:"win", title:t("win.title"), body:pbody(p.bodyKey), cta:t("win.cta") }
             : p.kind === "lose" ? { kind:"lose", title:t("lose.title"), body:t("lose.body"), cta:t("lose.cta") }
             : p.kind==="skip" ? { kind:"hint", title:t("popup.skipped"), body:pbody(p.bodyKey), cta:t("popup.close") } : { kind:"hint", title:t("popup.hint"), body:pbody(p.bodyKey), cta:t("popup.close") };
-  } else if (r.popup && r.popup.id === S.dismissed) { if(!String(S.popupId||"").startsWith("desk")) S.popup = null; }
+  } else if (r.popup && r.popup.id === S.dismissed) { S.popup = null; }
   else if (!r.popup && S.popupId && String(S.popupId).indexOf("desk")===0) { /* keep local desk popup alive across prog-only snapshots */ }
   // buzz guard: if a popup is open and the ONLY change is a fish-shape broadcast
   // (prog.*_shape), skip the full re-render so the open widget isn't torn down.
