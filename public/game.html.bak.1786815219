@@ -314,7 +314,6 @@ const t = (k)=>{
 };
 const vis = (c,n)=> c.visibleTo==="all" || (Array.isArray(c.visibleTo)&&c.visibleTo.includes(n));
 const flag = (x)=> !!(S.flags && S.flags[x]);
-const curStep=()=>{ const st=(S.game&&S.game.steps&&S.game.steps[S.step])||{}; if(st.uses){ const base=S.game.steps.find(x=>x.id===st.uses); if(base) return base; } return st; };
 const elid = (c)=> c.elementId || c.id;
 function calcApply(a,b,op){ a=(a==null?0:a); if(op=='+')return a+b; if(op=='-')return a-b; if(op=='*')return a*b; if(op=='/')return (b==0?0:a/b); return b; }
 function findComp(id){
@@ -617,7 +616,7 @@ function finaleView(){
     <p class="c-text">${cz(t("screens.finale.body"))}</p></div>`;
 }
 function playerView(){
-  const step=curStep();
+  const step=S.game.steps[S.step];
   const isBoard=step&&step.kind==="board";
   let inner;
   if(S.countdown!==null){
@@ -653,7 +652,7 @@ function playerView(){
   return `<div class="wrap"><div class="phone ${uv}">${topbar()}${inner}${S.hintOpen?hintSheet():""}${S.popup?popupHtml():""}</div></div>`;
 }
 function adminView(){
-  const step=curStep(), N=S.game.N;
+  const step=S.game.steps[S.step], N=S.game.N;
   let cols="";
   for(let n=1;n<=N;n++){
     const mine=step.components.filter(c=>vis(c,n));
@@ -661,9 +660,8 @@ function adminView(){
     const body=mine.map(c=>comp(c,false)).join("")+others.map(c=>`<div class="hidden-note">${c.type} — ${S.lang==='he'?'מוסתר':'hidden'}</div>`).join("");
     cols+=`<div class="col"><h4>${t("topbar.player")} ${n}</h4><div class="cbody">${body||"—"}</div></div>`;
   }
-  if(!window.__judged){ window.__judged={}; judge({action:"listJudged",gameId:GAME_ID,roomCode:ROOM_CODE}).then(r=>{ window.__judged=(r.data&&r.data.elements)||{}; render(); }).catch(()=>{}); }
-  const order=[]; { const m=window.__judged; const roots=Object.keys(m).filter(k=>!m[k]); const next=(id)=>Object.keys(m).find(k=>m[k]===id); roots.forEach(rt=>{ let c=rt; while(c&&!order.includes(c)){ order.push(c); c=next(c); } }); }
-  const jump=order.map(id=>`<button class="chip" data-solveupto="${id}">&#x25B8; ${id}</button>`).join("");
+  const els=[...new Set(S.game.steps.flatMap(st=>(st.components||[]).filter(c=>c.type==="widget"&&c.id&&c.judged!==false).map(c=>c.id)))];
+  const jump=els.map(id=>`<button class="chip" data-solveupto="${id}">&#x25B8; ${id}</button>`).join("");
   const fp=`<button class="chip" data-resetroom>&#x21BA; reset</button>`;
   return `<div class="adminbar"><strong>${t("game.title")}</strong> · ${t("topbar.stage")} ${S.step+1}/${S.game.steps.length}</div><div class="adminbar" style="flex-wrap:wrap">${fp}${jump}</div><div class="grid">${cols}</div>`;
 }
@@ -817,7 +815,7 @@ app.addEventListener("click",(e)=>{
     return; }
   if(el.hasAttribute("data-calcgo")){ const id=el.dataset.el; submitEl(id, W[id+"_disp"]||"", el); return; }
   if(el.hasAttribute("data-artifact")){ S.popup={kind:"hint",title:"", body:cz(t(el.dataset.artifact)), cta:t("popup.close")}; S.popupId="local"+Date.now(); render(); return; }
-  if(el.hasAttribute("data-deskobj")){ const step=curStep(); const c=(step.components||[]).find(x=>x.id===el.dataset.deskobj); if(c){ const bare=(c.widget==='roller'); if(bare && c.params){ W[elid(c)]=1; W["_autoroll_"+elid(c)]=true; } if(c.widget==='stepper'){ W["_sweep_"+elid(c)]=true; } if(c.widget==='fish'){ W[elid(c)+"_tapped"]=false; W[elid(c)+"_f"]=0; } if(c.widget==='train'){ W[elid(c)+"_att"]=Date.now().toString(36)+Math.random().toString(36).slice(2,8); } const noT=(bare||c.widget==='stepper'||c.widget==='train'||c.widget==='digits'||c.widget==='fish'||c.widget==='fishbtns'||c.widget==='lamp'||c.widget==='clock'||c.widget==='symbols'||c.widget==='gallery'||c.widget==='notebook'||c.widget==='book'); S.popup={kind:"hint",title:t(c.name_key),comp:c,cta:t("popup.close"),noTitle:noT}; S.popupId="desk"+c.id; render(); } return; }
+  if(el.hasAttribute("data-deskobj")){ const step=S.game.steps[S.step]; const c=(step.components||[]).find(x=>x.id===el.dataset.deskobj); if(c){ const bare=(c.widget==='roller'); if(bare && c.params){ W[elid(c)]=1; W["_autoroll_"+elid(c)]=true; } if(c.widget==='stepper'){ W["_sweep_"+elid(c)]=true; } if(c.widget==='fish'){ W[elid(c)+"_tapped"]=false; W[elid(c)+"_f"]=0; } if(c.widget==='train'){ W[elid(c)+"_att"]=Date.now().toString(36)+Math.random().toString(36).slice(2,8); } const noT=(bare||c.widget==='stepper'||c.widget==='train'||c.widget==='digits'||c.widget==='fish'||c.widget==='fishbtns'||c.widget==='lamp'||c.widget==='clock'||c.widget==='symbols'||c.widget==='gallery'||c.widget==='notebook'||c.widget==='book'); S.popup={kind:"hint",title:t(c.name_key),comp:c,cta:t("popup.close"),noTitle:noT}; S.popupId="desk"+c.id; render(); } return; }
   if(el.hasAttribute("data-solveupto")){ el.disabled=true; judge({action:"solveUpTo",gameId:GAME_ID,roomCode:ROOM_CODE,elementId:el.dataset.solveupto}).then(r=>{ el.disabled=false; console.log("solveUpTo",r.data); }).catch(e=>{ el.disabled=false; alert(e.message); }); return; }
   if(el.hasAttribute("data-resetroom")){ el.disabled=true; judge({action:"resetRoom",gameId:GAME_ID,roomCode:ROOM_CODE}).then(()=>{ el.disabled=false; }).catch(e=>{ el.disabled=false; alert(e.message); }); return; }
   if(el.hasAttribute("data-hintboard")){ S.hintOpen=true; render(); return; }

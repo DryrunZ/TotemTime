@@ -34,44 +34,6 @@ exports.judge = onCall(async (req) => {
   const lastStep = (game.steps || []).length - 1;
 
   // ---- createRoom: no roomCode needed ----
-  // ---- listJudged: which elements have answer docs (drives the generic admin test row) ----
-  if (action === "listJudged") {
-    if (!(await isAdmin(callerUid))) throw new HttpsError("permission-denied", "admins only");
-    const snap = await db.collection(`games/${gameId}/answers`).get();
-    const out = {};
-    snap.forEach(d => { out[d.id] = d.data().requires || null; });
-    return { elements: out };
-  }
-  // ---- solveUpTo: flag everything before elementId as solved (walks requires chain in answer docs) ----
-  if (action === "solveUpTo") {
-    if (!(await isAdmin(callerUid))) throw new HttpsError("permission-denied", "admins only");
-    const { elementId } = req.data || {};
-    const snap = await db.collection(`games/${gameId}/answers`).get();
-    const reqMap = {};
-    snap.forEach(d => { reqMap[d.id] = d.data().requires || null; });
-    if (!(elementId in reqMap)) throw new HttpsError("not-found", `no answer doc for ${elementId}`);
-    const upd = {}; let cur = reqMap[elementId], guard = 0;
-    while (cur && guard++ < 20) { upd[`flags.${cur}`] = true; cur = reqMap[cur]; }
-    if (Object.keys(upd).length) await roomRef.update(upd);
-    return { solved: Object.keys(upd).map(k => k.slice(6)) };
-  }
-  if (action === "installScenes") {
-    if (!(await isAdmin(callerUid))) throw new HttpsError("permission-denied", "admins only");
-    const gref = db.doc(`games/${gameId}`);
-    const g = (await gref.get()).data();
-    if (!g) throw new HttpsError("not-found", "game not found");
-    let steps = g.steps.filter(st => !st.el && st.id !== "vault");
-    const bIdx = steps.findIndex(st => st.kind === "board");
-    const board = steps[bIdx];
-    if (!board || !board.chain) throw new HttpsError("failed-precondition", "board with chain required");
-    const scenes = board.chain.map(el => ({ id: "sc_" + el, kind: "board", uses: board.id, el }));
-    const vault = { id: "vault", kind: "screen", components: [
-      { id: "vt", type: "title", text_key: "screens.finale.title" },
-      { id: "vb", type: "text", text_key: "screens.finale.body" } ] };
-    steps = [...steps.slice(0, bIdx + 1), ...scenes, ...steps.slice(bIdx + 1), vault];
-    await gref.update({ steps });
-    return { steps: steps.map(s => s.id) };
-  }
   if (action === "createRoom") {
     const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
     let code = "";
@@ -124,17 +86,7 @@ exports.judge = onCall(async (req) => {
     const step = Number(stepId);
     if (!Number.isInteger(step) || step < 0 || step > lastStep)
       throw new HttpsError("invalid-argument", "bad step");
-    const g2 = (await db.doc(`games/${gameId}`).get()).data();
-    const tgt = g2 && g2.steps && g2.steps[step];
-    if (tgt && tgt.el) {
-      const b2 = g2.steps.find(st => st.kind === "board" && st.chain) || {};
-      const ci = (b2.chain || []).indexOf(tgt.el);
-      const flags = {};
-      (b2.chain || []).slice(0, Math.max(ci, 0)).forEach(id => { flags[id] = true; });
-      await roomRef.update({ step, flags, prog: {}, popup: null });
-    } else {
-      await roomRef.update({ step });
-    }
+    await roomRef.update({ step });
     return { step };
   }
 
@@ -166,13 +118,6 @@ exports.judge = onCall(async (req) => {
     return { ok: true, value: ["black@line","blue@square","yellow@triangle"] };
   }
 
-  // ---- setFreeplay: admin/testing. When true, judge ignores `requires` so elements can be tested in isolation. ----
-  if (action === "setFreeplay") {
-    if (!(await isAdmin(callerUid))) throw new HttpsError("permission-denied", "admins only");
-    const on = !!(req.data && req.data.on);
-    await roomRef.update({ freeplay: on });
-    return { freeplay: on };
-  }
   // ---- patchBoard: admin. Merge arbitrary top-level keys into the board step (data-not-code). ----
   if (action === "patchBoard") {
     if (!(await isAdmin(callerUid))) throw new HttpsError("permission-denied", "admins only");
@@ -358,18 +303,12 @@ exports.judge = onCall(async (req) => {
       if (!room) throw new HttpsError("not-found", "room not found");
       if (room.flags && room.flags[elementId])
         return { correct: true, already: true, points: room.points };
-      const sIdx = game.steps.findIndex(st => st.el === elementId);
-      if (sIdx >= 0) {
-        if (room.step !== sIdx && !room.freeplay)
-          throw new HttpsError("failed-precondition", "not available yet");
-      } else if (a.requires && !room.freeplay && !(room.flags && room.flags[a.requires])) {
+      if (a.requires && !(room.flags && room.flags[a.requires]))
         throw new HttpsError("failed-precondition", "not available yet");
-      }
       const solver = (room.seats && room.seats[callerUid] && room.seats[callerUid].name) || "";
       const solve = () => {
         tx.update(roomRef, {
           points: room.points + pts,
-          step: (sIdx >= 0 ? sIdx + 1 : room.step),
           [`flags.${elementId}`]: true,
           [`prog.${elementId}`]: [],
           popup: { id: Date.now(), kind: "win", bodyKey: popupKey, solver },

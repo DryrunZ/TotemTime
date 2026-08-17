@@ -147,7 +147,7 @@ body{margin:0;background:#050506;color:var(--tt-text);font-family:-apple-system,
 .bookbox.open{background:#efe9d8;color:#222;}
 .bookbox .order{font-size:26px;letter-spacing:8px;color:#111;}
 .lamparea{display:flex;align-items:center;justify-content:center;gap:14px;}
-.lampbulb{width:120px;height:120px;border-radius:50%;background:#1c1c22;border:1px solid var(--tt-border);transition:all .4s;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.lampbulb{width:64px;height:64px;border-radius:50%;background:#1c1c22;border:1px solid var(--tt-border);transition:all .4s;}
 .lampbulb.small{background:#4a4420;box-shadow:0 0 18px rgba(232,180,100,.35);}
 .lampbulb.big{background:#8a7226;box-shadow:0 0 34px rgba(232,180,100,.75);}
 .lampbulb.uvon{background:#4c1d95;box-shadow:0 0 34px rgba(139,92,246,.85);}
@@ -314,7 +314,6 @@ const t = (k)=>{
 };
 const vis = (c,n)=> c.visibleTo==="all" || (Array.isArray(c.visibleTo)&&c.visibleTo.includes(n));
 const flag = (x)=> !!(S.flags && S.flags[x]);
-const curStep=()=>{ const st=(S.game&&S.game.steps&&S.game.steps[S.step])||{}; if(st.uses){ const base=S.game.steps.find(x=>x.id===st.uses); if(base) return base; } return st; };
 const elid = (c)=> c.elementId || c.id;
 function calcApply(a,b,op){ a=(a==null?0:a); if(op=='+')return a+b; if(op=='-')return a-b; if(op=='*')return a*b; if(op=='/')return (b==0?0:a/b); return b; }
 function findComp(id){
@@ -418,9 +417,13 @@ function wcomp(c, inter){
     const states=canUV?["off","small","big","uvon"]:["off","small","big"];
     if(W[id+"_st"]>=states.length) W[id+"_st"]=0;
     const st=uvDone?"uvon":states[W[id+"_st"]];
+    const showSubmit=(st==="uvon"&&!uvDone);
     return shell(`<div class="lamparea">
-      <div class="lampbulb ${st}" data-lampcycle data-el="${c.id}" role="button"></div>
-    </div>`);
+      <div class="lampbulb ${st}"></div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="chip" data-lampcycle data-el="${c.id}" ${uvDone?"disabled":dis}>&#x1F4A1;</button>
+        ${showSubmit?`<button class="chip" data-slider data-el="${id}">&#x2713;</button>`:""}
+      </div></div>`);
   }
   if(c.widget==="symbols"){
     const p=c.params||{}, g=p.glyphs||{};
@@ -617,7 +620,7 @@ function finaleView(){
     <p class="c-text">${cz(t("screens.finale.body"))}</p></div>`;
 }
 function playerView(){
-  const step=curStep();
+  const step=S.game.steps[S.step];
   const isBoard=step&&step.kind==="board";
   let inner;
   if(S.countdown!==null){
@@ -629,8 +632,7 @@ function playerView(){
     const bar=isBoard?`<div class="hintbar"><button class="chip" data-hintboard>💡 ${S.lang==='he'?'רמזים':'Hints'}</button></div>`:"";
     if(step.layout==='desk'){
       const heads=mine.filter(c=>c.type!=='widget').map(c=>comp(c,true)).join("");
-      let sceneSrc = step.scene ? (step.scene[S.player]||step.scene[String(S.player)]||"") : "";
-      if(step.sceneWhen){ for(const fk of Object.keys(step.sceneWhen)){ if(flag(fk)){ const m=step.sceneWhen[fk]||{}; const alt=m[S.player]||m[String(S.player)]; if(alt) sceneSrc=alt; } } }
+      const sceneSrc = step.scene ? (step.scene[S.player]||step.scene[String(S.player)]||"") : "";
       const spots=mine.filter(c=>c.type==='widget').map(c=>{
         const id=elid(c);
         if(c.showWhen && !flag(c.showWhen)) return "";   // hidden = truly absent until trigger
@@ -649,11 +651,11 @@ function playerView(){
       inner=`<div class="body">${mine.map(c=>comp(c,true)).join("")||"<p class='c-sub'>—</p>"}${bar}</div>`;
     }
   }
-  const uv="";
+  const uv=flag("uv")?"uv":"";
   return `<div class="wrap"><div class="phone ${uv}">${topbar()}${inner}${S.hintOpen?hintSheet():""}${S.popup?popupHtml():""}</div></div>`;
 }
 function adminView(){
-  const step=curStep(), N=S.game.N;
+  const step=S.game.steps[S.step], N=S.game.N;
   let cols="";
   for(let n=1;n<=N;n++){
     const mine=step.components.filter(c=>vis(c,n));
@@ -661,11 +663,7 @@ function adminView(){
     const body=mine.map(c=>comp(c,false)).join("")+others.map(c=>`<div class="hidden-note">${c.type} — ${S.lang==='he'?'מוסתר':'hidden'}</div>`).join("");
     cols+=`<div class="col"><h4>${t("topbar.player")} ${n}</h4><div class="cbody">${body||"—"}</div></div>`;
   }
-  if(!window.__judged){ window.__judged={}; judge({action:"listJudged",gameId:GAME_ID,roomCode:ROOM_CODE}).then(r=>{ window.__judged=(r.data&&r.data.elements)||{}; render(); }).catch(()=>{}); }
-  const order=[]; { const m=window.__judged; const roots=Object.keys(m).filter(k=>!m[k]); const next=(id)=>Object.keys(m).find(k=>m[k]===id); roots.forEach(rt=>{ let c=rt; while(c&&!order.includes(c)){ order.push(c); c=next(c); } }); }
-  const jump=order.map(id=>`<button class="chip" data-solveupto="${id}">&#x25B8; ${id}</button>`).join("");
-  const fp=`<button class="chip" data-resetroom>&#x21BA; reset</button>`;
-  return `<div class="adminbar"><strong>${t("game.title")}</strong> · ${t("topbar.stage")} ${S.step+1}/${S.game.steps.length}</div><div class="adminbar" style="flex-wrap:wrap">${fp}${jump}</div><div class="grid">${cols}</div>`;
+  return `<div class="adminbar"><strong>${t("game.title")}</strong> · ${t("topbar.stage")} ${S.step+1}/${S.game.steps.length}</div><div class="grid">${cols}</div>`;
 }
 function initPanos(){ if(!window.pannellum) return; document.querySelectorAll(".c-pano").forEach(el=>{ if(el.dataset.init) return; el.dataset.init="1"; try{ pannellum.viewer(el,{type:"equirectangular",panorama:el.dataset.pano,autoLoad:true,showZoomCtrl:true,showFullscreenCtrl:true}); }catch(e){} }); }
 function trainPausedAt(id){ const tr=TRAINS[id]; if(!tr||tr.phase!=='pause') return -1; return tr.seg; }
@@ -724,7 +722,7 @@ app.addEventListener("click",(e)=>{
   if(pv){ pv.pause(); pausedVideo=pv; document.getElementById("lbimg").src=pv.getAttribute("data-reveal"); lb.classList.add("open"); return; }
   const img=e.target.closest("img.c-img");
   if(img){ document.getElementById("lbimg").src=img.getAttribute("src"); lb.classList.add("open"); return; }
-  const el=e.target.closest("[data-action],[data-skip],[data-hint],[data-submit],[data-popcta],[data-close],[data-join],[data-ready],[data-forcestart],[data-wstep],[data-band],[data-wcommit],[data-wsubmit],[data-symkey],[data-voice],[data-calflip],[data-lampcycle],[data-slider],[data-roll],[data-trainstop],[data-tstation],[data-form],[data-fishcycle],[data-fishbtn],[data-clk],[data-clockset],[data-calc],[data-calckey],[data-calcgo],[data-artifact],[data-deskobj],[data-hintboard],[data-hintclose],[data-elhint],[data-elskip],[data-solveupto],[data-resetroom]"); if(!el)return;
+  const el=e.target.closest("[data-action],[data-skip],[data-hint],[data-submit],[data-popcta],[data-close],[data-join],[data-ready],[data-forcestart],[data-wstep],[data-band],[data-wcommit],[data-wsubmit],[data-symkey],[data-voice],[data-calflip],[data-lampcycle],[data-slider],[data-roll],[data-trainstop],[data-tstation],[data-form],[data-fishcycle],[data-fishbtn],[data-clk],[data-clockset],[data-calc],[data-calckey],[data-calcgo],[data-artifact],[data-deskobj],[data-hintboard],[data-hintclose],[data-elhint],[data-elskip]"); if(!el)return;
   /* --- widget interactions --- */
   if(el.hasAttribute("data-wstep")){
     const id=el.dataset.el, c=findComp(id), p=(c&&c.params)||{};
@@ -756,7 +754,7 @@ app.addEventListener("click",(e)=>{
     const im=document.getElementById("calimg_"+id), dt=document.getElementById("caldate_"+id), ct=document.getElementById("calcount_"+id);
     if(im){ im.src=pg.img; dt.textContent=pg.date; dt.classList.toggle("special",pg.special); ct.textContent=(W[id+"_pg"]+1)+" / "+pages.length; } else render();
     return; }
-  if(el.hasAttribute("data-lampcycle")){ const c=findComp(el.dataset.el)||{}; const id=elid(c); const k=id+"_st"; if(flag("uv")) return; const n=flag("calc")?4:3; W[k]=((W[k]||0)+1)%n; const st=["off","small","big","uvon"][W[k]]; el.className="lampbulb "+st; if(st==="uvon"){ submitEl(id,"press",el); } return; }
+  if(el.hasAttribute("data-lampcycle")){ const c=findComp(el.dataset.el)||{}; const k=elid(c)+"_st"; const n=flag("calc")?4:3; W[k]=((W[k]||0)+1)%n; render(); return; }
   if(el.hasAttribute("data-slider")){ submitEl(el.dataset.el, "press", el); return; }
   if(el.hasAttribute("data-roll")){ const id=el.dataset.el; const comp=findComp(id); const seq=(comp&&comp.params&&comp.params.fixedSequence)||[1,1,2,5];
     W[id]=(W[id]||0)+1; const face=seq[(W[id]-1)%seq.length]; const cube=document.getElementById('cube_'+id);
@@ -817,9 +815,7 @@ app.addEventListener("click",(e)=>{
     return; }
   if(el.hasAttribute("data-calcgo")){ const id=el.dataset.el; submitEl(id, W[id+"_disp"]||"", el); return; }
   if(el.hasAttribute("data-artifact")){ S.popup={kind:"hint",title:"", body:cz(t(el.dataset.artifact)), cta:t("popup.close")}; S.popupId="local"+Date.now(); render(); return; }
-  if(el.hasAttribute("data-deskobj")){ const step=curStep(); const c=(step.components||[]).find(x=>x.id===el.dataset.deskobj); if(c){ const bare=(c.widget==='roller'); if(bare && c.params){ W[elid(c)]=1; W["_autoroll_"+elid(c)]=true; } if(c.widget==='stepper'){ W["_sweep_"+elid(c)]=true; } if(c.widget==='fish'){ W[elid(c)+"_tapped"]=false; W[elid(c)+"_f"]=0; } if(c.widget==='train'){ W[elid(c)+"_att"]=Date.now().toString(36)+Math.random().toString(36).slice(2,8); } const noT=(bare||c.widget==='stepper'||c.widget==='train'||c.widget==='digits'||c.widget==='fish'||c.widget==='fishbtns'||c.widget==='lamp'||c.widget==='clock'||c.widget==='symbols'||c.widget==='gallery'||c.widget==='notebook'||c.widget==='book'); S.popup={kind:"hint",title:t(c.name_key),comp:c,cta:t("popup.close"),noTitle:noT}; S.popupId="desk"+c.id; render(); } return; }
-  if(el.hasAttribute("data-solveupto")){ el.disabled=true; judge({action:"solveUpTo",gameId:GAME_ID,roomCode:ROOM_CODE,elementId:el.dataset.solveupto}).then(r=>{ el.disabled=false; console.log("solveUpTo",r.data); }).catch(e=>{ el.disabled=false; alert(e.message); }); return; }
-  if(el.hasAttribute("data-resetroom")){ el.disabled=true; judge({action:"resetRoom",gameId:GAME_ID,roomCode:ROOM_CODE}).then(()=>{ el.disabled=false; }).catch(e=>{ el.disabled=false; alert(e.message); }); return; }
+  if(el.hasAttribute("data-deskobj")){ const step=S.game.steps[S.step]; const c=(step.components||[]).find(x=>x.id===el.dataset.deskobj); if(c){ const bare=(c.widget==='roller'); if(bare && c.params){ W[elid(c)]=1; W["_autoroll_"+elid(c)]=true; } if(c.widget==='stepper'){ W["_sweep_"+elid(c)]=true; } if(c.widget==='fish'){ W[elid(c)+"_tapped"]=false; W[elid(c)+"_f"]=0; } if(c.widget==='train'){ W[elid(c)+"_att"]=Date.now().toString(36)+Math.random().toString(36).slice(2,8); } const noT=(bare||c.widget==='stepper'||c.widget==='train'||c.widget==='digits'||c.widget==='fish'||c.widget==='fishbtns'||c.widget==='lamp'||c.widget==='clock'||c.widget==='symbols'||c.widget==='gallery'||c.widget==='notebook'||c.widget==='book'); S.popup={kind:"hint",title:t(c.name_key),comp:c,cta:t("popup.close"),noTitle:noT}; S.popupId="desk"+c.id; render(); } return; }
   if(el.hasAttribute("data-hintboard")){ S.hintOpen=true; render(); return; }
   if(el.hasAttribute("data-hintclose")){ if(e.target===el){ S.hintOpen=false; render(); } return; }
   if(el.hasAttribute("data-elhint")){
