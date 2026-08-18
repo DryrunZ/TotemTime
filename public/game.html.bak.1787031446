@@ -365,7 +365,7 @@ function wcomp(c, inter){
   if (c.showWhen && !flag(c.showWhen)) return "";
   const prog=(S.prog&&S.prog[id])||[];
   const fl=(W["_flash_"+id]&&Date.now()-W["_flash_"+id]<600)?"flash":"";
-  const shell=(inner)=>c.bare?`<div class="wdg ${done?'done':''} ${locked?'locked':''} ${fl}" id="w_${c.id}">${inner}</div>`:`<div class="wdg ${done?'done':''} ${locked?'locked':''} ${fl}" id="w_${c.id}">
+  const shell=(inner)=>`<div class="wdg ${done?'done':''} ${locked?'locked':''} ${fl}" id="w_${c.id}">
     <p class="wname">${t(c.name_key)} ${done?'✓':''}${locked?' 🔒':''}</p>${inner}
     ${c.caption_key?`<p class="wcap">${cz(t(c.caption_key))}</p>`:""}</div>`;
   const pips=(total)=>`<div class="pips">${Array.from({length:total},(_,i)=>`<span class="pip ${i<prog.length?'on':''}"></span>`).join("")}</div>`;

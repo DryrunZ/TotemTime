@@ -55,24 +55,6 @@ exports.judge = onCall(async (req) => {
     if (Object.keys(upd).length) await roomRef.update(upd);
     return { solved: Object.keys(upd).map(k => k.slice(6)) };
   }
-  // ---- installScenes: admin. One step per chain element; shared desk layout parked at the end. ----
-  if (action === "installScenes") {
-    if (!(await isAdmin(callerUid))) throw new HttpsError("permission-denied", "admins only");
-    const gref = db.doc(`games/${gameId}`);
-    const g = (await gref.get()).data();
-    if (!g) throw new HttpsError("not-found", "game not found");
-    let steps = g.steps.filter(st => !st.el && st.id !== "vault");
-    const bIdx = steps.findIndex(st => st.kind === "board");
-    const board = steps[bIdx];
-    if (!board || !board.chain) throw new HttpsError("failed-precondition", "board with chain required");
-    const scenes = board.chain.map(el => ({ id: "sc_" + el, kind: "board", uses: board.id, el }));
-    const vault = { id: "vault", kind: "screen", components: [
-      { id: "vt", type: "title", text_key: "screens.finale.title" },
-      { id: "vb", type: "text", text_key: "screens.finale.body" } ] };
-    steps = [...steps.slice(0, bIdx), ...scenes, ...steps.slice(bIdx + 1), vault, board];
-    await gref.update({ steps });
-    return { steps: steps.map(s => s.id) };
-  }
   if (action === "createRoom") {
     const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
     let code = "";
@@ -278,13 +260,7 @@ exports.judge = onCall(async (req) => {
       let step = room.step || 0;
       if (step === fromStep && step < lastStep) {
         step = step + 1;
-        const nxt = game.steps && game.steps[step];
-        if (nxt && nxt.kind === "board" && !nxt.el && game.steps[step + 1] && game.steps[step + 1].el) {
-          step = step + 1;
-          tx.update(roomRef, { step, flags: {}, prog: {}, popup: null });
-        } else {
-          tx.update(roomRef, { step });
-        }
+        tx.update(roomRef, { step });
       }
       return { step };
     });
@@ -380,18 +356,12 @@ exports.judge = onCall(async (req) => {
       if (!room) throw new HttpsError("not-found", "room not found");
       if (room.flags && room.flags[elementId])
         return { correct: true, already: true, points: room.points };
-      const sIdx = game.steps.findIndex(st => st.el === elementId);
-      if (sIdx >= 0) {
-        if (room.step !== sIdx && !room.freeplay)
-          throw new HttpsError("failed-precondition", "not available yet");
-      } else if (a.requires && !room.freeplay && !(room.flags && room.flags[a.requires])) {
+      if (a.requires && !room.freeplay && !(room.flags && room.flags[a.requires]))
         throw new HttpsError("failed-precondition", "not available yet");
-      }
       const solver = (room.seats && room.seats[callerUid] && room.seats[callerUid].name) || "";
       const solve = () => {
         tx.update(roomRef, {
           points: room.points + pts,
-          step: (sIdx >= 0 ? sIdx + 1 : room.step),
           [`flags.${elementId}`]: true,
           [`prog.${elementId}`]: [],
           popup: { id: Date.now(), kind: "win", bodyKey: popupKey, solver },
