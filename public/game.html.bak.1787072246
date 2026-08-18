@@ -472,9 +472,8 @@ function wcomp(c, inter){
       const r=angs[i]*Math.PI/180, x=CX+RX*Math.cos(r), y=CY+RY*Math.sin(r);
       return `<button class="tstation" id="st_${id}_${i}" data-tstation data-el="${id}" data-ci="${i}" style="left:${x}px;top:${y}px" ${dis}>${ch}</button>`;
     }).join("");
-    return `<div class="train-w"><div class="ttrack2" data-train="${id}" style="width:320px;height:280px">
+    return `<div class="train-w"><button class="chip" data-voice data-audio="assets/games/vault-exe/train.mp3" style="margin-bottom:8px">&#x1F50A;</button><div class="ttrack2" data-train="${id}" style="width:320px;height:280px">
       ${rail}${stations}
-      ${flag("radio")?`<button data-voice data-audio="assets/games/vault-exe/train.mp3" style="position:absolute;left:160px;top:140px;transform:translate(-50%,-50%);background:none;border:none;font-size:30px;cursor:pointer;z-index:3;-webkit-tap-highlight-color:transparent">&#x1F50A;</button>`:""}
       <img class="tloco2" id="loco_${id}" src="assets/games/vault-exe/loco.png?v=2" alt="" draggable="false">
     </div></div>`;
   }

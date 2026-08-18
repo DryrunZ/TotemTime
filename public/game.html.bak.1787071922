@@ -402,7 +402,7 @@ function wcomp(c, inter){
   }
   if(c.widget==="voice"){
     const p=c.params||{};
-    return shell(`<button class="chip" style="width:100%" data-voice="${p.say||''}" ${p.src?`data-audio="${p.src}"`:""} ${dis}>${t("el.audio.play")}</button>`);
+    return shell(`<button class="chip" style="width:100%" data-voice="${p.say}" ${dis}>${t("el.audio.play")}</button>`);
   }
   if(c.widget==="gallery"){
     const p=c.params||{};
@@ -474,7 +474,6 @@ function wcomp(c, inter){
     }).join("");
     return `<div class="train-w"><div class="ttrack2" data-train="${id}" style="width:320px;height:280px">
       ${rail}${stations}
-      ${flag("radio")?`<button data-voice data-audio="assets/games/vault-exe/train.mp3" style="position:absolute;left:160px;top:140px;transform:translate(-50%,-50%);background:none;border:none;font-size:30px;cursor:pointer;z-index:3;-webkit-tap-highlight-color:transparent">&#x1F50A;</button>`:""}
       <img class="tloco2" id="loco_${id}" src="assets/games/vault-exe/loco.png?v=2" alt="" draggable="false">
     </div></div>`;
   }
@@ -753,7 +752,7 @@ app.addEventListener("click",(e)=>{
       .catch(err=>console.error("symkey",err));
     return; }
   if(el.hasAttribute("data-wsubmit")){ submitEl(el.dataset.el, el.dataset.val, el); return; }
-  if(el.hasAttribute("data-voice")){ const src=el.dataset.audio; if(src){ try{ if(!window.__aud) window.__aud={}; if(!window.__aud[src]) window.__aud[src]=new Audio(src); window.__aud[src].currentTime=0; window.__aud[src].play(); }catch(err){} return; } try{ const u=new SpeechSynthesisUtterance(el.dataset.voice); u.rate=.8; speechSynthesis.speak(u);}catch(err){} return; }
+  if(el.hasAttribute("data-voice")){ try{ const u=new SpeechSynthesisUtterance(el.dataset.voice); u.rate=.8; speechSynthesis.speak(u);}catch(err){} return; }
   if(el.hasAttribute("data-calflip")){ const id=el.dataset.el, dir=Number(el.dataset.calflip);
     const comp=findComp(id)||{}, pr=comp.params||{}, four=flag(pr.show4When);
     const base="assets/games/vault-exe/";
