@@ -179,12 +179,6 @@ body{margin:0;background:#050506;color:var(--tt-text);font-family:-apple-system,
 .deskspot.done{background:radial-gradient(circle,rgba(140,255,170,.12),transparent 70%)}
 .deskspot.locked{}
 .deskreveal{width:100%;height:auto;display:block;animation:revealfade .5s ease-out}
-.fishsprite{transition:left .7s ease-in-out,top .7s ease-in-out,transform .7s ease-in-out}
-.fishsprite.dig{animation-duration:3.6s;animation-timing-function:linear;animation-iteration-count:infinite}
-.dg0{animation-name:dg0p}.dg8{animation-name:dg8p;animation-duration:4.6s}.dg1{animation-name:dg1p}
-@keyframes dg0p{0%{transform:translate(-50%,-50%) translate(0,-26px) rotate(0deg)}25%{transform:translate(-50%,-50%) translate(15px,0) rotate(90deg)}50%{transform:translate(-50%,-50%) translate(0,26px) rotate(180deg)}75%{transform:translate(-50%,-50%) translate(-15px,0) rotate(270deg)}100%{transform:translate(-50%,-50%) translate(0,-26px) rotate(360deg)}}
-@keyframes dg8p{0%{transform:translate(-50%,-50%) translate(0,-30px) rotate(0deg)}12.5%{transform:translate(-50%,-50%) translate(13px,-15px) rotate(70deg)}25%{transform:translate(-50%,-50%) translate(0,0) rotate(140deg)}37.5%{transform:translate(-50%,-50%) translate(-13px,15px) rotate(210deg)}50%{transform:translate(-50%,-50%) translate(0,30px) rotate(280deg)}62.5%{transform:translate(-50%,-50%) translate(13px,15px) rotate(210deg)}75%{transform:translate(-50%,-50%) translate(0,0) rotate(140deg)}87.5%{transform:translate(-50%,-50%) translate(-13px,-15px) rotate(70deg)}100%{transform:translate(-50%,-50%) translate(0,-30px) rotate(0deg)}}
-@keyframes dg1p{0%{transform:translate(-50%,-50%) translate(0,-30px) rotate(90deg)}50%{transform:translate(-50%,-50%) translate(0,30px) rotate(90deg)}50.01%{transform:translate(-50%,-50%) translate(0,30px) rotate(270deg)}100%{transform:translate(-50%,-50%) translate(0,-30px) rotate(270deg)}}
 @keyframes revealfade{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
 .deskspot.hasart{background:none}
 
@@ -511,7 +505,7 @@ function wcomp(c, inter){
       const ip=IDLE[i];
       return `<img class="fishsprite drift d${i}" src="${fishimg}" style="left:${ip[0]}%;top:${ip[1]}%" draggable="false">`;
     }).join("");
-    if(done){ const dg=(p.digits||"0 8 1 0").split(/\s+/); const fx=[16,39,62,85]; const fh=dg.map((d,i)=>`<img class="fishsprite dig dg${d}" src="${fishimg}" style="left:${fx[i]}%;top:50%" draggable="false">`).join(""); return `<div class="fish-w"><div class="bowl2 done">${fh}</div></div>`; }
+    if(done) return `<div class="fish-w"><div class="bowl2 done"><span class="fdigits">${p.digits||"0 8 1 0"}</span></div></div>`;
     return `<div class="fish-w"><div class="bowl2" id="bowl_${id}" data-fishcycle data-el="${id}">${fish}</div></div>`;
   }
   if(c.widget==="book"){
@@ -824,7 +818,7 @@ app.addEventListener("click",(e)=>{
     return; }
   if(el.hasAttribute("data-calcgo")){ const id=el.dataset.el; submitEl(id, W[id+"_disp"]||"", el); return; }
   if(el.hasAttribute("data-artifact")){ S.popup={kind:"hint",title:"", body:cz(t(el.dataset.artifact)), cta:t("popup.close")}; S.popupId="local"+Date.now(); render(); return; }
-  if(el.hasAttribute("data-deskobj")){ const step=curStep(); let c=(step.components||[]).find(x=>x.id===el.dataset.deskobj); if(c&&c.altOpen&&c.altOpenWhen&&flag(c.altOpenWhen)){ const alt=(step.components||[]).find(x=>x.id===c.altOpen); if(alt) c=alt; } else if(c&&c.altOpen&&c.altOpenWhen){ return; } if(c){ const bare=(c.widget==='roller'); if(bare && c.params){ W[elid(c)]=1; W["_autoroll_"+elid(c)]=true; } if(c.widget==='stepper'){ W["_sweep_"+elid(c)]=true; } if(c.widget==='fish'){ W[elid(c)+"_tapped"]=false; W[elid(c)+"_f"]=0; } if(c.widget==='train'){ W[elid(c)+"_att"]=Date.now().toString(36)+Math.random().toString(36).slice(2,8); } const noT=(bare||c.widget==='stepper'||c.widget==='train'||c.widget==='digits'||c.widget==='fish'||c.widget==='fishbtns'||c.widget==='lamp'||c.widget==='clock'||c.widget==='symbols'||c.widget==='gallery'||c.widget==='notebook'||c.widget==='book'); S.popup={kind:"hint",title:t(c.name_key),comp:c,cta:t("popup.close"),noTitle:noT}; S.popupId="desk"+c.id; render(); } return; }
+  if(el.hasAttribute("data-deskobj")){ const step=curStep(); const c=(step.components||[]).find(x=>x.id===el.dataset.deskobj); if(c){ const bare=(c.widget==='roller'); if(bare && c.params){ W[elid(c)]=1; W["_autoroll_"+elid(c)]=true; } if(c.widget==='stepper'){ W["_sweep_"+elid(c)]=true; } if(c.widget==='fish'){ W[elid(c)+"_tapped"]=false; W[elid(c)+"_f"]=0; } if(c.widget==='train'){ W[elid(c)+"_att"]=Date.now().toString(36)+Math.random().toString(36).slice(2,8); } const noT=(bare||c.widget==='stepper'||c.widget==='train'||c.widget==='digits'||c.widget==='fish'||c.widget==='fishbtns'||c.widget==='lamp'||c.widget==='clock'||c.widget==='symbols'||c.widget==='gallery'||c.widget==='notebook'||c.widget==='book'); S.popup={kind:"hint",title:t(c.name_key),comp:c,cta:t("popup.close"),noTitle:noT}; S.popupId="desk"+c.id; render(); } return; }
   if(el.hasAttribute("data-solveupto")){ el.disabled=true; judge({action:"solveUpTo",gameId:GAME_ID,roomCode:ROOM_CODE,elementId:el.dataset.solveupto}).then(r=>{ el.disabled=false; console.log("solveUpTo",r.data); }).catch(e=>{ el.disabled=false; alert(e.message); }); return; }
   if(el.hasAttribute("data-resetroom")){ el.disabled=true; judge({action:"resetRoom",gameId:GAME_ID,roomCode:ROOM_CODE}).then(()=>{ el.disabled=false; }).catch(e=>{ el.disabled=false; alert(e.message); }); return; }
   if(el.hasAttribute("data-hintboard")){ S.hintOpen=true; render(); return; }
@@ -872,7 +866,6 @@ lb.addEventListener("click",()=>{
   lb.classList.remove("open"); document.getElementById("lbimg").src="";
   if(pausedVideo){ try{ pausedVideo.play(); }catch(e){} pausedVideo=null; }
 });
-document.addEventListener("click",function(e){ const pv=e.target.closest("[data-stepprev],[data-stepnext]"); if(!pv) return; e.stopImmediatePropagation(); e.preventDefault(); const d=pv.hasAttribute("data-stepnext")?1:-1; const t=Math.max(0,Math.min(S.game.steps.length-1,S.step+d)); judge({action:"setStep",gameId:GAME_ID,roomCode:ROOM_CODE,stepId:t}).catch(function(err){alert(err.message);}); },true);
 function nextStep(){ S.running=true; S.step=Math.min(S.game.steps.length-1,S.step+1); S.popup=null; render(); }
 let roomStarted = 0;
 document.head.insertAdjacentHTML("beforeend", `<style>

@@ -73,13 +73,6 @@ exports.judge = onCall(async (req) => {
     await gref.update({ steps });
     return { steps: steps.map(s => s.id) };
   }
-  if (action === "patchAnswer") {
-    if (!(await isAdmin(callerUid))) throw new HttpsError("permission-denied", "admins only");
-    const { elementId, patch } = req.data || {};
-    if (!elementId || !patch) throw new HttpsError("invalid-argument", "elementId and patch required");
-    await db.doc(`games/${gameId}/answers/${elementId}`).set(patch, { merge: true });
-    return { ok: true, elementId };
-  }
   if (action === "createRoom") {
     const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
     let code = "";
@@ -120,16 +113,11 @@ exports.judge = onCall(async (req) => {
       throw new HttpsError("permission-denied", "admins or the director only");
     const seats = room.seats || {};
     for (const k of Object.keys(seats)) seats[k].ready = false;
-    const gdoc = (await db.doc(`games/${gameId}`).get()).data() || {};
-    const firstScene = (gdoc.steps || []).findIndex(st => st.el);
     await roomRef.set({
-      gameId, phase: firstScene >= 0 ? "play" : "lobby",
-      step: firstScene >= 0 ? firstScene : 0,
-      points: scoring.start ?? 100,
-      startedAt: firstScene >= 0 ? Date.now() : null,
-      solved: {}, hintsUsed: {}, seats, flags: {}, prog: {},
+      gameId, phase: "lobby", step: 0, points: scoring.start ?? 100,
+      startedAt: null, solved: {}, hintsUsed: {}, seats, flags: {}, prog: {},
     });
-    return { reset: true, step: firstScene >= 0 ? firstScene : 0 };
+    return { reset: true };
   }
 
   if (action === "setStep") {

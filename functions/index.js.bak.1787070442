@@ -73,13 +73,6 @@ exports.judge = onCall(async (req) => {
     await gref.update({ steps });
     return { steps: steps.map(s => s.id) };
   }
-  if (action === "patchAnswer") {
-    if (!(await isAdmin(callerUid))) throw new HttpsError("permission-denied", "admins only");
-    const { elementId, patch } = req.data || {};
-    if (!elementId || !patch) throw new HttpsError("invalid-argument", "elementId and patch required");
-    await db.doc(`games/${gameId}/answers/${elementId}`).set(patch, { merge: true });
-    return { ok: true, elementId };
-  }
   if (action === "createRoom") {
     const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
     let code = "";
