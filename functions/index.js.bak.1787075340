@@ -209,7 +209,7 @@ exports.judge = onCall(async (req) => {
     const gref = db.doc(`games/${gameId}`);
     const g = (await gref.get()).data();
     if (!g) throw new HttpsError("not-found", "game not found");
-    const board = g.steps.find(st => st.kind === "board" && st.chain);
+    const board = g.steps.find(st => st.kind === "board");
     if (!board) throw new HttpsError("not-found", "board step not found");
     Object.assign(board, patch);
     await gref.update({ steps: g.steps });
@@ -221,7 +221,7 @@ exports.judge = onCall(async (req) => {
     const gref = db.doc(`games/${gameId}`);
     const g = (await gref.get()).data();
     if (!g) throw new HttpsError("not-found", "game not found");
-    const board = g.steps.find(st => st.kind === "board" && st.chain);
+    const board = g.steps.find(st => st.kind === "board");
     if (!board) throw new HttpsError("not-found", "board step not found");
     board.components = board.components.filter(c => c.id !== "fishbtns");
     board.components.push({

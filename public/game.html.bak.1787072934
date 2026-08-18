@@ -518,7 +518,7 @@ function wcomp(c, inter){
   if(c.widget==="book"){
     const p=c.params||{}, isopen=flag(c.showOpenWhen);
     const order=(p.order||[]).map(k=>(p.glyphs||{})[k]||"?").join(" ");
-    const openhtml=p.img?('<div class="bookopen"><img src="'+p.img+'" style="width:100%;height:auto;display:block;border-radius:8px" draggable="false"></div>'):('<div class="bookopen"><div class="bookorder">'+order+'</div></div>');
+    const openhtml='<div class="bookopen"><div class="bookorder">'+order+'</div></div>';
     const closedhtml='<div class="bookclosed"></div>';
     return '<div class="book-w">'+(isopen?openhtml:closedhtml)+'</div>';
   }
