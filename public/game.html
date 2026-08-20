@@ -653,8 +653,11 @@ function playerView(){
       const sceneImg = sceneSrc ? `<img class="desk-img" src="${sceneSrc}" alt="" draggable="false">` : "";
       const board = sceneSrc ? `<div class="desk-board">${sceneImg}${spots}</div>` : `<div class="desk-board">${spots}</div>`;
       inner=`<div class="body">${heads}<div class="desk-scene">${board}</div>${bar}</div>`;
-    } else {
-      inner=`<div class="body">${mine.map(c=>comp(c,true)).join("")||"<p class='c-sub'>—</p>"}${bar}</div>`;
+       } else {
+      const _tx=(S.game.texts&&S.game.texts[step.id])||null;
+      const _key=_tx&&(_tx.plot||_tx.after);
+      const _narr=_key?`<p class="c-text vaultnarr">${cz(t(_key)).replace(/\n/g,"<br>")}</p>`:"";
+      inner=`<div class="body">${_narr}${mine.map(c=>comp(c,true)).join("")||(_narr?"":"<p class='c-sub'>—</p>")}${bar}</div>`;
     }
   }
   const uv="";
