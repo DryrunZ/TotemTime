@@ -1,0 +1,12 @@
+import { initializeApp } from 'firebase-admin/app';
+import { getFirestore } from 'firebase-admin/firestore';
+const db = getFirestore(initializeApp({ projectId: 'totemtime-357a2' }));
+const g = (await db.collection('games').doc('vault-exe').get()).data();
+console.log('=== GAME DOC top-level keys ===');
+console.log(Object.keys(g).join(', '));
+console.log('\n=== steps ===');
+g.steps.forEach((st,i)=>console.log(i, st.id, st.kind||'-', st.el||''));
+console.log('\n=== texts ===');
+console.log(JSON.stringify(g.texts, null, 2));
+console.log('\n=== scoring ===');
+console.log(JSON.stringify(g.scoring, null, 2));
