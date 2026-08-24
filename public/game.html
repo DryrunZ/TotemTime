@@ -87,6 +87,7 @@ body{margin:0;background:#050506;color:var(--tt-text);font-family:-apple-system,
 .peak{position:absolute;top:-17px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:26px solid transparent;border-right:26px solid transparent;border-bottom:18px solid var(--tt-sheet);}
 @keyframes rise{from{transform:translateY(50px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 .glyph{font-size:44px;}
+.p-help{color:var(--tt-muted,#9a9a9a);font-size:15px;line-height:1.5;margin:2px 0 14px;text-align:center;}
 .p-title{margin:.4rem 0 .5rem;font-size:28px;font-weight:800;}
 .p-title.win{color:var(--tt-accent);}
 .p-body{margin:0 0 22px;font-size:15px;color:var(--tt-muted);line-height:1.5;white-space:pre-line;}
@@ -654,7 +655,9 @@ function popupHtml(){
   const p=S.popup, glyph={hint:"✉️",win:"⭐",lose:"🚩"}[p.kind]||"✉️";
   if(p.comp){
     const ttl = p.noTitle ? "" : `<h2 class="p-title">${p.title||""}</h2>`;
-    return `<div class="scrim" data-close><div class="sheet"><span class="peak"></span>${ttl}<div class="p-widget">${comp(p.comp,true)}</div><button class="cta" data-popcta>${p.cta}</button></div></div>`;
+    const _mode = S.mode2||S.level||"easy";
+    const hlp = (p.help && _mode==="easy") ? `<p class="p-help">${p.help}</p>` : "";
+    return `<div class="scrim" data-close><div class="sheet"><span class="peak"></span>${ttl}${hlp}<div class="p-widget">${comp(p.comp,true)}</div><button class="cta" data-popcta>${p.cta}</button></div></div>`;
   }
   return `<div class="scrim" data-close><div class="sheet"><span class="peak"></span><div class="glyph">${glyph}</div><h2 class="p-title ${p.kind==='win'?'win':''}">${p.title}</h2>${p.body?`<p class="p-body">${p.body}</p>`:""}<button class="cta" data-popcta>${p.cta}</button></div></div>`;
 }
@@ -873,7 +876,7 @@ app.addEventListener("click",(e)=>{
     return; }
   if(el.hasAttribute("data-calcgo")){ const id=el.dataset.el; submitEl(id, W[id+"_disp"]||"", el); return; }
   if(el.hasAttribute("data-artifact")){ S.popup={kind:"hint",title:"", body:cz(t(el.dataset.artifact)), cta:t("popup.close")}; S.popupId="local"+Date.now(); render(); return; }
-  if(el.hasAttribute("data-deskobj")){ const step=curStep(); let c=(step.components||[]).find(x=>x.id===el.dataset.deskobj); if(c&&c.altOpen&&c.altOpenWhen&&flag(c.altOpenWhen)){ const alt=(step.components||[]).find(x=>x.id===c.altOpen); if(alt) c=alt; } else if(c&&c.altOpen&&c.altOpenWhen){ return; } if(c){ const bare=(c.widget==='roller'); if(bare && c.params){ W[elid(c)]=1; W["_autoroll_"+elid(c)]=true; } if(c.widget==='stepper'){ W["_sweep_"+elid(c)]=true; } if(c.widget==='fish'){ W[elid(c)+"_tapped"]=false; W[elid(c)+"_f"]=0; } if(c.widget==='train'){ W[elid(c)+"_att"]=Date.now().toString(36)+Math.random().toString(36).slice(2,8); } const noT=(bare||c.widget==='stepper'||c.widget==='train'||c.widget==='digits'||c.widget==='fish'||c.widget==='fishbtns'||c.widget==='lamp'||c.widget==='clock'||c.widget==='symbols'||c.widget==='gallery'||c.widget==='notebook'||c.widget==='book'); S.popup={kind:"hint",title:t(c.name_key),comp:c,cta:t("popup.close"),noTitle:noT}; S.popupId="desk"+c.id; render(); } return; }
+  if(el.hasAttribute("data-deskobj")){ const step=curStep(); let c=(step.components||[]).find(x=>x.id===el.dataset.deskobj); if(c&&c.altOpen&&c.altOpenWhen&&flag(c.altOpenWhen)){ const alt=(step.components||[]).find(x=>x.id===c.altOpen); if(alt) c=alt; } else if(c&&c.altOpen&&c.altOpenWhen){ return; } if(c){ const bare=(c.widget==='roller'); if(bare && c.params){ W[elid(c)]=1; W["_autoroll_"+elid(c)]=true; } if(c.widget==='stepper'){ W["_sweep_"+elid(c)]=true; } if(c.widget==='fish'){ W[elid(c)+"_tapped"]=false; W[elid(c)+"_f"]=0; } if(c.widget==='train'){ W[elid(c)+"_att"]=Date.now().toString(36)+Math.random().toString(36).slice(2,8); } const noT=(bare||c.widget==='stepper'||c.widget==='train'||c.widget==='digits'||c.widget==='fish'||c.widget==='fishbtns'||c.widget==='lamp'||c.widget==='clock'||c.widget==='symbols'||c.widget==='gallery'||c.widget==='notebook'||c.widget==='book'); S.popup={kind:"hint",title:t(c.name_key),comp:c,cta:t("popup.close"),noTitle:noT,help:cz(t("el."+c.id+".help"))}; S.popupId="desk"+c.id; render(); } return; }
   if(el.hasAttribute("data-solveupto")){ el.disabled=true; judge({action:"solveUpTo",gameId:GAME_ID,roomCode:ROOM_CODE,elementId:el.dataset.solveupto}).then(r=>{ el.disabled=false; console.log("solveUpTo",r.data); }).catch(e=>{ el.disabled=false; alert(e.message); }); return; }
   if(el.hasAttribute("data-resetroom")){ el.disabled=true; judge({action:"resetRoom",gameId:GAME_ID,roomCode:ROOM_CODE}).then(()=>{ el.disabled=false; }).catch(e=>{ el.disabled=false; alert(e.message); }); return; }
   if(el.hasAttribute("data-hintboard")){ S.hintOpen=true; render(); return; }
