@@ -597,6 +597,17 @@ function hintSheet(){
   }).join("");
   return `<div class="scrim" data-hintclose><div class="sheet hb"><span class="peak"></span>${rows||"<p class='c-sub'>—</p>"}</div></div>`;
 }
+function narrBlock(stepId, plotKey){
+  const header=cz(t(stepId+".header"));
+  const sub=cz(t(stepId+".subhead"));
+  const body=plotKey?cz(t(plotKey)):"";
+  if(!header && !sub && !body) return "";
+  const h=header?`<h1 class="c-title">${header}</h1>`:"";
+  const s=sub?`<p class="c-sub">${sub}</p>`:"";
+  const b=body?`<p class="c-text vaultnarr">${body.replace(/\n/g,"<br>")}</p>`:"";
+  return h+s+b;
+}
+
 function lobbyView(){
   const N = (S.game && S.game.N) || 3;
   const he = S.lang === "he";
@@ -653,13 +664,12 @@ function playerView(){
       const sceneImg = sceneSrc ? `<img class="desk-img" src="${sceneSrc}" alt="" draggable="false">` : "";
       const board = sceneSrc ? `<div class="desk-board">${sceneImg}${spots}</div>` : `<div class="desk-board">${spots}</div>`;
       const _sid=(S.game.steps[S.step]&&S.game.steps[S.step].id)||"";
-      const _pt=cz(t(_sid+".plot"));
-      const _plot=_pt?`<p class="c-text vaultnarr">${_pt.replace(/\n/g,"<br>")}</p>`:"";
+      const _plot=narrBlock(_sid, _sid+".plot");
       inner=`<div class="body">${_plot}${heads}<div class="desk-scene">${board}</div>${bar}</div>`;
        } else {
       const _tx=(S.game.texts&&S.game.texts[step.id])||null;
       const _key=_tx&&(_tx.plot||_tx.after);
-      const _narr=_key?`<p class="c-text vaultnarr">${cz(t(_key)).replace(/\n/g,"<br>")}</p>`:"";
+      const _narr=narrBlock(step.id, _key);
       inner=`<div class="body">${_narr}${mine.map(c=>comp(c,true)).join("")||(_narr?"":"<p class='c-sub'>—</p>")}${bar}</div>`;
     }
   }
