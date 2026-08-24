@@ -582,7 +582,35 @@ function comp(c,inter){
   }
   return "";
 }
+function vaultScene(){
+  const step=curStep();
+  if(!step||step.kind!=="board") return null;
+  const realStep=(S.game.steps&&S.game.steps[S.step])||{};
+  const sceneId=realStep.id&&/^sc_/.test(realStep.id)?realStep.id:null;
+  if(!sceneId) return null;
+  const tx=(S.game.texts&&S.game.texts[sceneId])||null;
+  if(!tx||!(tx.hints&&tx.hints.length)) return null;
+  return { sceneId, tx };
+}
+function hintStartIdx(){
+  const sc=(S.game&&S.game.scoring)||{}, mode=S.mode2||S.level||"easy";
+  return (sc.modes&&sc.modes[mode]&&sc.modes[mode].hintStart)||0;
+}
+function vaultHintRow(vs){
+  const el=vs.tx.hintEl, keys=vs.tx.hints, name=t("el."+el+".name");
+  const start=hintStartIdx();
+  const visKeys=keys.slice(start);
+  const used=(S.hintsUsed&&S.hintsUsed[el])||0;
+  const solved=flag(el);
+  if(solved) return `<div class="hrow"><span class="hname">${name}</span><span class="st">\u2713</span></div>`;
+  const chips=visKeys.map((k,i)=>{ const gi=start+i; return `<button class="chip" data-elhint data-el="${el}" data-hintindex="${gi}" data-hintkey="${k}" ${gi>used?"disabled":""}>${t("popup.hint")} ${i+1}</button>`; }).join("");
+  const skip=(used>=keys.length)?`<button class="chip" data-elskip data-el="${el}">${t("popup.skip")}</button>`:"";
+  return `<div class="hrow"><span class="hname">${name}</span>${chips}${skip}</div>`;
+}
+
 function hintSheet(){
+  const _vs=vaultScene();
+  if(_vs){ return `<div class="scrim" data-hintclose><div class="sheet hb"><span class="peak"></span>${vaultHintRow(_vs)}</div></div>`; }
   const st=S.game.steps[S.step]||{}, hot=blockerId();
   const mine=(st.components||[]).filter(c=>c.type==="widget"&&(c.hints||[]).length&&vis(c,S.player));
   mine.sort((a,b)=>(elid(a)===hot?-1:0)-(elid(b)===hot?-1:0));
@@ -645,7 +673,8 @@ function playerView(){
     inner=finaleView();
   } else {
     const mine=step.components.filter(c=>vis(c,S.player));
-    const bar=isBoard?`<div class="hintbar"><button class="chip" data-hintboard>💡 ${S.lang==='he'?'רמזים':'Hints'}</button></div>`:"";
+    const _vsBar=vaultScene(); const _showBar = _vsBar ? (S.player===_vsBar.tx.hintsTo) : isBoard;
+    const bar=_showBar?`<div class="hintbar"><button class="chip" data-hintboard>\uD83D\uDCA1 ${S.lang==='he'?'\u05E8\u05DE\u05D6\u05D9\u05DD':'Hints'}</button></div>`:"";
     if(step.layout==='desk'){
       const heads=mine.filter(c=>c.type!=='widget').map(c=>comp(c,true)).join("");
       let sceneSrc = step.scene ? (step.scene[S.player]||step.scene[String(S.player)]||"") : "";
