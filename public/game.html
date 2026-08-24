@@ -602,10 +602,10 @@ function vaultHintRow(vs){
   const visKeys=keys.slice(start);
   const used=(S.hintsUsed&&S.hintsUsed[el])||0;
   const solved=flag(el);
-  if(solved) return `<div class="hrow"><span class="hname">${name}</span><span class="st">\u2713</span></div>`;
+  if(solved) return `<div class="hrow"><span class="st">\u2713</span></div>`;
   const chips=visKeys.map((k,i)=>{ const gi=start+i; return `<button class="chip" data-elhint data-el="${el}" data-hintindex="${gi}" data-hintkey="${k}" ${gi>used?"disabled":""}>${t("popup.hint")} ${i+1}</button>`; }).join("");
   const skip=(used>=keys.length)?`<button class="chip" data-elskip data-el="${el}">${t("popup.skip")}</button>`:"";
-  return `<div class="hrow"><span class="hname">${name}</span>${chips}${skip}</div>`;
+  return `<div class="hrow">${chips}${skip}</div>`;
 }
 
 function hintSheet(){
