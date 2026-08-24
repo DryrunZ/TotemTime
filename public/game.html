@@ -694,7 +694,10 @@ function playerView(){
       const board = sceneSrc ? `<div class="desk-board">${sceneImg}${spots}</div>` : `<div class="desk-board">${spots}</div>`;
       const _sid=(S.game.steps[S.step]&&S.game.steps[S.step].id)||"";
       const _plot=narrBlock(_sid, _sid+".plot");
-      inner=`<div class="body">${_plot}${heads}<div class="desk-scene">${board}</div>${bar}</div>`;
+      const _vsInline=vaultScene();
+      const vaultHintsInline=(_vsInline && S.player===_vsInline.tx.hintsTo)
+        ? `<div class="hints hintsdesk">${vaultHintRow(_vsInline)}</div>` : "";
+      inner=`<div class="body">${_plot}${heads}<div class="desk-scene">${board}</div>${vaultHintsInline||bar}</div>`;
        } else {
       const _tx=(S.game.texts&&S.game.texts[step.id])||null;
       const _key=_tx&&(_tx.plot||_tx.after);
