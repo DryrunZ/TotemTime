@@ -363,18 +363,19 @@ exports.judge = onCall(async (req) => {
     });
     if (sIdx < 0) sIdx = game.steps.findIndex(st => st.el === elementId);
     const sceneId = sIdx >= 0 ? game.steps[sIdx].id : null;
+    const sceneEl = sIdx >= 0 ? (game.steps[sIdx].el || elementId) : elementId;
     const allHints = (sceneId && game.texts && game.texts[sceneId] && game.texts[sceneId].hints) || [];
     return await db.runTransaction(async (tx) => {
       const room = (await tx.get(roomRef)).data();
       if (!room) throw new HttpsError("not-found", "room not found");
-      if (room.flags && room.flags[elementId]) return { skipped: false, step: room.step || 0 };
+      if (room.flags && room.flags[sceneEl]) return { skipped: false, step: room.step || 0 };
       const visible = allHints.length - __hintStart(room);
       if (visible < 1) throw new HttpsError("failed-precondition", "this element cannot be skipped");
       const used = (room.hintsUsed && room.hintsUsed[elementId]) || 0;
       if (used < visible) throw new HttpsError("failed-precondition", "skip unlocks after all hints are used");
       const upd = {
-        [`flags.${elementId}`]: true,
-        [`prog.${elementId}`]: [],
+        [`flags.${sceneEl}`]: true,
+        [`prog.${sceneEl}`]: [],
         popup: { id: Date.now(), kind: "skip", bodyKey: "popup.skippedBody", solver: (room.seats && room.seats[callerUid] && room.seats[callerUid].name) || "" },
       };
       if (sIdx >= 0) { const target = sIdx + 1; if (target > (room.step || 0)) upd.step = target; }
