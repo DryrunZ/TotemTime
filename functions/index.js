@@ -356,7 +356,12 @@ exports.judge = onCall(async (req) => {
     const elementId = req.data && req.data.elementId;
     if (!elementId) throw new HttpsError("invalid-argument", "elementId required");
      // skipElement: advances step like solve; hint count from per-scene texts, gated by hintStart
-    const sIdx = game.steps.findIndex(st => st.el === elementId);
+    // resolve scene by hintEl mapping first (handles split like sc_uv hintEl=lamp, el=uv), fall back to el match — by texts.hintEl
+    let sIdx = game.steps.findIndex(st => {
+      const tx = (game.texts && game.texts[st.id]) || {};
+      return tx.hintEl === elementId;
+    });
+    if (sIdx < 0) sIdx = game.steps.findIndex(st => st.el === elementId);
     const sceneId = sIdx >= 0 ? game.steps[sIdx].id : null;
     const allHints = (sceneId && game.texts && game.texts[sceneId] && game.texts[sceneId].hints) || [];
     return await db.runTransaction(async (tx) => {
