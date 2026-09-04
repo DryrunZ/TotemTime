@@ -388,6 +388,7 @@ function wcomp(c, inter){
         const iv=setInterval(()=>{ v+=3; step++; if(v>=target){v=target;clearInterval(iv);} rf.textContent=v; }, 22);
       }, 80); }
     const band=W[id+"_band"], freq=done?1125:W[id];
+    const _aud=(done && p.audio) ? `<button class="chip radio-audio" style="width:100%;margin-top:10px;font-size:22px" data-voice data-audio="${p.audio}" ${dis}>&#x1F50A;</button>` : "";
     return `<div class="radio-w">
       <div class="radio-band">
         <button class="rb ${band==='AM'?'on':''}" id="rb_AM_${id}" data-band="AM" data-el="${id}" ${dis}>AM</button>
@@ -399,6 +400,7 @@ function wcomp(c, inter){
         <button class="chip rtune" data-wstep="1" data-el="${id}" ${dis}>+</button>
       </div>
       <button class="cta radio-on" data-wcommit data-el="${id}" ${dis}>ON</button>`}
+      ${_aud}
     </div>`;
   }
   if(c.widget==="voice"){
@@ -475,7 +477,6 @@ function wcomp(c, inter){
     }).join("");
     return `<div class="train-w"><div class="ttrack2" data-train="${id}" style="width:320px;height:280px">
       ${rail}${stations}
-      ${flag("radio")?`<button data-voice data-audio="assets/games/vault-exe/train.mp3" style="position:absolute;left:160px;top:140px;transform:translate(-50%,-50%);background:none;border:none;font-size:30px;cursor:pointer;z-index:3;-webkit-tap-highlight-color:transparent">&#x1F50A;</button>`:""}
       <img class="tloco2" id="loco_${id}" src="assets/games/vault-exe/loco.png?v=2" alt="" draggable="false">
     </div></div>`;
   }
