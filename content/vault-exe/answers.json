@@ -1,0 +1,53 @@
+{
+  "calc": {
+    "type": "equals",
+    "value": "3954607",
+    "requires": "train"
+  },
+  "clock": {
+    "type": "equals",
+    "requires": "fish",
+    "value": "10:10"
+  },
+  "fish": {
+    "type": "sequence",
+    "value": [
+      "black@line",
+      "blue@square",
+      "yellow@triangle"
+    ],
+    "requires": "uv",
+    "popup_key": null
+  },
+  "laptop": {
+    "type": "sequence",
+    "value": [
+      "s3",
+      "s1",
+      "s5",
+      "s2",
+      "s6",
+      "s4"
+    ],
+    "requires": "clock"
+  },
+  "radio": {
+    "type": "equals",
+    "value": 1125
+  },
+  "train": {
+    "type": "sequence",
+    "value": [
+      "B",
+      "G",
+      "7",
+      "F",
+      "3"
+    ],
+    "requires": "radio"
+  },
+  "uv": {
+    "type": "action",
+    "requires": "calc"
+  }
+}
