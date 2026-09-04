@@ -673,8 +673,6 @@ function playerView(){
   let inner;
   if(S.countdown!==null){
     inner=`<div class="body"><div class="cd"><p class="lbl">${t("countdown.getReady")}</p><div class="ring"><span class="num">${S.countdown}</span></div></div></div>`;
-  } else if(isBoard&&flag("laptop")){
-    inner=finaleView();
   } else {
     const mine=step.components.filter(c=>vis(c,S.player));
     const _vsBar=vaultScene(); const _showBar = _vsBar ? (S.player===_vsBar.tx.hintsTo) : isBoard;
