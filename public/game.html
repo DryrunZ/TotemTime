@@ -439,6 +439,15 @@ function wcomp(c, inter){
   }
   if(c.widget==="artifact"){
     const p=c.params||{};
+    // customizable artifact: show director image + caption inline (data-gated on cust_key/src)
+    if(c.cust_key || c.src){
+      const _src=(c.cust_key&&CUST[c.cust_key])||c.src||"";
+      let _cap=cz(t(c.quip_key));
+      if(c.caption_cust_key&&CUST[c.caption_cust_key]) _cap=cz(CUST[c.caption_cust_key]);
+      const _im=_src?`<img class="artifact-cust" src="${_src}" alt="" style="width:100%;border-radius:12px;display:block">`:"";
+      const _tx=_cap?`<p class="p-body" style="margin:12px 0 0">${_cap}</p>`:"";
+      return `<div class="wdg">${_im}${_tx}</div>`;
+    }
     return `<div class="wdg" style="opacity:.85"><button class="chip" style="width:100%;font-size:26px;background:none;border:none" data-artifact="${c.quip_key}" data-artifactid="${c.id}">${p.emoji||"🎁"}</button></div>`;
   }
   if(c.widget==="roller"){
