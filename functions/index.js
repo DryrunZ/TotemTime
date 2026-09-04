@@ -63,15 +63,14 @@ exports.judge = onCall(async (req) => {
     const gref = db.doc(`games/${gameId}`);
     const g = (await gref.get()).data();
     if (!g) throw new HttpsError("not-found", "game not found");
-    let steps = g.steps.filter(st => !st.el && st.id !== "vault");
+    // drop only generated scene steps; preserve end screens (vault, vault2, ...) exactly as authored
+    let steps = g.steps.filter(st => !st.el);
     const bIdx = steps.findIndex(st => st.kind === "board");
     const board = steps[bIdx];
     if (!board || !board.chain) throw new HttpsError("failed-precondition", "board with chain required");
     const scenes = board.chain.map(el => ({ id: "sc_" + el, kind: "board", uses: board.id, el }));
-    const vault = { id: "vault", kind: "screen", components: [
-      { id: "vt", type: "title", text_key: "screens.finale.title" },
-      { id: "vb", type: "text", text_key: "screens.finale.body" } ] };
-    steps = [...steps.slice(0, bIdx), ...scenes, ...steps.slice(bIdx + 1), vault, board];
+    const tail = steps.slice(bIdx + 1);
+    steps = [...steps.slice(0, bIdx), ...scenes, ...tail, board];
     await gref.update({ steps });
     return { steps: steps.map(s => s.id) };
   }
