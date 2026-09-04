@@ -439,7 +439,7 @@ function wcomp(c, inter){
   }
   if(c.widget==="artifact"){
     const p=c.params||{};
-    return `<div class="wdg" style="opacity:.85"><button class="chip" style="width:100%;font-size:26px;background:none;border:none" data-artifact="${c.quip_key}">${p.emoji||"🎁"}</button></div>`;
+    return `<div class="wdg" style="opacity:.85"><button class="chip" style="width:100%;font-size:26px;background:none;border:none" data-artifact="${c.quip_key}" data-artifactid="${c.id}">${p.emoji||"🎁"}</button></div>`;
   }
   if(c.widget==="roller"){
     const p=c.params||{}, seq=p.fixedSequence||[1,1,2,5];
@@ -660,7 +660,7 @@ function popupHtml(){
     const hlp = (p.help && _mode==="easy") ? `<p class="p-help">${p.help}</p>` : "";
     return `<div class="scrim" data-close><div class="sheet"><span class="peak"></span>${ttl}${hlp}<div class="p-widget">${comp(p.comp,true)}</div><button class="cta" data-popcta>${p.cta}</button></div></div>`;
   }
-  return `<div class="scrim" data-close><div class="sheet"><span class="peak"></span><div class="glyph">${glyph}</div><h2 class="p-title ${p.kind==='win'?'win':''}">${p.title}</h2>${p.body?`<p class="p-body">${p.body}</p>`:""}<button class="cta" data-popcta>${p.cta}</button></div></div>`;
+  return `<div class="scrim" data-close><div class="sheet"><span class="peak"></span><div class="glyph">${glyph}</div><h2 class="p-title ${p.kind==='win'?'win':''}">${p.title}</h2>${p.img?`<img class="p-img" src="${p.img}" alt="" style="width:100%;border-radius:12px;margin:4px 0 12px">`:""}${p.body?`<p class="p-body">${p.body}</p>`:""}<button class="cta" data-popcta>${p.cta}</button></div></div>`;
 }
 function finaleView(){
   return `<div class="body"><h1 class="c-title" style="color:var(--tt-accent)">${t("screens.finale.title")}</h1>
@@ -874,7 +874,7 @@ app.addEventListener("click",(e)=>{
     if(k=="="){ const cur=parseFloat(W[id+"_disp"]); if(W[id+"_op"]!=null){ W[id+"_acc"]=calcApply(W[id+"_acc"],cur,W[id+"_op"]); W[id+"_disp"]=String(W[id+"_acc"]); W[id+"_op"]=null; W[id+"_fresh"]=true; setD(); } return; }
     return; }
   if(el.hasAttribute("data-calcgo")){ const id=el.dataset.el; submitEl(id, W[id+"_disp"]||"", el); return; }
-  if(el.hasAttribute("data-artifact")){ S.popup={kind:"hint",title:"", body:cz(t(el.dataset.artifact)), cta:t("popup.close")}; S.popupId="local"+Date.now(); render(); return; }
+  if(el.hasAttribute("data-artifact")){ const _aid=el.dataset.artifactid, _ac=_aid?findComp(_aid):null; let _body=cz(t(el.dataset.artifact)); if(_ac&&_ac.caption_cust_key&&CUST[_ac.caption_cust_key]) _body=cz(CUST[_ac.caption_cust_key]); const _src=_ac?((_ac.cust_key&&CUST[_ac.cust_key])||_ac.src||""):""; S.popup={kind:"hint",title:"", body:_body, img:_src, cta:t("popup.close")}; S.popupId="local"+Date.now(); render(); return; }
   if(el.hasAttribute("data-deskobj")){ const step=curStep(); let c=(step.components||[]).find(x=>x.id===el.dataset.deskobj); if(c&&c.altOpen&&c.altOpenWhen&&flag(c.altOpenWhen)){ const alt=(step.components||[]).find(x=>x.id===c.altOpen); if(alt) c=alt; } else if(c&&c.altOpen&&c.altOpenWhen){ return; } if(c){ const bare=(c.widget==='roller'); if(bare && c.params){ W[elid(c)]=1; W["_autoroll_"+elid(c)]=true; } if(c.widget==='stepper'){ W["_sweep_"+elid(c)]=true; } if(c.widget==='fish'){ W[elid(c)+"_tapped"]=false; W[elid(c)+"_f"]=0; } if(c.widget==='train'){ W[elid(c)+"_att"]=Date.now().toString(36)+Math.random().toString(36).slice(2,8); } const noT=(bare||c.widget==='stepper'||c.widget==='train'||c.widget==='digits'||c.widget==='fish'||c.widget==='fishbtns'||c.widget==='lamp'||c.widget==='clock'||c.widget==='symbols'||c.widget==='gallery'||c.widget==='notebook'||c.widget==='book'); S.popup={kind:"hint",title:t(c.name_key),comp:c,cta:t("popup.close"),noTitle:noT,help:cz(t("el."+c.id+".help"))}; S.popupId="desk"+c.id; render(); } return; }
   if(el.hasAttribute("data-solveupto")){ el.disabled=true; judge({action:"solveUpTo",gameId:GAME_ID,roomCode:ROOM_CODE,elementId:el.dataset.solveupto}).then(r=>{ el.disabled=false; console.log("solveUpTo",r.data); }).catch(e=>{ el.disabled=false; alert(e.message); }); return; }
   if(el.hasAttribute("data-resetroom")){ el.disabled=true; judge({action:"resetRoom",gameId:GAME_ID,roomCode:ROOM_CODE}).then(()=>{ el.disabled=false; }).catch(e=>{ el.disabled=false; alert(e.message); }); return; }
