@@ -166,15 +166,24 @@ exports.judge = onCall(async (req) => {
   if (action === "createRoom") {
     const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
     let code = "";
-    for (let tries = 0; tries < 5; tries++) {
-      code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-      if (!(await db.doc(`rooms/${code}`).get()).exists) break;
+    const want = req.data && req.data.code;          // dev/admin: create a room with a chosen code
+    const dev = !!(req.data && req.data.dev);
+    if (want) {
+      if (!(await isAdmin(callerUid))) throw new HttpsError("permission-denied", "admins only");
+      code = String(want).toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+      if ((await db.doc(`rooms/${code}`).get()).exists) return { roomCode: code, existed: true };
+    } else {
+      for (let tries = 0; tries < 5; tries++) {
+        code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+        if (!(await db.doc(`rooms/${code}`).get()).exists) break;
+      }
     }
     await db.doc(`rooms/${code}`).set({
-      gameId, phase: "lobby", step: 0, points: scoring.start ?? 100,
-      startedAt: null, solved: {}, hintsUsed: {}, seats: {}, flags: {}, prog: {},
+      gameId, phase: dev ? "play" : "lobby", step: 0, points: scoring.start ?? 100,
+      startedAt: dev ? Date.now() : null, solved: {}, hintsUsed: {}, seats: {}, flags: {}, prog: {},
+      mode: pickMode(game, req.data && req.data.mode), language: (req.data && req.data.language) || game.defaultLanguage || "he",
     });
-    return { roomCode: code };
+    return { roomCode: code, mode: pickMode(game, req.data && req.data.mode) };
   }
 
   // ---- admin testing powers ----
