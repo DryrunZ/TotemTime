@@ -381,7 +381,7 @@ function wcomp(c, inter){
 
   if(c.widget==="stepper"){
     const p=c.params||{};
-    if(!(id in W)) W[id]=(c.id==="radio"?1124:(p.start??p.min??950));
+    if(!(id in W)) W[id]=(p.start??p.min??950);
     if(!(id+"_band" in W)) W[id+"_band"]="FM";
     if(W["_sweep_"+id]){ W["_sweep_"+id]=false; const target=W[id];
       setTimeout(()=>{ const rf=document.getElementById('rf_'+id); if(!rf) return;
