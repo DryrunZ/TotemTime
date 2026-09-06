@@ -277,7 +277,7 @@ body{margin:0;background:#050506;color:var(--tt-text);font-family:-apple-system,
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-functions.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { firebaseConfig } from "./config.js";
 const fbApp = initializeApp(firebaseConfig);
 const db = getFirestore(fbApp);
@@ -659,7 +659,7 @@ function lobbyView(){
   return `<div class="wrap"><div class="phone">${topbar()}<div class="body"><h1 class="c-title">${he ? "חדר" : "Room"} ${ROOM_CODE}</h1>${rows}${joinUi}${(S.isAdmin||S.buyerUid===SEAT_ID)?`<button class="chip" data-forcestart>${he ? "התחל בכל זאת (מנהל)" : "Force start (director)"}</button>`:""}</div></div></div>`;
 }
 function topbar(){
-  return `<header class="topbar"><div class="brandside"><div class="logo"></div><div class="pl" data-signout style="cursor:pointer" title="${S.lang==='he'?'יציאה':'Sign out'}"><span class="nm">${MY_NAME||(S.lang==='he'?'מאיה':'Maya')}</span><span class="badge">${t("topbar.player")} ${S.player}</span></div></div><span class="timer" id="timer">${fmt(S.elapsed)}</span><div class="rightside"><div class="metaside"><span class="pts">${S.points} ${t("topbar.points")}</span><span class="stg">${t("topbar.stage")} ${S.step+1}</span></div></div></header>`;
+  return `<header class="topbar"><div class="brandside"><div class="logo"></div><div class="pl"><span class="nm">${MY_NAME||(S.lang==='he'?'מאיה':'Maya')}</span><span class="badge">${t("topbar.player")} ${S.player}</span></div></div><span class="timer" id="timer">${fmt(S.elapsed)}</span><div class="rightside"><div class="metaside"><span class="pts">${S.points} ${t("topbar.points")}</span><span class="stg">${t("topbar.stage")} ${S.step+1}</span></div></div></header>`;
 }
 function popupHtml(){
   const p=S.popup, glyph={hint:"✉️",win:"⭐",lose:"🚩"}[p.kind]||"✉️";
@@ -1031,34 +1031,6 @@ function gameAuthView(){
     catch(e){ document.getElementById("g_err").textContent = S.lang === "he" ? "האימייל או הסיסמה שגויים" : "Wrong email or password"; }
   };
 }
-// ---- sign out: tap your name in the top bar. Clears the Firebase session + any local tt.* keys, back to the portal. ----
-function signoutSheet(){
-  const he = S.lang === 'he';
-  document.querySelectorAll('.so-scrim').forEach(n => n.remove());
-  const d = document.createElement('div');
-  d.className = 'so-scrim';
-  d.setAttribute('style', 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:24px');
-  d.innerHTML = `<div style="background:#141416;border:1px solid rgba(255,255,255,.14);border-radius:24px;padding:22px;max-width:360px;width:100%;text-align:center;font-family:inherit;color:#F9F8F8">
-    <div style="font-size:34px;margin-bottom:8px">👋</div>
-    <div style="font-size:19px;font-weight:700;margin-bottom:6px">${he ? 'לצאת מהחשבון?' : 'Sign out?'}</div>
-    <div style="font-size:14px;opacity:.7;margin-bottom:18px">${he ? 'תחזרו לפורטל ותוכלו להיכנס עם שחקן אחר.' : "You'll return to the portal and can sign in as another player."}</div>
-    <button data-signout-go style="width:100%;min-height:50px;border:0;border-radius:16px;background:#D0F267;color:#12160A;font-weight:700;font-size:15px;cursor:pointer">${he ? 'כן, לצאת' : 'Yes, sign out'}</button>
-    <button data-signout-no style="width:100%;min-height:44px;margin-top:8px;border:0;border-radius:16px;background:transparent;color:#A5AABE;font-weight:600;font-size:14px;cursor:pointer">${he ? 'ביטול' : 'Cancel'}</button>
-  </div>`;
-  d.addEventListener('click', e => { if (e.target === d) d.remove(); });
-  document.body.appendChild(d);
-}
-async function doSignOut(){
-  try { Object.keys(localStorage).filter(k => /^tt[._]/i.test(k)).forEach(k => localStorage.removeItem(k)); } catch {}
-  try { await signOut(auth); } catch (e) { console.warn('signOut', e); }
-  location.href = 'portal.html';
-}
-document.addEventListener('click', e => {
-  if (e.target.closest('[data-signout-go]')) { e.preventDefault(); doSignOut(); return; }
-  if (e.target.closest('[data-signout-no]')) { e.preventDefault(); document.querySelectorAll('.so-scrim').forEach(n => n.remove()); return; }
-  if (e.target.closest('[data-signout]')) { e.preventDefault(); e.stopPropagation(); signoutSheet(); }
-}, true);
-
 onAuthStateChanged(auth, async (user) => {
   if (!user) { SEAT_ID = null; gameAuthView(); return; }
   SEAT_ID = user.uid;
