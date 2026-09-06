@@ -933,7 +933,15 @@ lb.addEventListener("click",()=>{
   if(pausedVideo){ try{ pausedVideo.play(); }catch(e){} pausedVideo=null; }
 });
 document.addEventListener("click",function(e){ const pv=e.target.closest("[data-stepprev],[data-stepnext]"); if(!pv) return; e.stopImmediatePropagation(); e.preventDefault(); const d=pv.hasAttribute("data-stepnext")?1:-1; const t=Math.max(0,Math.min(S.game.steps.length-1,S.step+d)); judge({action:"setStep",gameId:GAME_ID,roomCode:ROOM_CODE,stepId:t}).catch(function(err){alert(err.message);}); },true);
-function nextStep(){ S.running=true; S.step=Math.min(S.game.steps.length-1,S.step+1); S.popup=null; render(); }
+// judge advance: server is source of truth, so every player moves together
+function nextStep(){
+  S.running=true; S.popup=null;
+  const from=S.step;
+  judge({ action:"advance", gameId:GAME_ID, roomCode:ROOM_CODE, stepId:from })
+    .then(res=>{ if(res&&res.data&&typeof res.data.step==="number") S.step=res.data.step; })
+    .catch(err=>{ console.error("advance failed",err); S.step=Math.min(S.game.steps.length-1,from+1); })
+    .finally(()=>render());
+}
 let roomStarted = 0;
 document.head.insertAdjacentHTML("beforeend", `<style>
 .ptfloat{position:fixed;top:70px;left:50%;transform:translateX(-50%);font-size:28px;font-weight:800;z-index:9999;pointer-events:none;animation:ptfl 1.6s ease-out forwards;}
