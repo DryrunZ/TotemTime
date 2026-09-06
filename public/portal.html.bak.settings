@@ -558,14 +558,6 @@ const I18N = {
     "store.checkout":"Continue to payment",
     "store.checkout.soon":"Payment isn't connected yet. Your order was prepared — we'll finish checkout once Stripe is live.",
     "store.empty":"No games published yet.",
-    "store.language":"Game language",
-    "store.mode":"Difficulty",
-    "mode.easy":"Easy", "mode.hard":"Hard", "mode.normal":"Normal",
-    "settings.title":"Game settings",
-    "settings.sub":"Language and difficulty. Locked once the game starts.",
-    "settings.save":"Save settings",
-    "settings.saved":"Settings saved",
-    "settings.locked":"The game has started, so settings are locked.",
     "store.what":"What you get",
     "store.perk.1":"One shareable game, played together",
     "store.perk.2":"You become the Director — invite your team",
@@ -789,14 +781,6 @@ const I18N = {
     "store.checkout":"המשך לתשלום",
     "store.checkout.soon":"התשלום עדיין לא מחובר. ההזמנה הוכנה — נשלים את הרכישה כשהתשלום יעלה לאוויר.",
     "store.empty":"עדיין לא פורסמו משחקים.",
-    "store.language":"שפת המשחק",
-    "store.mode":"רמת קושי",
-    "mode.easy":"קל", "mode.hard":"קשה", "mode.normal":"רגיל",
-    "settings.title":"הגדרות המשחק",
-    "settings.sub":"שפה ורמת קושי. ננעל כשהמשחק מתחיל.",
-    "settings.save":"שמירת ההגדרות",
-    "settings.saved":"ההגדרות נשמרו",
-    "settings.locked":"המשחק התחיל, ולכן ההגדרות נעולות.",
     "store.what":"מה מקבלים",
     "store.perk.1":"משחק אחד לשיתוף, משחקים ביחד",
     "store.perk.2":"אתם מנהלי המשחק — הזמינו את הצוות",
@@ -1209,38 +1193,6 @@ const currencyOf = g => (g.store && g.store.currency) || g.currency || "usd";
 const seatOpts   = g => (g.store && g.store.seatOptions) || g.seatOptions || [4,6,8];
 const coverOf    = g => (g.store && g.store.cover) || g.cover || g.hero || "";
 const freeLaunch = g => !!(g.store && g.store.freeLaunch);
-const modesOf    = g => { const m = Object.keys((g.scoring && g.scoring.modes) || {}); return m.length ? m : ["easy"]; };
-const modeLabel  = m => { const k = "mode."+m; const v = t(k); return v === k ? m : v; };
-const langLabel  = c => (LANGS.find(l=>l.code===c) || {}).label || c;
-async function langsOf(gameId){
-  if (S.langsCache && S.langsCache[gameId]) return S.langsCache[gameId];
-  S.langsCache = S.langsCache || {};
-  try{ const snap = await getDocs(collection(db,"games",gameId,"locales")); S.langsCache[gameId] = snap.docs.map(d=>d.id); }
-  catch{ S.langsCache[gameId] = []; }
-  return S.langsCache[gameId];
-}
-/* pickers render only when a game offers more than one option — one option = no UI, silently that one */
-function settingsFields(g, langs, cur){
-  const modes = modesOf(g);
-  const langSel = langs.length > 1 ? `
-    <label class="field"><span class="label">${esc(t("store.language"))}</span>
-      <select class="select" name="language">${langs.map(c=>`<option value="${esc(c)}" ${c===(cur.language||S.lang)?"selected":""}>${esc(langLabel(c))}</option>`).join("")}</select></label>` : "";
-  const modeSel = modes.length > 1 ? `
-    <div class="field"><span class="label">${esc(t("store.mode"))}</span>
-      <div class="seatpick" data-modepick>${modes.map((m,ix)=>`<div class="opt ${m===(cur.mode||modes[0])?"on":""}" data-mode="${esc(m)}">${esc(modeLabel(m))}</div>`).join("")}</div></div>` : "";
-  return langSel + modeSel;
-}
-const readSettings = (scope, g, langs) => {
-  const modes = modesOf(g);
-  const l = scope.querySelector("[name=language]");
-  const m = scope.querySelector("[data-modepick] .opt.on");
-  return { language: l ? l.value : (langs.length === 1 ? langs[0] : S.lang), mode: m ? m.dataset.mode : modes[0] };
-};
-function wireModePick(scope){
-  const pick = scope.querySelector("[data-modepick]"); if (!pick) return;
-  pick.addEventListener("click", ev => { const o = ev.target.closest(".opt"); if (!o) return;
-    pick.querySelectorAll(".opt").forEach(x=>x.classList.remove("on")); o.classList.add("on"); });
-}
 
 async function resolveTitles(){
   await Promise.all(S.instances.map(async i => {
@@ -1707,21 +1659,9 @@ function viewCustomize(inst){
   const locked   = !!(inst.playedAt || inst.status === "played" || inst.status === "finished");
   const values   = inst.customization || {};
 
-  const langs = inst._langs || [];
-  const hasSettings = langs.length > 1 || modesOf(inst.game).length > 1;
-  const settingsCard = hasSettings ? `
-  <div class="card" style="margin-bottom:var(--gap)">
-    <h3 class="h3" style="margin-bottom:4px">${esc(t("settings.title"))}</h3>
-    <p class="small muted" style="margin-bottom:14px">${esc(locked ? t("settings.locked") : t("settings.sub"))}</p>
-    <form id="settingsform" class="stack" ${locked?"inert":""} style="${locked?"opacity:.55;pointer-events:none":""}">
-      ${settingsFields(inst.game, langs, { language:inst.language, mode:inst.mode })}
-      <button class="btn ghost block" type="submit">${esc(t("settings.save"))}</button>
-    </form>
-  </div>` : "";
-
   if (!manifest.length)
-    return pageTitle(t("cust.title"), t("cust.sub"), "director") + settingsCard
-      + (hasSettings ? "" : emptyState("✨", t("cust.none"), t("dir.sub")));
+    return pageTitle(t("cust.title"), t("cust.sub"), "director")
+      + emptyState("✨", t("cust.none"), t("dir.sub"));
 
   const fields = manifest.map(f => {
     const v   = values[f.key] ?? "";
@@ -1762,7 +1702,7 @@ function viewCustomize(inst){
              value="${esc(v)}" placeholder="${esc(f._def||f.default||"")}"></label>`;
   }).join("");
 
-  return pageTitle(t("cust.title"), t("cust.sub"), "director") + settingsCard + `
+  return pageTitle(t("cust.title"), t("cust.sub"), "director") + `
   ${locked?`<div class="card" style="border-color:rgba(255,173,13,.35);margin-bottom:var(--gap)">
       <div class="row"><span>⚠️</span><span class="small">${esc(t("cust.locked"))}</span></div></div>`:""}
   <div class="card">
@@ -1798,14 +1738,13 @@ async function loadAdmin(force){
   await Promise.all((S.admin.games||[]).map(async g => {
     const full = await loadGame(g.id);
     g._title = await gt(full, g.title_key || full.title_key, full.title || g.id);
-    g._langs = await langsOf(g.id); g._modes = modesOf(full);
   }));
   S.admin.gameById = Object.fromEntries((S.admin.games||[]).map(g => [g.id, g]));
   return S.admin;
 }
 const adminTitleOf = gid => (S.admin && S.admin.gameById[gid] && S.admin.gameById[gid]._title) || gid;
 const adminUserLabel = uid => { const u = S.admin && S.admin.userByUid[uid]; return u ? (u.nickname || u.displayName || u.email || uid) + (u.email ? ` <span class="muted">${esc(u.email)}</span>` : "") : esc(uid||"—"); };
-const testUrlOf = (g, lang, mode) => `${location.origin}/game.html?game=${encodeURIComponent(g.id)}&room=${encodeURIComponent((g.store&&g.store.testRoom)||"")}&dev=1${lang?`&lang=${encodeURIComponent(lang)}`:""}${mode?`&mode=${encodeURIComponent(mode)}`:""}`;
+const testUrlOf = g => `${location.origin}/game.html?game=${encodeURIComponent(g.id)}&room=${encodeURIComponent((g.store&&g.store.testRoom)||"")}&dev=1`;
 const playUrlOf = i => `${location.origin}/game.html?code=${encodeURIComponent(i.code||"")}&game=${encodeURIComponent(i.gameId||"")}&lang=${encodeURIComponent(i.language||"he")}`;
 
 function adminTabs(cur){
@@ -1847,7 +1786,7 @@ function adminInstances(A, filter){
           </div>
           <div class="small">${esc(t("admin.inst.buyer"))}: ${adminUserLabel(i.buyerUid)}</div>
           <div class="tiny muted" style="margin-top:2px">
-            ${esc(t("games.players_short",{n:i.seatCount||0}))} · ${esc(langLabel(i.language||"?"))}${i.mode?` · ${esc(modeLabel(i.mode))}`:""} · ${esc(fmtDate(i.createdAt))}
+            ${esc(t("games.players_short",{n:i.seatCount||0}))} · ${esc(fmtDate(i.createdAt))}
             ${i.finishedAt?` · ${esc(t("games.finished.at",{date:fmtDate(i.finishedAt)}))}`:""}
             ${typeof i.finalPoints==="number"?` · ${esc(t("games.points",{n:i.finalPoints}))}`:""}
             ${i.durationMs?` · ${esc(t("games.duration",{m:Math.round(i.durationMs/60000)}))}`:""}
@@ -1886,9 +1825,7 @@ function adminGames(A){
           <input class="input" name="testRoom" value="${esc(s.testRoom||"")}" dir="ltr" autocapitalize="characters" placeholder="VAULT1"></label>
         <button class="btn sm" type="submit">${esc(t("admin.game.save"))}</button>
       </form>
-      ${s.testRoom?`<div class="row wrap" style="gap:8px;margin-top:10px" data-testurl="${esc(g.id)}">
-        ${(g._langs||[]).length>1?`<select class="select sm" name="lang" style="min-height:40px;width:auto;padding:6px 36px 6px 12px">${(g._langs||[]).map(c=>`<option value="${esc(c)}">${esc(langLabel(c))}</option>`).join("")}</select>`:""}
-        ${(g._modes||[]).length>1?`<select class="select sm" name="mode" style="min-height:40px;width:auto;padding:6px 36px 6px 12px">${(g._modes||[]).map(m=>`<option value="${esc(m)}">${esc(modeLabel(m))}</option>`).join("")}</select>`:""}
+      ${s.testRoom?`<div class="row" style="gap:8px;margin-top:10px">
         <input class="input grow small" readonly dir="ltr" value="${esc(testUrlOf(g))}" onclick="this.select()">
         <a class="iconbtn" href="${esc(testUrlOf(g))}" target="_blank" rel="noopener" aria-label="${esc(t("admin.game.testurl"))}">↗</a>
         <button class="iconbtn" data-act="copytext" data-v="${esc(testUrlOf(g))}">⧉</button>
@@ -2039,7 +1976,6 @@ async function render(){
       await loadInvites(inst);
       body = viewInvites(inst);
     } else {
-      inst._langs = await langsOf(inst.gameId);
       const man = (inst.game && inst.game.customizable) || [];
       await Promise.all(man.map(async f => {
         f.label = await gt(inst.game, f.label_key, f.label || f.key.replace(/_/g," "));
@@ -2079,18 +2015,9 @@ function wire(){
   inv && inv.addEventListener("submit", createInvite);
   const cf = $("#custform");
   cf && cf.addEventListener("submit", saveCustomization);
-  const sf = $("#settingsform");
-  if (sf){ wireModePick(sf); sf.addEventListener("submit", saveSettings); }
   const cpf = $("#couponform");
   cpf && cpf.addEventListener("submit", adminCreateCoupon);
   document.querySelectorAll("form[data-testroom]").forEach(f => f.addEventListener("submit", adminSaveTestRoom));
-  document.querySelectorAll("[data-testurl]").forEach(row => {
-    const g = S.admin && S.admin.gameById[row.dataset.testurl]; if (!g) return;
-    const upd = () => { const l = row.querySelector("[name=lang]"), m = row.querySelector("[name=mode]");
-      const u = testUrlOf(g, l && l.value, m && m.value);
-      row.querySelector("input[readonly]").value = u; row.querySelector("a").href = u; row.querySelector("[data-act=copytext]").dataset.v = u; };
-    row.querySelectorAll("select").forEach(s => s.addEventListener("change", upd)); upd();
-  });
 
   document.querySelectorAll('[data-cust] input[type=file]').forEach(i =>
     i.addEventListener("change", onFileChosen));
@@ -2242,9 +2169,8 @@ function playInstance(id){
 }
 
 /* ---- store ---- */
-async function buySheet(gameId){
+function buySheet(gameId){
   const g = S.catalog.find(x=>x.id===gameId) || S.gamesById[gameId] || { id:gameId };
-  const langs = await langsOf(g.id);
   const opts = seatOpts(g);
   const cur  = currencyOf(g);
   const base = priceOf(g);
@@ -2261,7 +2187,6 @@ async function buySheet(gameId){
              <small>${esc(t("store.seats.n",{n}))}</small></div>`).join("")}
         </div>
       </div>
-      ${settingsFields(g, langs, { language:S.lang })}
       ${freeLaunch(g)?`
       <label class="field"><span class="label">${esc(t("store.claim"))}</span>
         <input class="input" name="claimcode" placeholder="${esc(t("store.claim.ph"))}" autocapitalize="none" autocomplete="off"></label>`:""}
@@ -2298,20 +2223,18 @@ async function buySheet(gameId){
         o.classList.add("on"); recalc();
       });
       sel && sel.addEventListener("change", recalc);
-      wireModePick(scrim);
       scrim.querySelector("#buyform").addEventListener("submit", async ev => {
         ev.preventDefault();
         const { seats, cents } = recalc();
-        const st = readSettings(scrim, g, langs);
         const payload = { gameId:g.id, seatCount:seats, amount:cents, currency:cur,
-                          language:st.language, mode:st.mode, coupon: sel ? sel.value : "" };
+                          language:S.lang, coupon: sel ? sel.value : "" };
         const b = ev.target.querySelector("button[type=submit]");
         b.disabled = true; b.textContent = t("common.saving");
         try{
           if (freeLaunch(g)){
             const codeInEl = document.querySelector('input[name="claimcode"]'); const codeIn = String((codeInEl&&codeInEl.value)||"").trim();
             const claim = httpsCallable(fns, "claimGame");
-            await claim({ gameId:g.id, seatCount:seats, language:st.language, mode:st.mode, claimCode:codeIn });
+            await claim({ gameId:g.id, seatCount:seats, language:S.lang, claimCode:codeIn });
             closeSheet();
             await loadEverything(); await resolveTitles();
             toast(t("store.claimed"));
@@ -2457,19 +2380,6 @@ async function onFileChosen(e){
   }catch(ex){ console.warn(ex); prog.textContent = ""; toast(t("common.error"), "bad"); }
 }
 
-async function saveSettings(e){
-  e.preventDefault();
-  const inst = instById(S.route.args[0]); if (!inst) return;
-  const btn = e.target.querySelector("button[type=submit]");
-  btn.disabled = true; btn.textContent = t("common.saving");
-  const st = readSettings(e.target, inst.game, inst._langs || []);
-  try{
-    const r = await httpsCallable(fns, "setInstanceSettings")({ instanceId: inst.id, language: st.language, mode: st.mode });
-    inst.language = r.data.language; inst.mode = r.data.mode;
-    toast(t("settings.saved"));
-  }catch(ex){ console.warn(ex); toast(t("common.error"), "bad"); }
-  btn.disabled = false; btn.textContent = t("settings.save");
-}
 async function saveCustomization(e){
   e.preventDefault();
   const inst = instById(S.route.args[0]);

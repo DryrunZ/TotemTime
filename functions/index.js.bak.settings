@@ -46,15 +46,6 @@ const instGet = async (tx, room) => {
   const ref = instRefOf(room); if (!ref) return null;
   const s = await tx.get(ref); return s.exists ? s.data() : null;
 };
-// ---- game settings (language, difficulty) — options come from data: locale docs and scoring.modes ----
-const modesOf = (game) => { const m = Object.keys((game.scoring && game.scoring.modes) || {}); return m.length ? m : ["easy"]; };
-const langsOf = async (gameId) => { const s = await db.collection(`games/${gameId}/locales`).get(); return s.docs.map(d => d.id); };
-const pickMode = (game, want) => { const ms = modesOf(game); return ms.includes(want) ? want : ms[0]; };
-const pickLang = async (game, gameId, want) => {
-  const ls = await langsOf(gameId); const def = game.defaultLanguage || "he";
-  if (want && ls.includes(want)) return want;
-  return ls.includes(def) ? def : (ls[0] || def);
-};
 const isFinalElement = (game, elementId) => {
   if (game.finalElement) return game.finalElement === elementId;
   const board = (game.steps || []).find(st => st.kind === "board" && st.chain);
@@ -214,17 +205,6 @@ exports.judge = onCall(async (req) => {
     });
     await instLogDirect(room, callerUid, [{ kind: "reset" }], { status: "played", playedAt: nowIso() });
     return { reset: true, step: firstScene >= 0 ? firstScene : 0 };
-  }
-
-  // ---- setMode: difficulty on the room (data the judge already reads via __mode). Admin anytime; director before start. ----
-  if (action === "setMode") {
-    const room = (await roomRef.get()).data() || {};
-    const admin = await isAdmin(callerUid);
-    if (!admin && room.buyerUid !== callerUid) throw new HttpsError("permission-denied", "admins or the director only");
-    if (!admin && room.phase !== "lobby") throw new HttpsError("failed-precondition", "locked once the game has started");
-    const md = pickMode(game, req.data && req.data.mode);
-    await roomRef.update({ mode: md });
-    return { mode: md };
   }
 
   if (action === "setStep") {
@@ -631,7 +611,7 @@ exports.claimGame = onCall(async (req) => {
   const uid = req.auth && req.auth.uid;
   if (!uid) throw new HttpsError("unauthenticated", "sign in first");
 
-  const { gameId, seatCount, language, claimCode, mode } = req.data || {};
+  const { gameId, seatCount, language, claimCode } = req.data || {};
   if (!gameId || !seatCount) throw new HttpsError("invalid-argument", "gameId and seatCount required");
 
   const gameSnap = await db.doc(`games/${gameId}`).get();
@@ -656,23 +636,20 @@ exports.claimGame = onCall(async (req) => {
     if (!(await db.doc(`rooms/${code}`).get()).exists) break;
   }
   const scoring = game.scoring || {};
-  const lang = await pickLang(game, gameId, language);
-  const md = pickMode(game, mode);
   await db.doc(`rooms/${code}`).set({
     gameId, phase: "lobby", step: 0, points: scoring.start ?? 100, buyerUid: uid,
     startedAt: null, solved: {}, hintsUsed: {}, seats: {}, flags: {}, prog: {},
-    mode: md, language: lang,
   });
 
   const instRef = db.collection("instances").doc();
   await db.doc(`rooms/${code}`).update({ instanceId: instRef.id });
   await instRef.set({
     gameId, buyerUid: uid, seatCount: seats,
-    language: lang, mode: md, status: "open",
+    language: language || game.defaultLanguage || "he",
     code, customization: {}, createdAt: new Date().toISOString(),
   });
 
-  return { instanceId: instRef.id, code, language: lang, mode: md };
+  return { instanceId: instRef.id, code };
 });
 
 // ---- getInvitePreview: pre-auth peek for the invite signup screen ----
@@ -781,23 +758,4 @@ exports.adminOverview = onCall(async (req) => {
   const coupons = cs.docs.map(d => ({ id: d.id, ...d.data() }));
   const admins = (await db.collection("admins").get()).docs.map(d => d.id);
   return { games, instances, users, coupons, admins };
-});
-
-// ---- setInstanceSettings: director edits language/difficulty before the room starts. Writes instance + room together. ----
-exports.setInstanceSettings = onCall(async (req) => {
-  const uid = req.auth && req.auth.uid;
-  if (!uid) throw new HttpsError("unauthenticated", "sign in first");
-  const { instanceId, language, mode } = req.data || {};
-  if (!instanceId) throw new HttpsError("invalid-argument", "instanceId required");
-  const iRef = db.doc(`instances/${instanceId}`);
-  const inst = (await iRef.get()).data();
-  if (!inst) throw new HttpsError("not-found", "instance not found");
-  if (inst.buyerUid !== uid && !(await isAdmin(uid))) throw new HttpsError("permission-denied", "director only");
-  if (inst.status === "played" || inst.status === "finished") throw new HttpsError("failed-precondition", "locked once the game has started");
-  const game = (await db.doc(`games/${inst.gameId}`).get()).data() || {};
-  const lang = await pickLang(game, inst.gameId, language || inst.language);
-  const md = pickMode(game, mode || inst.mode);
-  await iRef.update({ language: lang, mode: md });
-  if (inst.code) await db.doc(`rooms/${inst.code}`).set({ language: lang, mode: md }, { merge: true });
-  return { language: lang, mode: md };
 });

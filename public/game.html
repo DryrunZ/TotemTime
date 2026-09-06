@@ -289,6 +289,7 @@ const DEVFLAG = QS.get("dev") === "1";
 window.__judge = (data) => judge({ gameId: GAME_ID, roomCode: ROOM_CODE, ...data }).then(r => (console.log(r.data), r.data));
 const ROOM_CODE = QS.get("room") || QS.get("code") || "dev";
 let SEAT_ID = null;
+let MODE_SYNCED = false; // dev: ?mode= pushed to the room once
 let CUST = {}, CUST_LOADED = false;
 function cz(str){
   if (!str) return str;
@@ -970,6 +971,13 @@ onSnapshot(doc(db, "rooms", ROOM_CODE), (snap) => {
   S.flags = r.flags || {};
   S.prog = r.prog || {};
   S.buyerUid = r.buyerUid || null;
+  // difficulty is room data (judge reads room.mode); mirror it so client hint gating matches the server
+  S.mode2 = r.mode || S.mode2 || null;
+  if (DEVFLAG && !MODE_SYNCED && SEAT_ID) {
+    MODE_SYNCED = true;
+    const want = QS.get("mode");
+    if (want && want !== r.mode) judge({ action:"setMode", gameId:GAME_ID, roomCode:ROOM_CODE, mode:want }).catch(e => console.warn("setMode", e));
+  }
   if (r.instanceId && !CUST_LOADED) {
     CUST_LOADED = true;
     getDoc(doc(db, "instances", r.instanceId)).then(snap => {
