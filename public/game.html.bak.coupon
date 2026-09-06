@@ -908,7 +908,7 @@ app.addEventListener("click",(e)=>{
   if(el.hasAttribute("data-join")){ const nm=((document.getElementById("joinName")||{}).value||"").trim(); if(!nm) return; judge({action:"join", gameId:GAME_ID, roomCode:ROOM_CODE, seatId:SEAT_ID, name:nm}).catch(err=>console.error("join failed",err)); return; }
   if(el.hasAttribute("data-ready")){ const me=S.seats[SEAT_ID]; judge({action:"ready", gameId:GAME_ID, roomCode:ROOM_CODE, seatId:SEAT_ID, ready:!(me&&me.ready)}).catch(err=>console.error("ready failed",err)); return; }
   if(el.hasAttribute("data-forcestart")){ judge({action:"forceStart", gameId:GAME_ID, roomCode:ROOM_CODE}).catch(err=>console.error("forceStart failed",err)); return; }
-  if(el.hasAttribute("data-action")){ if(el.dataset.action==="advance") nextStep(); else if(el.dataset.action==="coupon"){ showCouponPopup(); } }
+  if(el.hasAttribute("data-action")){ if(el.dataset.action==="advance") nextStep(); else if(el.dataset.action==="coupon"){ S.popup={kind:"win",title:"🎁",body:t("coupon.soon"),cta:t("popup.close")}; render(); } }
   else if(el.hasAttribute("data-skip")){ el.disabled=true; judge({ action:"skip", gameId: GAME_ID, roomCode: ROOM_CODE, stepId: String(S.step) }).catch((err)=>{ console.error("skip failed", err); el.disabled=false; }); }
   else if(el.hasAttribute("data-hint")){
     judge({ action:"hint", gameId: GAME_ID, roomCode: ROOM_CODE, stepId: String(S.step), hintIndex: Number(el.dataset.hintindex), hintKey: el.dataset.hint })
@@ -925,7 +925,7 @@ app.addEventListener("click",(e)=>{
       S.popup = {kind:"lose",title:"!",body:"connection error — try again",cta:t("lose.cta")};
     }).finally(()=>{ el.disabled=false; render(); });
   }
-  else if(el.hasAttribute("data-popcta")){ const _href=S.popup&&S.popup.href; if(!String(S.popupId).startsWith("desk")) S.dismissed=S.popupId; S.popup=null; if(_href){ location.href=_href; return; } render(); }
+  else if(el.hasAttribute("data-popcta")){ if(!String(S.popupId).startsWith("desk")) S.dismissed=S.popupId; S.popup=null; render(); }
   else if(el.hasAttribute("data-close")){ if(e.target===el){ if(!String(S.popupId).startsWith("desk")) S.dismissed=S.popupId; S.popup=null; render(); } }
 });
 lb.addEventListener("click",()=>{
@@ -1032,28 +1032,6 @@ function gameAuthView(){
   };
 }
 // ---- sign out: tap your name in the top bar. Clears the Firebase session + any local tt.* keys, back to the portal. ----
-// ---- finish coupon: each player's own reward, minted by the judge when the last puzzle was solved.
-// Data-gated: instance rooms only (users/{uid}.coupons); dev rooms fall back to the generic text. CTA exits to the portal.
-async function showCouponPopup(){
-  const he = S.lang === 'he';
-  const tk = (k, fb) => { const v = t(k); return (v && v !== k) ? v : fb; };
-  const cta = tk("coupon.cta", he ? 'סיימנו! חזרה למשחקים שלי' : 'Done! Back to My Games');
-  let body = tk("coupon.soon", he ? 'הקופון שלכם מחכה בפורטל.' : 'Your coupon is waiting in the portal.');
-  try{
-    const u = SEAT_ID ? (await getDoc(doc(db, "users", SEAT_ID))).data() : null;
-    const cs = ((u && u.coupons) || []).filter(c => c && c.source === "finish" && !c.used);
-    const c = cs[cs.length - 1];
-    if (c){
-      const d = new Date(c.expiresAt).toLocaleDateString(he ? 'he-IL' : 'en-GB', { day:'numeric', month:'short', year:'numeric' });
-      const tpl = tk("coupon.body", he ? 'קופון {pct}% הנחה למשחק הבא<br><b style="font-size:1.3em;letter-spacing:.08em" dir="ltr">{code}</b><br>בתוקף עד {date}'
-                                        : '{pct}% off your next game<br><b style="font-size:1.3em;letter-spacing:.08em" dir="ltr">{code}</b><br>Valid until {date}');
-      body = tpl.replace('{pct}', c.discountPct).replace('{code}', c.code).replace('{date}', d);
-    }
-  }catch(e){ console.warn('coupon popup', e); }
-  S.popup = { kind:"win", title:"🎁", body, cta, href:"portal.html#/games" };
-  render();
-}
-
 function signoutSheet(){
   const he = S.lang === 'he';
   document.querySelectorAll('.so-scrim').forEach(n => n.remove());
