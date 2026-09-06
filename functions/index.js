@@ -143,6 +143,17 @@ exports.judge = onCall(async (req) => {
     await db.doc(`games/${gameId}/answers/${elementId}`).set(patch, { merge: true });
     return { ok: true, elementId };
   }
+  // ---- patchStore: admin. Merge keys into games/{id}.store (testRoom, published toggle lives top-level) ----
+  if (action === "patchStore") {
+    if (!(await isAdmin(callerUid))) throw new HttpsError("permission-denied", "admins only");
+    const { patch, published } = req.data || {};
+    const upd = {};
+    if (patch && typeof patch === "object") upd.store = patch;
+    if (typeof published === "boolean") upd.published = published;
+    if (!Object.keys(upd).length) throw new HttpsError("invalid-argument", "patch or published required");
+    await db.doc(`games/${gameId}`).set(upd, { merge: true });
+    return { ok: true, gameId, keys: Object.keys(upd.store || {}), published: upd.published };
+  }
   if (action === "createRoom") {
     const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
     let code = "";

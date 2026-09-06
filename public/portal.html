@@ -492,6 +492,50 @@ const I18N = {
     "ledger.hint":"Hint {n} on {ref}",
     "ledger.skip":"Skipped {ref}",
     "ledger.finish":"Finished the game",
+
+    "nav.admin":"Admin",
+    "admin.title":"Admin",
+    "admin.sub":"Everything on the platform, in one place.",
+    "admin.tab.instances":"Purchased games",
+    "admin.tab.games":"Games",
+    "admin.tab.users":"Users",
+    "admin.tab.coupons":"Coupons",
+    "admin.reload":"Refresh",
+    "admin.filter.all":"All", "admin.filter.live":"Live", "admin.filter.done":"Finished", "admin.filter.archived":"Archived",
+    "admin.inst.buyer":"Buyer",
+    "admin.inst.archive":"Archive",
+    "admin.inst.restore":"Restore",
+    "admin.inst.archived":"Archived",
+    "admin.inst.play":"Open",
+    "admin.inst.none":"No purchased games match.",
+    "admin.game.published":"Published",
+    "admin.game.hidden":"Hidden",
+    "admin.game.seats":"Seats",
+    "admin.game.claim":"Claim code",
+    "admin.game.price":"Price",
+    "admin.game.testroom":"Test room",
+    "admin.game.testurl":"Test URL",
+    "admin.game.save":"Save",
+    "admin.game.saved":"Saved",
+    "admin.game.steps":"{n} steps",
+    "admin.user.games":"{n} games",
+    "admin.user.coupons":"{n} coupons",
+    "admin.user.admin":"Admin",
+    "admin.coupon.new":"New coupon",
+    "admin.coupon.code":"Code (blank = random)",
+    "admin.coupon.pct":"Discount %",
+    "admin.coupon.games":"Games",
+    "admin.coupon.expires":"Expires",
+    "admin.coupon.owner":"Owner (optional)",
+    "admin.coupon.owner.any":"Anyone",
+    "admin.coupon.create":"Create coupon",
+    "admin.coupon.created":"Coupon {code} created",
+    "admin.coupon.delete":"Delete",
+    "admin.coupon.delete.confirm":"Delete coupon {code}? This cannot be undone.",
+    "admin.coupon.deleted":"Coupon deleted",
+    "admin.coupon.none":"No coupons yet.",
+    "admin.coupon.source.finish":"Finish reward",
+    "admin.coupon.source.admin":"Admin",
     "games.seats":"{used} of {total} seats",
     "games.players_short":"{n} players",
 
@@ -677,6 +721,50 @@ const I18N = {
     "ledger.skip":"דילגתם על {ref}",
     "ledger.finish":"סיימתם את המשחק",
 
+    "nav.admin":"ניהול",
+    "admin.title":"ניהול",
+    "admin.sub":"כל מה שקורה בפלטפורמה, במקום אחד.",
+    "admin.tab.instances":"משחקים שנרכשו",
+    "admin.tab.games":"משחקים",
+    "admin.tab.users":"משתמשים",
+    "admin.tab.coupons":"קופונים",
+    "admin.reload":"רענון",
+    "admin.filter.all":"הכל", "admin.filter.live":"פעילים", "admin.filter.done":"הסתיימו", "admin.filter.archived":"בארכיון",
+    "admin.inst.buyer":"רוכש",
+    "admin.inst.archive":"לארכיון",
+    "admin.inst.restore":"שחזור",
+    "admin.inst.archived":"בארכיון",
+    "admin.inst.play":"פתיחה",
+    "admin.inst.none":"אין משחקים שנרכשו שמתאימים לסינון.",
+    "admin.game.published":"מפורסם",
+    "admin.game.hidden":"מוסתר",
+    "admin.game.seats":"מקומות",
+    "admin.game.claim":"קוד השקה",
+    "admin.game.price":"מחיר",
+    "admin.game.testroom":"חדר בדיקה",
+    "admin.game.testurl":"קישור בדיקה",
+    "admin.game.save":"שמירה",
+    "admin.game.saved":"נשמר",
+    "admin.game.steps":"{n} שלבים",
+    "admin.user.games":"{n} משחקים",
+    "admin.user.coupons":"{n} קופונים",
+    "admin.user.admin":"מנהל",
+    "admin.coupon.new":"קופון חדש",
+    "admin.coupon.code":"קוד (ריק = אקראי)",
+    "admin.coupon.pct":"% הנחה",
+    "admin.coupon.games":"משחקים",
+    "admin.coupon.expires":"בתוקף עד",
+    "admin.coupon.owner":"בעלים (לא חובה)",
+    "admin.coupon.owner.any":"כל אחד",
+    "admin.coupon.create":"יצירת קופון",
+    "admin.coupon.created":"הקופון {code} נוצר",
+    "admin.coupon.delete":"מחיקה",
+    "admin.coupon.delete.confirm":"למחוק את הקופון {code}? אי אפשר לבטל.",
+    "admin.coupon.deleted":"הקופון נמחק",
+    "admin.coupon.none":"עדיין אין קופונים.",
+    "admin.coupon.source.finish":"פרס סיום",
+    "admin.coupon.source.admin":"מנהל",
+
     "store.sub":"בוחרים משחק, בוחרים גודל צוות, משחקים הערב.",
     "store.from":"החל מ-",
     "store.buy":"לקנות",
@@ -822,7 +910,9 @@ const S = {                       // app state
   localesCache: {},               // `${gameId}:${lang}` -> map
   catalog: [],                    // store listings
   route: { name:"games", args:[] },
-  busy: false
+  busy: false,
+  isAdmin: false,                 // admins/{uid} exists
+  admin: null                     // adminOverview cache
 };
 
 function t(key, vars){
@@ -894,7 +984,8 @@ const ICONS = {
   store:'<svg viewBox="0 0 24 24"><path d="M3 9h18l-1.4 9.3a2 2 0 0 1-2 1.7H6.4a2 2 0 0 1-2-1.7L3 9Z"/><path d="M8 9V7a4 4 0 0 1 8 0v2"/></svg>',
   coupons:'<svg viewBox="0 0 24 24"><path d="M3 9.5V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2.5a2.5 2.5 0 0 0 0 5V17a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2.5a2.5 2.5 0 0 0 0-5Z"/><path d="M14 8.5 10 15.5"/></svg>',
   account:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>',
-  director:'<svg viewBox="0 0 24 24"><path d="M4 7h16v10H4z"/><path d="M4 11h16M9 7 7 17M15 7l-2 10"/></svg>'
+  director:'<svg viewBox="0 0 24 24"><path d="M4 7h16v10H4z"/><path d="M4 11h16M9 7 7 17M15 7l-2 10"/></svg>',
+  admin:'<svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6l8-3Z"/><path d="M9 12l2 2 4-4"/></svg>'
 };
 
 /* ================================================================
@@ -1078,6 +1169,8 @@ async function loadEverything(){
     }catch(e){ console.warn("instance", id, e); }
   }
 
+  try{ S.isAdmin = (await getDoc(doc(db,"admins",S.user.uid))).exists(); }catch{ S.isAdmin = false; }
+
   S.instances = [...byId.values()].filter(i => !i.archived);
   await Promise.all(S.instances.map(async i => { i.game = await loadGame(i.gameId); }));
   S.instances.sort((a,b)=> String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
@@ -1129,7 +1222,8 @@ window.addEventListener("hashchange", () => { S.route = parseHash(); closeSheet(
    ================================================================ */
 function shell(content){
   const dir = isDirector();
-  const tabs = dir ? [...TABS.slice(0,3), "director", "account"] : TABS;
+  let tabs = dir ? [...TABS.slice(0,3), "director", "account"] : [...TABS];
+  if (S.isAdmin) tabs.push("admin");
   const active = ["invites","customize","director"].includes(S.route.name) ? "director" : S.route.name;
   const av = (S.profile && S.profile.avatar) || "🎭";
 
@@ -1633,6 +1727,224 @@ function viewJoin(instanceId, token, invite, inst){
 }
 
 /* ================================================================
+   8b. Views — Admin (uids in admins/ only; data comes from adminOverview)
+   ================================================================ */
+const ADMIN_TABS = ["instances","games","users","coupons"];
+async function loadAdmin(force){
+  if (S.admin && !force) return S.admin;
+  const r = await httpsCallable(fns, "adminOverview")({});
+  S.admin = r.data;
+  S.admin.userByUid = Object.fromEntries((S.admin.users||[]).map(u => [u.uid, u]));
+  await Promise.all((S.admin.games||[]).map(async g => {
+    const full = await loadGame(g.id);
+    g._title = await gt(full, g.title_key || full.title_key, full.title || g.id);
+  }));
+  S.admin.gameById = Object.fromEntries((S.admin.games||[]).map(g => [g.id, g]));
+  return S.admin;
+}
+const adminTitleOf = gid => (S.admin && S.admin.gameById[gid] && S.admin.gameById[gid]._title) || gid;
+const adminUserLabel = uid => { const u = S.admin && S.admin.userByUid[uid]; return u ? (u.nickname || u.displayName || u.email || uid) + (u.email ? ` <span class="muted">${esc(u.email)}</span>` : "") : esc(uid||"—"); };
+const testUrlOf = g => `${location.origin}/game.html?game=${encodeURIComponent(g.id)}&room=${encodeURIComponent((g.store&&g.store.testRoom)||"")}&dev=1`;
+const playUrlOf = i => `${location.origin}/game.html?code=${encodeURIComponent(i.code||"")}&game=${encodeURIComponent(i.gameId||"")}&lang=${encodeURIComponent(i.language||"he")}`;
+
+function adminTabs(cur){
+  return `<div class="seg" style="margin-bottom:16px">
+    ${ADMIN_TABS.map(k=>`<button class="${cur===k?"on":""}" data-act="go" data-v="admin/${k}">${esc(t("admin.tab."+k))}</button>`).join("")}
+  </div>`;
+}
+
+function viewAdmin(tab, filter){
+  const A = S.admin;
+  let body = "";
+  if (tab === "games") body = adminGames(A);
+  else if (tab === "users") body = adminUsers(A);
+  else if (tab === "coupons") body = adminCoupons(A);
+  else body = adminInstances(A, filter || "live");
+  return pageTitle(t("admin.title"), t("admin.sub")) + `
+    <div class="row between" style="margin-bottom:10px"><div class="grow"></div>
+      <button class="btn ghost xs" data-act="adminreload">↻ ${esc(t("admin.reload"))}</button></div>
+    ${adminTabs(tab)}${body}`;
+}
+
+function adminInstances(A, filter){
+  const st = i => i.archived ? "archived" : (i.status === "finished" ? "done" : "live");
+  const list = (A.instances||[]).filter(i => filter === "all" || st(i) === filter)
+    .sort((a,b)=> String(b.createdAt||"").localeCompare(String(a.createdAt||"")));
+  const chips = ["live","done","archived","all"].map(f =>
+    `<button class="chip ${filter===f?"lime":""}" data-act="go" data-v="admin/instances/${f}">${esc(t("admin.filter."+f))}</button>`).join(" ");
+  const rows = list.map(i => {
+    const s = st(i);
+    const custN = Object.values(i.customization||{}).filter(v=>String(v||"").trim()).length;
+    return `<div class="card tight">
+      <div class="row between" style="align-items:flex-start;gap:10px">
+        <div class="grow">
+          <div class="row wrap" style="gap:6px;margin-bottom:4px">
+            <b class="h3">${esc(adminTitleOf(i.gameId))}</b>
+            <span class="chip" dir="ltr">${esc(i.code||"")}</span>
+            <span class="chip ${s==="done"?"dead":s==="archived"?"warn":"lime"}">${esc(s==="archived"?t("admin.inst.archived"):t("games.status."+(s==="done"?"done":(i.status==="played"?"playing":"ready"))))}</span>
+            ${custN?`<span class="chip lime">✨ ${custN}</span>`:""}
+          </div>
+          <div class="small">${esc(t("admin.inst.buyer"))}: ${adminUserLabel(i.buyerUid)}</div>
+          <div class="tiny muted" style="margin-top:2px">
+            ${esc(t("games.players_short",{n:i.seatCount||0}))} · ${esc(fmtDate(i.createdAt))}
+            ${i.finishedAt?` · ${esc(t("games.finished.at",{date:fmtDate(i.finishedAt)}))}`:""}
+            ${typeof i.finalPoints==="number"?` · ${esc(t("games.points",{n:i.finalPoints}))}`:""}
+            ${i.durationMs?` · ${esc(t("games.duration",{m:Math.round(i.durationMs/60000)}))}`:""}
+            · ${(i.ledger||[]).length} ev
+          </div>
+        </div>
+      </div>
+      <div class="row wrap" style="gap:6px;margin-top:10px">
+        <button class="btn ghost xs" data-act="adminledger" data-v="${esc(i.id)}">📜 ${esc(t("games.ledger"))}</button>
+        <a class="btn ghost xs" href="${esc(playUrlOf(i))}" target="_blank" rel="noopener">▶ ${esc(t("admin.inst.play"))}</a>
+        ${i.archived
+          ? `<button class="btn ghost xs" data-act="adminarchive" data-v="${esc(i.id)}|restore">↩ ${esc(t("admin.inst.restore"))}</button>`
+          : `<button class="btn danger xs" data-act="adminarchive" data-v="${esc(i.id)}|archive">🗑 ${esc(t("admin.inst.archive"))}</button>`}
+      </div>
+    </div>`;
+  }).join("");
+  return `<div class="row wrap" style="gap:6px;margin-bottom:12px">${chips}</div>
+    <div class="stack">${rows || `<p class="small muted">${esc(t("admin.inst.none"))}</p>`}</div>`;
+}
+
+function adminGames(A){
+  const rows = (A.games||[]).map(g => {
+    const s = g.store||{};
+    return `<div class="card">
+      <div class="row between" style="margin-bottom:8px">
+        <div class="grow"><b class="h2">${esc(g._title||g.id)}</b> <span class="tiny muted" dir="ltr">${esc(g.id)}</span></div>
+        <button class="chip ${g.published?"lime":"warn"}" data-act="adminpublish" data-v="${esc(g.id)}|${g.published?"0":"1"}">${esc(g.published?t("admin.game.published"):t("admin.game.hidden"))}</button>
+      </div>
+      <div class="tiny muted" style="margin-bottom:12px">
+        ${esc(t("admin.game.steps",{n:g.stepCount}))} · N=${g.N} · ${esc(t("admin.game.seats"))} ${esc((s.seatOptions||[]).join("/"))}
+        · ${esc(t("admin.game.price"))} ${s.freeLaunch?esc(t("store.freelaunch")):money(s.price||0,s.currency)}
+        · ${esc(t("admin.game.claim"))} <b dir="ltr">${esc(s.claimCode||"—")}</b> · ✨ ${g.customizable}
+      </div>
+      <form class="row" data-testroom="${esc(g.id)}" style="gap:8px;align-items:flex-end">
+        <label class="field grow" style="margin:0"><span class="label">${esc(t("admin.game.testroom"))}</span>
+          <input class="input" name="testRoom" value="${esc(s.testRoom||"")}" dir="ltr" autocapitalize="characters" placeholder="VAULT1"></label>
+        <button class="btn sm" type="submit">${esc(t("admin.game.save"))}</button>
+      </form>
+      ${s.testRoom?`<div class="row" style="gap:8px;margin-top:10px">
+        <input class="input grow small" readonly dir="ltr" value="${esc(testUrlOf(g))}" onclick="this.select()">
+        <a class="iconbtn" href="${esc(testUrlOf(g))}" target="_blank" rel="noopener" aria-label="${esc(t("admin.game.testurl"))}">↗</a>
+        <button class="iconbtn" data-act="copytext" data-v="${esc(testUrlOf(g))}">⧉</button>
+      </div>`:""}
+    </div>`;
+  }).join("");
+  return `<div class="stack">${rows}</div>`;
+}
+
+function adminUsers(A){
+  const admins = new Set(A.admins||[]);
+  const rows = (A.users||[]).slice().sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||""))).map(u => `
+    <div class="rowitem">
+      <div class="avatar sm">${esc(u.avatar||"🎭")}</div>
+      <div class="grow">
+        <div class="small truncate" style="font-weight:600">${esc(u.nickname||u.displayName||"—")}
+          ${admins.has(u.uid)?`<span class="chip blue" style="margin-inline-start:6px">${esc(t("admin.user.admin"))}</span>`:""}</div>
+        <div class="tiny muted truncate" dir="ltr">${esc(u.email||"")} · ${esc(u.uid)}</div>
+      </div>
+      <div class="tiny muted" style="text-align:end">
+        ${esc(t("admin.user.games",{n:(u.instances||[]).length}))}<br>${esc(t("admin.user.coupons",{n:(u.coupons||[]).length}))}<br>${esc(u.preferredLanguage||"")} · ${esc(fmtDate(u.createdAt))}
+      </div>
+    </div>`).join("");
+  return `<div class="card">${rows}</div>`;
+}
+
+function adminCoupons(A){
+  const now = Date.now();
+  const rows = (A.coupons||[]).slice().sort((a,b)=>String(b.createdAt||"").localeCompare(String(a.createdAt||""))).map(c => {
+    const expired = c.expiresAt && new Date(c.expiresAt).getTime() < now;
+    const dead = c.used || expired;
+    return `<div class="rowitem">
+      <div class="grow">
+        <div class="row wrap" style="gap:6px">
+          <b dir="ltr" style="font-family:ui-monospace,monospace;letter-spacing:.06em">${esc(c.code)}</b>
+          <span class="chip ${dead?"dead":"lime"}">${c.discountPct}%</span>
+          <span class="chip">${esc(t(c.source==="finish"?"admin.coupon.source.finish":"admin.coupon.source.admin"))}</span>
+          ${dead?`<span class="chip dead">${esc(c.used?t("coupons.used"):t("coupons.expired"))}</span>`:""}
+        </div>
+        <div class="tiny muted" style="margin-top:3px">
+          ${esc(t("admin.coupon.games"))} ${c.games||1} · ${esc(t("coupons.expires",{date:fmtDate(c.expiresAt)}))}
+          ${c.ownerUid?` · ${adminUserLabel(c.ownerUid)}`:` · ${esc(t("admin.coupon.owner.any"))}`}
+        </div>
+      </div>
+      <button class="iconbtn" data-act="admincoupondel" data-v="${esc(c.code)}" aria-label="${esc(t("admin.coupon.delete"))}">✕</button>
+    </div>`;
+  }).join("");
+  const d = new Date(now + 90*86400000).toISOString().slice(0,10);
+  return `<div class="cols-2">
+    <div class="card">${rows || `<p class="small muted">${esc(t("admin.coupon.none"))}</p>`}</div>
+    <div class="card">
+      <h3 class="h3" style="margin-bottom:12px">${esc(t("admin.coupon.new"))}</h3>
+      <form id="couponform" class="stack">
+        <label class="field"><span class="label">${esc(t("admin.coupon.code"))}</span>
+          <input class="input" name="code" dir="ltr" autocapitalize="characters" maxlength="24"></label>
+        <div class="row" style="gap:10px">
+          <label class="field grow"><span class="label">${esc(t("admin.coupon.pct"))}</span>
+            <input class="input" name="discountPct" type="number" min="1" max="100" value="10" required></label>
+          <label class="field grow"><span class="label">${esc(t("admin.coupon.games"))}</span>
+            <input class="input" name="games" type="number" min="1" value="1" required></label>
+        </div>
+        <label class="field"><span class="label">${esc(t("admin.coupon.expires"))}</span>
+          <input class="input" name="expiresAt" type="date" value="${d}" required></label>
+        <label class="field"><span class="label">${esc(t("admin.coupon.owner"))}</span>
+          <select class="select" name="ownerUid"><option value="">${esc(t("admin.coupon.owner.any"))}</option>
+            ${(A.users||[]).map(u=>`<option value="${esc(u.uid)}">${esc(u.email||u.uid)}</option>`).join("")}</select></label>
+        <button class="btn block" type="submit">${esc(t("admin.coupon.create"))}</button>
+      </form>
+    </div>
+  </div>`;
+}
+
+async function adminArchive(id, mode){
+  try{ await httpsCallable(fns, "archiveInstance")({ instanceId:id, restore: mode==="restore" });
+       await loadAdmin(true); await loadEverything(); await resolveTitles(); render(); }
+  catch(ex){ console.warn(ex); toast(t("common.error"),"bad"); }
+}
+async function adminPublish(gid, on){
+  try{ await httpsCallable(fns, "judge")({ action:"patchStore", gameId:gid, published:on });
+       S.gamesById[gid] = null; await loadAdmin(true); await loadEverything(); await resolveTitles(); render(); }
+  catch(ex){ console.warn(ex); toast(t("common.error"),"bad"); }
+}
+async function adminSaveTestRoom(e){
+  e.preventDefault();
+  const gid = e.target.dataset.testroom;
+  const v = String(new FormData(e.target).get("testRoom")||"").trim().toUpperCase();
+  try{ await httpsCallable(fns, "judge")({ action:"patchStore", gameId:gid, patch:{ testRoom:v } });
+       toast(t("admin.game.saved")); await loadAdmin(true); render(); }
+  catch(ex){ console.warn(ex); toast(t("common.error"),"bad"); }
+}
+async function adminCreateCoupon(e){
+  e.preventDefault();
+  const f = new FormData(e.target), btn = e.target.querySelector("button[type=submit]");
+  btn.disabled = true;
+  const exp = new Date(String(f.get("expiresAt"))+"T23:59:59");
+  try{
+    const r = await httpsCallable(fns, "adminCoupon")({ op:"create", code:String(f.get("code")||""),
+      discountPct:Number(f.get("discountPct")), games:Number(f.get("games")), expiresAt:exp.toISOString(),
+      ownerUid:String(f.get("ownerUid")||"")||null });
+    toast(t("admin.coupon.created",{code:r.data.coupon.code}));
+    await loadAdmin(true); render();
+  }catch(ex){ console.warn(ex); toast(t("common.error"),"bad"); btn.disabled=false; }
+}
+async function adminDeleteCoupon(code){
+  if (!confirm(t("admin.coupon.delete.confirm",{code}))) return;
+  try{ await httpsCallable(fns, "adminCoupon")({ op:"delete", code }); toast(t("admin.coupon.deleted"));
+       await loadAdmin(true); render(); }
+  catch(ex){ console.warn(ex); toast(t("common.error"),"bad"); }
+}
+function adminLedgerSheet(id){
+  const i = (S.admin.instances||[]).find(x=>x.id===id); if (!i) return;
+  const rows = (i.ledger||[]).slice().sort((a,b)=>(a.t||0)-(b.t||0)).map(ledgerLine).join("");
+  sheet(`<h3 class="h2" style="margin-bottom:4px">${esc(t("games.ledger"))}</h3>
+    <p class="small muted" style="margin-bottom:12px">${esc(adminTitleOf(i.gameId))} · <span dir="ltr">${esc(i.code||"")}</span></p>
+    ${rows || `<p class="small muted">${esc(t("games.ledger.empty"))}</p>`}
+    <button class="btn ghost block" style="margin-top:16px" data-act="closesheet">${esc(t("common.close"))}</button>`);
+}
+
+/* ================================================================
    9. Render
    ================================================================ */
 async function render(){
@@ -1676,6 +1988,11 @@ async function render(){
   else if (name === "coupons")  body = viewCoupons();
   else if (name === "account")  body = viewAccount();
   else if (name === "director") body = viewDirector();
+  else if (name === "admin"){
+    if (!S.isAdmin){ go("games"); return; }
+    try{ await loadAdmin(); }catch(e){ console.warn("admin", e); body = emptyState("🔒", t("common.error"), ""); }
+    if (!body) body = viewAdmin(ADMIN_TABS.includes(args[0]) ? args[0] : "instances", args[1]);
+  }
   else                          body = viewGames();
 
   root.innerHTML = shell(body);
@@ -1698,6 +2015,9 @@ function wire(){
   inv && inv.addEventListener("submit", createInvite);
   const cf = $("#custform");
   cf && cf.addEventListener("submit", saveCustomization);
+  const cpf = $("#couponform");
+  cpf && cpf.addEventListener("submit", adminCreateCoupon);
+  document.querySelectorAll("form[data-testroom]").forEach(f => f.addEventListener("submit", adminSaveTestRoom));
 
   document.querySelectorAll('[data-cust] input[type=file]').forEach(i =>
     i.addEventListener("change", onFileChosen));
@@ -1734,6 +2054,11 @@ document.addEventListener("click", async e => {
     case "deletegamesheet": deleteGameSheet(v); break;
     case "deletegame":  await deleteGame(v); break;
     case "ledger":      ledgerSheet(v); break;
+    case "adminreload": S.admin = null; render(); break;
+    case "adminledger": adminLedgerSheet(v); break;
+    case "adminarchive":{ const [id,mode]=v.split("|"); await adminArchive(id,mode); break; }
+    case "adminpublish":{ const [gid,on]=v.split("|"); await adminPublish(gid, on==="1"); break; }
+    case "admincoupondel": await adminDeleteCoupon(v); break;
     case "closesheet": closeSheet(); break;
     case "pickfile":   { const el = $("#file_"+v); el && el.click(); break; }
     case "clearfile":  { const el = $("#cf_"+v); if (el) el.value=""; render(); break; }
