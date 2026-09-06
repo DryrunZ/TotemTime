@@ -1,6 +1,6 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
-const { getFirestore, FieldValue } = require("firebase-admin/firestore");
+const { getFirestore } = require("firebase-admin/firestore");
 
 initializeApp();
 const db = getFirestore();
@@ -19,68 +19,6 @@ const findComp = (game, id) => {
   for (const st of game.steps || []) for (const c of st.components || []) if (c.id === id) return c;
   return null;
 };
-const mintCode = (len = 6, alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789") =>
-  Array.from({ length: len }, () => alphabet[Math.floor(Math.random() * alphabet.length)]).join("");
-
-// ---- instance ledger / lifecycle ----
-// Data-gated: only rooms carrying `instanceId` write anything. Rooms without one (dev/legacy) are untouched.
-// The ledger lives on the INSTANCE, never on the room, so the listened-to room doc stays tiny.
-const instRefOf = (room) => (room && room.instanceId) ? db.doc(`instances/${room.instanceId}`) : null;
-const seatName = (room, uid) => (room && room.seats && room.seats[uid] && room.seats[uid].name) || "";
-const nowIso = () => new Date().toISOString();
-const entry = (room, uid, e) => Object.assign({ t: Date.now(), uid: uid || null, name: seatName(room, uid) }, e);
-// one write per instance per transaction (entries may be many, fields optional)
-const instLog = (tx, room, uid, entries, fields) => {
-  const ref = instRefOf(room); if (!ref) return;
-  const upd = Object.assign({ updatedAt: nowIso() }, fields || {});
-  if (entries && entries.length) upd.ledger = FieldValue.arrayUnion(...entries.map(e => entry(room, uid, e)));
-  tx.set(ref, upd, { merge: true });
-};
-const instLogDirect = async (room, uid, entries, fields) => {
-  const ref = instRefOf(room); if (!ref) return;
-  const upd = Object.assign({ updatedAt: nowIso() }, fields || {});
-  if (entries && entries.length) upd.ledger = FieldValue.arrayUnion(...entries.map(e => entry(room, uid, e)));
-  await ref.set(upd, { merge: true });
-};
-const instGet = async (tx, room) => {
-  const ref = instRefOf(room); if (!ref) return null;
-  const s = await tx.get(ref); return s.exists ? s.data() : null;
-};
-const isFinalElement = (game, elementId) => {
-  if (game.finalElement) return game.finalElement === elementId;
-  const board = (game.steps || []).find(st => st.kind === "board" && st.chain);
-  const chain = (board && board.chain) || [];
-  return chain.length > 0 && chain[chain.length - 1] === elementId;
-};
-const finishFields = (room, points) => ({
-  status: "finished", finishedAt: nowIso(), finalPoints: points,
-  durationMs: Date.now() - (room.startedAt || Date.now()),
-});
-// After a finish commits: one coupon per seated player. Idempotent via instance.couponsMinted.
-// Coupon shape/size come from config/platform.finishCoupon { pct, days }; defaults 10% / 90 days.
-async function mintFinishCoupons(roomCode) {
-  try {
-    const room = (await db.doc(`rooms/${roomCode}`).get()).data();
-    if (!room || !room.instanceId) return;
-    const iRef = db.doc(`instances/${room.instanceId}`);
-    const inst = (await iRef.get()).data();
-    if (!inst || inst.couponsMinted) return;
-    const cfg = (((await db.doc("config/platform").get()).data() || {}).finishCoupon) || {};
-    const pct = Number(cfg.pct ?? 10), days = Number(cfg.days ?? 90);
-    const expiresAt = new Date(Date.now() + days * 86400000).toISOString();
-    const minted = [];
-    for (const uid of Object.keys(room.seats || {})) {
-      let code = "TT" + mintCode(6);
-      for (let i = 0; i < 5 && (await db.doc(`coupons/${code}`).get()).exists; i++) code = "TT" + mintCode(6);
-      const c = { code, discountPct: pct, games: 1, expiresAt, ownerUid: uid, source: "finish",
-        instanceId: room.instanceId, gameId: inst.gameId || room.gameId || null, createdAt: nowIso(), used: false, usedBy: [] };
-      await db.doc(`coupons/${code}`).set(c);
-      await db.doc(`users/${uid}`).set({ coupons: FieldValue.arrayUnion({ code, discountPct: pct, expiresAt, used: false, source: "finish" }) }, { merge: true });
-      minted.push(code);
-    }
-    await iRef.set({ couponsMinted: true, coupons: minted }, { merge: true });
-  } catch (e) { console.error("mintFinishCoupons", e); }
-}
 
 exports.judge = onCall(async (req) => {
   const { action = "submit", gameId, roomCode, stepId, submission, hintIndex, seatId, name, ready, hintKey, outcomeKey } = req.data || {};
@@ -192,7 +130,6 @@ exports.judge = onCall(async (req) => {
       startedAt: firstScene >= 0 ? Date.now() : null,
       solved: {}, hintsUsed: {}, seats, flags: {}, prog: {},
     });
-    await instLogDirect(room, callerUid, [{ kind: "reset" }], { status: "played", playedAt: nowIso() });
     return { reset: true, step: firstScene >= 0 ? firstScene : 0 };
   }
 
@@ -332,7 +269,6 @@ exports.judge = onCall(async (req) => {
         phase = "play";
         upd.phase = phase;
         upd.startedAt = Date.now();
-        instLog(tx, room, callerUid, [{ kind: "start" }], { status: "played", playedAt: nowIso() });
       }
       tx.update(roomRef, upd);
       return { phase };
@@ -344,7 +280,6 @@ exports.judge = onCall(async (req) => {
     if (!(await isAdmin(callerUid)) && room.buyerUid !== callerUid)
       throw new HttpsError("permission-denied", "admins or the director only");
     await roomRef.update({ phase: "play", startedAt: Date.now() });
-    await instLogDirect(room, callerUid, [{ kind: "start", forced: true }], { status: "played", playedAt: nowIso() });
     return { phase: "play" };
   }
 
@@ -388,7 +323,6 @@ exports.judge = onCall(async (req) => {
         charged = true;
         upd.points = points;
         upd[`hintsUsed.${hkey}`] = used + 1;
-        instLog(tx, room, callerUid, [{ kind: "hint", ref: String(hkey), idx: hintIndex, points: scoring.hints[hintIndex] }]);
       }
       tx.update(roomRef, upd);
       return { points, charged };
@@ -411,7 +345,6 @@ exports.judge = onCall(async (req) => {
       const upd = { [`solved.${stepId}`]: true, [`skipped.${stepId}`]: true, popup: { id: Date.now(), kind: "skip", bodyKey: "popup.skippedBody" } };
       const target = Math.min(Number(stepId) + 1, lastStep);
       if (target > step) { step = target; upd.step = step; }
-      instLog(tx, room, callerUid, [{ kind: "skip", ref: String(stepId) }]);
       tx.update(roomRef, upd);
       return { skipped: true, step };
     });
@@ -445,7 +378,6 @@ exports.judge = onCall(async (req) => {
         popup: { id: Date.now(), kind: "skip", bodyKey: "popup.skippedBody", solver: (room.seats && room.seats[callerUid] && room.seats[callerUid].name) || "" },
       };
       if (sIdx >= 0) { const target = sIdx + 1; if (target > (room.step || 0)) upd.step = target; }
-      instLog(tx, room, callerUid, [{ kind: "skip", ref: sceneEl }]);
       tx.update(roomRef, upd);
       return { skipped: true, step: upd.step || room.step || 0 };
     });
@@ -467,10 +399,9 @@ exports.judge = onCall(async (req) => {
     const norm = (x) => String(x).trim().toLowerCase();
     const type = a.type || "equals";
 
-    const __res = await db.runTransaction(async (tx) => {
+    return await db.runTransaction(async (tx) => {
       const room = (await tx.get(roomRef)).data();
       if (!room) throw new HttpsError("not-found", "room not found");
-      const inst = await instGet(tx, room);
       if (room.flags && room.flags[elementId])
         return { correct: true, already: true, points: room.points };
       const sIdx = game.steps.findIndex(st => st.el === elementId);
@@ -482,24 +413,18 @@ exports.judge = onCall(async (req) => {
       }
       const solver = (room.seats && room.seats[callerUid] && room.seats[callerUid].name) || "";
       const solve = () => {
-        const newPts = room.points + pts;
         tx.update(roomRef, {
-          points: newPts,
+          points: room.points + pts,
           step: (sIdx >= 0 ? sIdx + 1 : room.step),
           [`flags.${elementId}`]: true,
           [`prog.${elementId}`]: [],
           popup: { id: Date.now(), kind: "win", bodyKey: popupKey, solver },
         });
-        const fin = isFinalElement(game, elementId) && !!inst && inst.status !== "finished";
-        const ents = [{ kind: "solve", ref: elementId, points: pts }];
-        if (fin) ents.push({ kind: "finish", points: newPts, ms: Date.now() - (room.startedAt || Date.now()) });
-        instLog(tx, room, callerUid, ents, fin ? finishFields(room, newPts) : null);
-        return { correct: true, complete: true, points: newPts, finished: fin };
+        return { correct: true, complete: true, points: room.points + pts };
       };
 
       if (type === "equals") {
         if (norm(value) === norm(a.value)) return solve();
-        instLog(tx, room, callerUid, [{ kind: "wrong", ref: elementId, points: wrongPenalty || 0 }]);
         if (wrongPenalty) {
           tx.update(roomRef, { points: room.points + wrongPenalty });
           return { correct: false, points: room.points + wrongPenalty };
@@ -529,8 +454,6 @@ exports.judge = onCall(async (req) => {
 
       throw new HttpsError("failed-precondition", `unknown answer type: ${type}`);
     });
-    if (__res && __res.finished) await mintFinishCoupons(roomCode);
-    return __res;
   }
 
   if (action === "submit") {
@@ -551,15 +474,13 @@ exports.judge = onCall(async (req) => {
     const normAll = (x) => { let y = String(x); for (const n of a.normalize || ["trim", "caseInsensitive"]) { const fn = normalizers[n]; if (fn) y = fn(y); } return y; };
     const correct = vals ? vals.some((v) => matcher(sub, normAll(v))) : matcher(sub, val);
 
-    const __res = await db.runTransaction(async (tx) => {
+    return await db.runTransaction(async (tx) => {
       const room = (await tx.get(roomRef)).data();
       if (!room) throw new HttpsError("not-found", "room not found");
-      const inst = await instGet(tx, room);
       let points = room.points;
       let step = room.step || 0;
       const alreadySolved = room.solved && room.solved[stepId];
       let timeBonus = 0;
-      let finished = false;
 
       if (!alreadySolved) {
         if (correct) {
@@ -574,21 +495,14 @@ exports.judge = onCall(async (req) => {
           const upd = { points, [`solved.${stepId}`]: true, popup: { id: Date.now(), kind: "win", bodyKey: outcomeKey || null } };
           const target = Math.min(Number(stepId) + 1, lastStep);
           if (target > step) { step = target; upd.step = step; }
-          finished = String(stepId) === String(game.lastAnswerStep) && !!inst && inst.status !== "finished";
-          const ents = [{ kind: "solve", ref: String(stepId), points: (scoring.solve || 0) + timeBonus }];
-          if (finished) ents.push({ kind: "finish", points, ms: Date.now() - (room.startedAt || Date.now()) });
-          instLog(tx, room, callerUid, ents, finished ? finishFields(room, points) : null);
           tx.update(roomRef, upd);
         } else {
           points += scoring.mistake || 0;
-          instLog(tx, room, callerUid, [{ kind: "wrong", ref: String(stepId), points: scoring.mistake || 0 }]);
           tx.update(roomRef, { points, popup: { id: Date.now(), kind: "lose" } });
         }
       }
-      return { correct, points, timeBonus, step, finished };
+      return { correct, points, timeBonus, step };
     });
-    if (__res && __res.finished) await mintFinishCoupons(roomCode);
-    return __res;
   }
 
   throw new HttpsError("invalid-argument", `unknown action: ${action}`);
@@ -678,72 +592,4 @@ exports.addSeat = onCall(async (req) => {
     tx.update(ref, { baseSeatCount: base, seatCount: inst.seatCount + 1 });
     return { seatCount: inst.seatCount + 1, cap };
   });
-});
-
-// ---- archiveInstance: soft delete. Director or admin. Data stays; the portal just stops showing it. ----
-exports.archiveInstance = onCall(async (req) => {
-  const uid = req.auth && req.auth.uid;
-  if (!uid) throw new HttpsError("unauthenticated", "sign in first");
-  const { instanceId, restore } = req.data || {};
-  if (!instanceId) throw new HttpsError("invalid-argument", "instanceId required");
-  const ref = db.doc(`instances/${instanceId}`);
-  const inst = (await ref.get()).data();
-  if (!inst) throw new HttpsError("not-found", "instance not found");
-  if (inst.buyerUid !== uid && !(await isAdmin(uid)))
-    throw new HttpsError("permission-denied", "director or admin only");
-  const archived = !restore;
-  await ref.set({ archived, archivedAt: archived ? nowIso() : null, archivedBy: archived ? uid : null }, { merge: true });
-  return { instanceId, archived };
-});
-
-// ---- adminCoupon: create / delete coupons. Coupon = { code, discountPct, games, expiresAt, ownerUid|null } ----
-exports.adminCoupon = onCall(async (req) => {
-  const uid = req.auth && req.auth.uid;
-  if (!uid || !(await isAdmin(uid))) throw new HttpsError("permission-denied", "admins only");
-  const { op, code, discountPct, games, expiresAt, ownerUid } = req.data || {};
-  if (op === "delete") {
-    if (!code) throw new HttpsError("invalid-argument", "code required");
-    await db.doc(`coupons/${String(code).toUpperCase()}`).delete();
-    return { deleted: String(code).toUpperCase() };
-  }
-  if (op === "create") {
-    const pct = Number(discountPct);
-    const n = Number(games || 1);
-    if (!(pct >= 1 && pct <= 100)) throw new HttpsError("invalid-argument", "discountPct 1..100");
-    if (!(n >= 1)) throw new HttpsError("invalid-argument", "games >= 1");
-    const exp = new Date(expiresAt || 0);
-    if (isNaN(exp) || exp.getTime() < Date.now()) throw new HttpsError("invalid-argument", "expiresAt must be a future date");
-    let c = String(code || "").trim().toUpperCase().replace(/[^A-Z0-9-]/g, "");
-    if (!c) c = "TT" + mintCode(6);
-    const ref = db.doc(`coupons/${c}`);
-    if ((await ref.get()).exists) throw new HttpsError("already-exists", "coupon code exists");
-    const cp = { code: c, discountPct: pct, games: n, expiresAt: exp.toISOString(), ownerUid: ownerUid || null,
-      source: "admin", createdBy: uid, createdAt: nowIso(), used: false, usedBy: [] };
-    await ref.set(cp);
-    if (ownerUid) await db.doc(`users/${ownerUid}`).set({ coupons: FieldValue.arrayUnion({ code: c, discountPct: pct, expiresAt: cp.expiresAt, used: false, source: "admin" }) }, { merge: true });
-    return { coupon: cp };
-  }
-  throw new HttpsError("invalid-argument", "op must be create|delete");
-});
-
-// ---- adminOverview: everything the admin page shows, one call, server-side (no client rules needed) ----
-exports.adminOverview = onCall(async (req) => {
-  const uid = req.auth && req.auth.uid;
-  if (!uid || !(await isAdmin(uid))) throw new HttpsError("permission-denied", "admins only");
-  const [gs, is, us, cs] = await Promise.all([
-    db.collection("games").get(), db.collection("instances").get(),
-    db.collection("users").get(), db.collection("coupons").get(),
-  ]);
-  const games = gs.docs.map(d => { const g = d.data(); return {
-    id: d.id, published: g.published !== false, store: g.store || {}, stepCount: (g.steps || []).length,
-    N: g.N || 3, defaultLanguage: g.defaultLanguage || "he", title_key: g.title_key || null, customizable: (g.customizable || []).length,
-  }; });
-  const instances = is.docs.map(d => ({ id: d.id, ...d.data() }));
-  const users = us.docs.map(d => { const u = d.data(); return {
-    uid: d.id, email: u.email || "", displayName: u.displayName || "", nickname: u.nickname || "", avatar: u.avatar || "",
-    preferredLanguage: u.preferredLanguage || "", createdAt: u.createdAt || "", instances: u.instances || [], coupons: u.coupons || [],
-  }; });
-  const coupons = cs.docs.map(d => ({ id: d.id, ...d.data() }));
-  const admins = (await db.collection("admins").get()).docs.map(d => d.id);
-  return { games, instances, users, coupons, admins };
 });
