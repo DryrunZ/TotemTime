@@ -973,11 +973,6 @@ onSnapshot(doc(db, "rooms", ROOM_CODE), (snap) => {
   S.buyerUid = r.buyerUid || null;
   // difficulty is room data (judge reads room.mode); mirror it so client hint gating matches the server
   S.mode2 = r.mode || S.mode2 || null;
-  if (DEVFLAG && !MODE_SYNCED && SEAT_ID) {
-    MODE_SYNCED = true;
-    const want = QS.get("mode");
-    if (want && want !== r.mode) judge({ action:"setMode", gameId:GAME_ID, roomCode:ROOM_CODE, mode:want }).catch(e => console.warn("setMode", e));
-  }
   if (r.instanceId && !CUST_LOADED) {
     CUST_LOADED = true;
     getDoc(doc(db, "instances", r.instanceId)).then(snap => {
@@ -1092,6 +1087,11 @@ document.addEventListener('click', e => {
 onAuthStateChanged(auth, async (user) => {
   if (!user) { SEAT_ID = null; gameAuthView(); return; }
   SEAT_ID = user.uid;
+  // dev rooms: ?mode= is pushed to the room once we are signed in (judge reads room.mode)
+  if (DEVFLAG && !MODE_SYNCED && QS.get("mode")) {
+    MODE_SYNCED = true;
+    judge({ action:"setMode", gameId:GAME_ID, roomCode:ROOM_CODE, mode:QS.get("mode") }).catch(e => console.warn("setMode", e));
+  }
   try {
     const u = await getDoc(doc(db, "users", user.uid));
     MY_NAME = (u.exists() && (u.data().nickname || u.data().fullName)) || user.email.split("@")[0];
