@@ -335,11 +335,12 @@ exports.judge = onCall(async (req) => {
       const seats = room.seats || {};
       if (!seats[seatId]) throw new HttpsError("failed-precondition", "join first");
       seats[seatId].ready = !!ready;
-      const covered = new Set(Object.values(seats).map((s) => playerNum(s.joinIndex, N)));
-      const allReady = Object.values(seats).every((s) => s.ready);
+      // start when the READY seats cover every player number 1..N; idle seats (absent director, a dropped
+      // phone) never block the table. Absent seats keep their joinIndex and slot in when they arrive.
+      const covered = new Set(Object.values(seats).filter((s) => s.ready).map((s) => playerNum(s.joinIndex, N)));
       const upd = { seats };
       let phase = room.phase;
-      if (room.phase === "lobby" && covered.size >= N && allReady) {
+      if (room.phase === "lobby" && covered.size >= N) {
         phase = "play";
         upd.phase = phase;
         upd.startedAt = Date.now();
