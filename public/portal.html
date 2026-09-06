@@ -1559,7 +1559,8 @@ function playInstance(id){
   const i = instById(id);
   if (!i) return;
   const q = i.code ? `?code=${encodeURIComponent(i.code)}` : `?instance=${encodeURIComponent(id)}`;
-  location.href = "game.html" + q + `&lang=${encodeURIComponent(i.language || S.lang)}`;
+  const gq = i.gameId ? `&game=${encodeURIComponent(i.gameId)}` : "";
+  location.href = "game.html" + q + gq + `&lang=${encodeURIComponent(i.language || S.lang)}`;
 }
 
 /* ---- store ---- */
@@ -1768,7 +1769,9 @@ async function onFileChosen(e){
     if (input) input.value = url;
     inst.customization = { ...(inst.customization||{}), [key]: url };
     prog.textContent = "";
-    render();
+    // no full render: would wipe unsaved text fields. Update just this field's preview.
+    const prev = document.querySelector('[data-cust="'+key+'"] img.custprev');
+    if (prev) prev.src = url;
   }catch(ex){ console.warn(ex); prog.textContent = ""; toast(t("common.error"), "bad"); }
 }
 
