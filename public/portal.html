@@ -544,7 +544,7 @@ const I18N = {
     "games.players_short":"{n} players",
 
     "store.title":"Store",
-    "store.sub":"Pick a game, pick your team size, play tonight.",
+    "store.sub":"Two very different evenings. Pick yours, pick the team size, play tonight.",
     "store.from":"from",
     "store.buy":"Buy game",
     "store.seats":"Team size",
@@ -781,7 +781,7 @@ const I18N = {
     "admin.coupon.source.finish":"פרס סיום",
     "admin.coupon.source.admin":"מנהל",
 
-    "store.sub":"בוחרים משחק, בוחרים גודל צוות, משחקים הערב.",
+    "store.sub":"שני ערבים שונים לגמרי. בוחרים את שלכם, בוחרים גודל צוות, משחקים הערב.",
     "store.from":"החל מ-",
     "store.buy":"לקנות",
     "store.seats":"גודל הצוות",
@@ -1257,6 +1257,7 @@ async function resolveTitles(){
   await Promise.all(S.catalog.map(async g => {
     g._title  = await gt(g, g.title_key,  g.title || g.id);
     g._blurb  = await gt(g, g.blurb_key || (g.store && g.store.blurb_key), (g.store && g.store.blurb) || g.blurb || "");
+    g._tags = {}; for (const k of ((g.store && g.store.tags) || [])) g._tags[k] = await gt(g, k, k);
   }));
 }
 
@@ -1493,7 +1494,9 @@ function viewStore(){
     return `
     <article class="gamecard">
       <div class="cover" style="${cov?`background-image:url('${esc(cov)}')`:""}">
-        <div class="over"><span class="chip lime">${esc(t("store.seats.n",{n:seatOpts(g)[0]}))}+</span></div>
+        <div class="over"><span class="row wrap" style="gap:6px">${((g.store&&g.store.tags)||[]).length
+            ? (g.store.tags).map(k=>`<span class="chip lime">${esc(g._tags&&g._tags[k]||k)}</span>`).join("")
+            : `<span class="chip lime">${esc(t("store.seats.n",{n:seatOpts(g)[0]}))}+</span>`}</span></div>
       </div>
       <div class="body">
         <h3 class="h2">${esc(g._title || g.id)}</h3>
