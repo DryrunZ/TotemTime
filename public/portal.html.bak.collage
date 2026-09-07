@@ -485,10 +485,6 @@ const I18N = {
     "games.delete.go":"Yes, delete it",
     "games.delete.done":"Game deleted",
     "games.custom.badge":"Personalized",
-    "games.collage":"Team collage",
-    "games.collage.download":"Download",
-    "games.collage.share":"Share",
-    "games.collage.none":"No collage yet — it appears once a player adds a selfie at the end of the game.",
     "ledger.start":"Game started",
     "ledger.reset":"Game reset",
     "ledger.solve":"Solved {ref}",
@@ -725,10 +721,6 @@ const I18N = {
     "games.delete.go":"כן, למחוק",
     "games.delete.done":"המשחק נמחק",
     "games.custom.badge":"מותאם אישית",
-    "games.collage":"הקולאז׳ של הקבוצה",
-    "games.collage.download":"הורדה",
-    "games.collage.share":"שיתוף",
-    "games.collage.none":"עדיין אין קולאז׳ — הוא נוצר כשמישהו מוסיף סלפי בסוף המשחק.",
     "ledger.start":"המשחק התחיל",
     "ledger.reset":"המשחק אופס",
     "ledger.solve":"פתרתם את {ref}",
@@ -1457,12 +1449,6 @@ function viewGames(){
               ${mins!=null?` · ${esc(t("games.duration",{m:mins}))}`:""}</p>
           </div>
         </div>
-        ${i.collageUrl ? `<a href="${esc(i.collageUrl)}" target="_blank" rel="noopener" style="display:block;margin-top:12px">
-            <img src="${esc(i.collageUrl)}" alt="${esc(t("games.collage"))}" style="width:100%;border-radius:var(--r-md);display:block"></a>
-          <div class="row" style="gap:8px;margin-top:8px">
-            <a class="btn ghost xs grow" href="${esc(i.collageUrl)}" download="totemtime-collage.jpg" target="_blank" rel="noopener">⬇ ${esc(t("games.collage.download"))}</a>
-            <button class="btn ghost xs grow" data-act="sharecollage" data-v="${esc(i.collageUrl)}">↗ ${esc(t("games.collage.share"))}</button>
-          </div>` : `<p class="tiny muted" style="margin-top:10px">${esc(t("games.collage.none"))}</p>`}
         <div class="row" style="gap:8px;margin-top:12px">
           <button class="btn ghost sm grow" data-act="ledger" data-v="${esc(i.id)}">📜 ${esc(t("games.ledger"))}</button>
           <button class="btn ghost sm grow" data-act="play" data-v="${esc(i.id)}">${esc(t("games.replay"))}</button>
@@ -1871,7 +1857,6 @@ function adminInstances(A, filter){
       </div>
       <div class="row wrap" style="gap:6px;margin-top:10px">
         <button class="btn ghost xs" data-act="adminledger" data-v="${esc(i.id)}">📜 ${esc(t("games.ledger"))}</button>
-        ${i.collageUrl?`<a class="btn ghost xs" href="${esc(i.collageUrl)}" target="_blank" rel="noopener">🖼 ${esc(t("games.collage"))}${i.collagePhotos?` (${i.collagePhotos})`:""}</a>`:""}
         <a class="btn ghost xs" href="${esc(playUrlOf(i))}" target="_blank" rel="noopener">▶ ${esc(t("admin.inst.play"))}</a>
         ${i.archived
           ? `<button class="btn ghost xs" data-act="adminarchive" data-v="${esc(i.id)}|restore">↩ ${esc(t("admin.inst.restore"))}</button>`
@@ -2142,7 +2127,6 @@ document.addEventListener("click", async e => {
     case "deletegamesheet": deleteGameSheet(v); break;
     case "deletegame":  await deleteGame(v); break;
     case "ledger":      ledgerSheet(v); break;
-    case "sharecollage": { if (navigator.share) { try{ await navigator.share({ title:"TotemTime", url:v }); }catch{} } else { await copy(v); toast(t("common.copied")); } break; }
     case "adminreload": S.admin = null; render(); break;
     case "adminledger": adminLedgerSheet(v); break;
     case "adminarchive":{ const [id,mode]=v.split("|"); await adminArchive(id,mode); break; }

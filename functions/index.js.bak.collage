@@ -1,9 +1,6 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
-const { getStorage } = require("firebase-admin/storage");
-const { randomUUID } = require("crypto");
-const { renderCollage } = require("./collage");
 
 initializeApp();
 const db = getFirestore();
@@ -226,39 +223,6 @@ exports.judge = onCall(async (req) => {
     });
     await instLogDirect(room, callerUid, [{ kind: "reset" }], { status: "played", playedAt: nowIso() });
     return { reset: true, step: firstScene >= 0 ? firstScene : 0 };
-  }
-
-  // ---- buildCollage: after finish. Reads every photo under instances/{id}/photos/, renders, stores collage.jpg.
-  // Rebuilt on every call, so late selfies just improve it. Data-gated: instance rooms only.
-  if (action === "buildCollage") {
-    const room = (await roomRef.get()).data();
-    if (!room || !room.instanceId) throw new HttpsError("failed-precondition", "no instance on this room");
-    const seated = room.seats && room.seats[callerUid];
-    if (!seated && room.buyerUid !== callerUid && !(await isAdmin(callerUid))) throw new HttpsError("permission-denied", "players only");
-    const iRef = db.doc(`instances/${room.instanceId}`);
-    const inst = (await iRef.get()).data() || {};
-    const bucket = getStorage().bucket();
-    const [files] = await bucket.getFiles({ prefix: `instances/${room.instanceId}/photos/` });
-    const photoFiles = files.filter(f => !f.name.endsWith("/"));
-    if (!photoFiles.length) throw new HttpsError("failed-precondition", "no photos yet");
-    const photos = [];
-    for (const f of photoFiles) { const [b] = await f.download(); photos.push(b); }
-    const lang = inst.language || room.language || game.defaultLanguage || "he";
-    const loc = (await db.doc(`games/${gameId}/locales/${lang}`).get()).data() || {};
-    const gameTitle = (game.title_key && loc[game.title_key]) || game.title || gameId;
-    const cz = inst.customization || {};
-    const title = String(cz.collage_title || cz.owner_name || cz.team_name || gameTitle).trim();
-    const d = new Date(inst.finishedAt || Date.now());
-    const dateStr = d.toLocaleDateString(lang === "he" ? "he-IL" : "en-GB", { day: "numeric", month: "long", year: "numeric" });
-    const pts = typeof inst.finalPoints === "number" ? inst.finalPoints : room.points;
-    const subtitle = [gameTitle, dateStr, lang === "he" ? `${pts} נקודות` : `${pts} points`].join(" · ");
-    const jpg = await renderCollage(photos, { title, subtitle, footer: "TotemTime · totemtime.com" });
-    const token = randomUUID();
-    const dest = bucket.file(`instances/${room.instanceId}/collage.jpg`);
-    await dest.save(jpg, { contentType: "image/jpeg", metadata: { cacheControl: "public,max-age=60", metadata: { firebaseStorageDownloadTokens: token } } });
-    const url = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(dest.name)}?alt=media&token=${token}`;
-    await iRef.set({ collageUrl: url, collageAt: nowIso(), collagePhotos: photos.length }, { merge: true });
-    return { collageUrl: url, photos: photos.length };
   }
 
   // ---- setMode: difficulty on the room (data the judge already reads via __mode). Admin anytime; director before start. ----
