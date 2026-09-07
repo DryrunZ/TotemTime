@@ -101,12 +101,17 @@ nav.links a:hover{background:var(--surface-2);color:var(--ltc-50)}
 .hero{padding:40px 0 48px;position:relative;overflow:hidden;display:flex;align-items:center}
 .hero::before{content:"";position:absolute;width:min(640px,120vw);height:min(640px,120vw);border-radius:50%;filter:blur(110px);background:rgba(208,242,103,.13);top:-220px;inset-inline-end:-180px;pointer-events:none}
 .phones{position:relative;display:flex;justify-content:center;align-items:flex-end;margin-top:34px;padding:10px 0 6px}
-.ph{position:relative;width:31%;aspect-ratio:9/19;border-radius:9% / 4.3%;background:linear-gradient(160deg,#1b1d16,#131416 70%);border:5px solid #26262a;box-shadow:0 30px 60px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.06);overflow:hidden;margin:0;transition:transform .35s cubic-bezier(.2,.8,.25,1)}
+.ph{position:relative;width:33%;aspect-ratio:2/3;border-radius:14px;background:#131416;border:1px solid rgba(255,255,255,.12);box-shadow:0 30px 60px rgba(0,0,0,.6);overflow:hidden;margin:0;display:block;transition:transform .35s cubic-bezier(.2,.8,.25,1)}
 .ph img{width:100%;height:100%;object-fit:cover;object-position:top}
-.ph figcaption{position:absolute;bottom:10px;inset-inline:0;text-align:center;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--p-500);background:linear-gradient(180deg,transparent,rgba(0,0,0,.85) 60%);padding:26px 6px 4px}
-html[dir="rtl"] .ph figcaption{letter-spacing:0}
+.ph .cap{position:absolute;bottom:0;inset-inline:0;text-align:center;font-size:12.5px;font-weight:800;color:#fff;background:linear-gradient(180deg,transparent,rgba(0,0,0,.9) 60%);padding:34px 8px 10px;line-height:1.2}
+.ph .cap small{display:block;font-size:10.5px;font-weight:700;color:var(--p-500);margin-top:3px;letter-spacing:.05em;text-transform:uppercase}
+.ph.soon .cap small{color:var(--warning)}
+.ph.soon img{filter:saturate(.75) brightness(.85)}
+html[dir="rtl"] .ph .cap small{letter-spacing:0}
 .ph.p1{transform:rotate(-7deg) translateY(16px);z-index:1}
 .ph.p2{transform:translateY(-8px) scale(1.06);z-index:3;border-color:rgba(208,242,103,.55);box-shadow:0 36px 70px rgba(0,0,0,.7),0 0 0 1px rgba(208,242,103,.25)}
+.ph:hover{z-index:4}
+.ph.p2:hover{transform:translateY(-14px) scale(1.08)}
 .ph.p3{transform:rotate(7deg) translateY(16px);z-index:2}
 .phones:hover .ph.p1{transform:rotate(-9deg) translate(-6px,14px)}
 .phones:hover .ph.p3{transform:rotate(9deg) translate(6px,14px)}
@@ -323,11 +328,11 @@ footer{border-top:1px solid var(--hairline);padding:40px 0 calc(34px + var(--saf
 
       <div>
         <div class="phones" aria-label="Three players, three different views">
-          <figure class="ph p1"><img src="assets/site/phone-p1.png" alt="" loading="eager" onerror="this.remove()"><figcaption><span data-t="ph.p">Player</span> 1</figcaption></figure>
-          <figure class="ph p2"><img src="assets/site/phone-p2.png" alt="" loading="eager" onerror="this.remove()"><figcaption><span data-t="ph.p">Player</span> 2</figcaption></figure>
-          <figure class="ph p3"><img src="assets/site/phone-p3.png" alt="" loading="eager" onerror="this.remove()"><figcaption><span data-t="ph.p">Player</span> 3</figcaption></figure>
+          <a class="ph p1" href="#g-kidnapped"><img src="assets/site/poster-kidnapped.jpg" alt="kidnAPPed" loading="eager" decoding="async"><span class="cap">kidnAPPed<small data-t="shelf.play">Play now</small></span></a>
+          <a class="ph p2" href="#g-vault"><img src="assets/site/poster-vault.jpg" alt="Vault.exe" loading="eager" decoding="async"><span class="cap">Vault.exe<small data-t="shelf.play">Play now</small></span></a>
+          <a class="ph p3 soon" href="#g-artofwar"><img src="assets/site/poster-suntzu.jpg" alt="Sun Tzu: The Art of War" loading="eager" decoding="async"><span class="cap">Sun Tzu<small data-t="shelf.soon">Coming soon</small></span></a>
         </div>
-        <p class="phcap tiny muted center" data-t="ph.cap">One desk · three phones · three different views. Nobody sees the whole picture.</p>
+        <p class="phcap tiny muted center" data-t="ph.cap">Three games, one phone each. Nobody sees the whole picture.</p>
         <div class="statrow">
           <div class="stat hi"><b>10,000+</b><span data-t="stat.played">games played worldwide</span></div>
           <div class="stat"><b>3+</b><span data-t="stat.players">players per team</span></div>
@@ -573,7 +578,7 @@ footer{border-top:1px solid var(--hairline);padding:40px 0 calc(34px + var(--saf
       "pill.lang": "עברית ואנגלית",
       "pill.custom": "מותאם לקבוצה שלכם",
       "ph.p": "שחקן",
-      "ph.cap": "שולחן אחד · שלושה טלפונים · שלושה מסכים שונים. אף אחד לא רואה את כל התמונה.",
+      "ph.cap": "שלושה משחקים, טלפון לכל אחד. אף אחד לא רואה את כל התמונה.",
       "shelf.play": "זמין עכשיו",
       "shelf.soon": "בקרוב",
       "shelf.kind.story": "חידות עלילתיות",
