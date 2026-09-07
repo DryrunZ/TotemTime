@@ -1740,12 +1740,13 @@ function viewCustomize(inst){
   const fields = manifest.map(f => {
     const v   = values[f.key] ?? "";
     const lab = f.label || f.key.replace(/_/g," ");
+    const help = f._help ? `<span class="hint" style="margin:-2px 2px 8px;display:block">${esc(f._help)}</span>` : "";
     const id  = "cf_" + f.key;
     if (f.type === "image" || f.type === "video"){
       const has = !!v;
       return `
       <div class="field" data-cust="${esc(f.key)}" data-type="${esc(f.type)}">
-        <span class="label">${esc(lab)}</span>
+        <span class="label">${esc(lab)}</span>${help}
         ${has ? (f.type==="image"
             ? `<img class="thumb" src="${esc(v)}" alt="">`
             : `<video class="thumb" src="${esc(v)}" controls playsinline></video>`)
@@ -1767,11 +1768,11 @@ function viewCustomize(inst){
       </div>`;
     }
     if (f.type === "textarea" || (f.maxLength && f.maxLength > 80)){
-      return `<label class="field"><span class="label">${esc(lab)}</span>
+      return `<label class="field"><span class="label">${esc(lab)}</span>${help}
         <textarea class="textarea" name="${esc(f.key)}" maxlength="${f.maxLength||400}"
           placeholder="${esc(f._def||f.default||"")}">${esc(v)}</textarea></label>`;
     }
-    return `<label class="field"><span class="label">${esc(lab)}</span>
+    return `<label class="field"><span class="label">${esc(lab)}</span>${help}
       <input class="input" name="${esc(f.key)}" maxlength="${f.maxLength||60}"
              value="${esc(v)}" placeholder="${esc(f._def||f.default||"")}"></label>`;
   }).join("");
@@ -2059,6 +2060,7 @@ async function render(){
       await Promise.all(man.map(async f => {
         f.label = await gt(inst.game, f.label_key, f.label || f.key.replace(/_/g," "));
         f._def = f.default_key ? await gt(inst.game, f.default_key, f.default || "") : (f.default || "");
+        f._help = f.help_key ? await gt(inst.game, f.help_key, "") : "";
       }));
       body = viewCustomize(inst);
     }

@@ -502,7 +502,7 @@ function wcomp(c, inter){
     if(done) return `<div class="fishbtns-w"><div class="fb-done">✓</div></div>`;
     const btns=colors.map(col=>`<button class="cbtn ${col}" data-fishbtn data-el="${elid(c)}" data-col="${col}"></button>`).join("");
     const label=shape?`<div class="fb-shape" id="fbshape_${elid(c)}">${shape}</div>`:`<div class="fb-shape dim" id="fbshape_${elid(c)}">—</div>`;
-    return `<div class="fishbtns-w">${label}<div class="fb-row">${btns}</div></div>`;
+    return `<div class="fishbtns-w"><div style="display:none">${label}</div><div class="fb-row">${btns}</div></div>`;
   }
   if(c.widget==="fish"){
     const p=c.params||{}, forms=p.formations||["line","square","triangle"];
