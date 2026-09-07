@@ -98,7 +98,19 @@ nav.links a:hover{background:var(--surface-2);color:var(--ltc-50)}
 .mobmenu a{display:block;padding:13px 4px;font-weight:600;font-size:16px;border-bottom:1px solid var(--hairline)}
 
 /* hero: teaser video behind, copy + cover shelf in front */
-.hero{padding:40px 0 48px;position:relative;overflow:hidden;min-height:82vh;display:flex;align-items:center}
+.hero{padding:40px 0 48px;position:relative;overflow:hidden;display:flex;align-items:center}
+.hero::before{content:"";position:absolute;width:min(640px,120vw);height:min(640px,120vw);border-radius:50%;filter:blur(110px);background:rgba(208,242,103,.13);top:-220px;inset-inline-end:-180px;pointer-events:none}
+.phones{position:relative;display:flex;justify-content:center;align-items:flex-end;margin-top:34px;padding:10px 0 6px}
+.ph{position:relative;width:31%;aspect-ratio:9/19;border-radius:9% / 4.3%;background:linear-gradient(160deg,#1b1d16,#131416 70%);border:5px solid #26262a;box-shadow:0 30px 60px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.06);overflow:hidden;margin:0;transition:transform .35s cubic-bezier(.2,.8,.25,1)}
+.ph img{width:100%;height:100%;object-fit:cover;object-position:top}
+.ph figcaption{position:absolute;bottom:10px;inset-inline:0;text-align:center;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--p-500);background:linear-gradient(180deg,transparent,rgba(0,0,0,.85) 60%);padding:26px 6px 4px}
+html[dir="rtl"] .ph figcaption{letter-spacing:0}
+.ph.p1{transform:rotate(-7deg) translateY(16px);z-index:1}
+.ph.p2{transform:translateY(-8px) scale(1.06);z-index:3;border-color:rgba(208,242,103,.55);box-shadow:0 36px 70px rgba(0,0,0,.7),0 0 0 1px rgba(208,242,103,.25)}
+.ph.p3{transform:rotate(7deg) translateY(16px);z-index:2}
+.phones:hover .ph.p1{transform:rotate(-9deg) translate(-6px,14px)}
+.phones:hover .ph.p3{transform:rotate(9deg) translate(6px,14px)}
+.phcap{margin-top:16px}
 .hero .bgv{position:absolute;inset:0;z-index:0;overflow:hidden}
 .hero .bgv video,.hero .bgv img{width:100%;height:100%;object-fit:cover;opacity:.55;filter:saturate(1.05)}
 .hero .bgv::after{content:"";position:absolute;inset:0;background:
@@ -245,8 +257,8 @@ footer{border-top:1px solid var(--hairline);padding:40px 0 calc(34px + var(--saf
   nav.links{display:flex}
   .burger{display:none}
   .hero{padding:72px 0 88px}
-  .hero .grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:56px;align-items:center}
-  .shelf{margin-top:0;gap:14px}
+  .hero .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center}
+  .phones{margin-top:0}
   .hero .statrow{margin-top:44px}
   .games{grid-template-columns:repeat(3,1fr)}
   .pricewrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:32px;align-items:center}
@@ -290,11 +302,6 @@ footer{border-top:1px solid var(--hairline);padding:40px 0 calc(34px + var(--saf
 
 <!-- ============================ HERO ============================ -->
 <section class="hero">
-  <div class="bgv" id="herobg">
-    <!-- teasers: list as data; the page plays whichever exist, in turn. Poster shows until the first loads. -->
-    <video id="herovid" muted playsinline autoplay preload="metadata" poster="assets/games/kidnapped-il/cover-v2.jpg"
-           data-sources="assets/site/teaser-kidnapped.mp4,assets/site/teaser-vault.mp4"></video>
-  </div>
   <div class="wrap">
     <div class="grid">
       <div>
@@ -315,21 +322,12 @@ footer{border-top:1px solid var(--hairline);padding:40px 0 calc(34px + var(--saf
       </div>
 
       <div>
-        <div class="shelf">
-          <a href="#g-kidnapped">
-            <img src="assets/games/kidnapped-il/cover-v2.jpg" alt="kidnAPPed" loading="eager" decoding="async" onerror="this.style.display='none';this.parentElement.classList.add('cover-fallback')">
-            <span class="tag" data-t="shelf.play">Play now</span>
-            <span class="cap">kidnAPPed<small data-t="shelf.kind.story">Story riddles</small></span>
-          </a>
-          <a href="#g-vault">
-            <img src="assets/games/vault-exe/cover.jpg" alt="Vault.exe" loading="eager" decoding="async" onerror="this.style.display='none';this.parentElement.classList.add('cover-fallback')">
-            <span class="tag" data-t="shelf.play">Play now</span>
-            <span class="cap">Vault.exe<small data-t="shelf.kind.gadgets">Gadget desk</small></span>
-          </a>
-          <div class="tile soon">
-            <div><span class="tag" data-t="shelf.soon">Coming soon</span><b>Sun Tzu:<br>The Art of War</b><small class="tiny" data-t="shelf.kind.ai">Strategy vs. AI</small></div>
-          </div>
+        <div class="phones" aria-label="Three players, three different views">
+          <figure class="ph p1"><img src="assets/site/phone-p1.png" alt="" loading="eager" onerror="this.remove()"><figcaption><span data-t="ph.p">Player</span> 1</figcaption></figure>
+          <figure class="ph p2"><img src="assets/site/phone-p2.png" alt="" loading="eager" onerror="this.remove()"><figcaption><span data-t="ph.p">Player</span> 2</figcaption></figure>
+          <figure class="ph p3"><img src="assets/site/phone-p3.png" alt="" loading="eager" onerror="this.remove()"><figcaption><span data-t="ph.p">Player</span> 3</figcaption></figure>
         </div>
+        <p class="phcap tiny muted center" data-t="ph.cap">One desk · three phones · three different views. Nobody sees the whole picture.</p>
         <div class="statrow">
           <div class="stat hi"><b>10,000+</b><span data-t="stat.played">games played worldwide</span></div>
           <div class="stat"><b>3+</b><span data-t="stat.players">players per team</span></div>
@@ -574,6 +572,8 @@ footer{border-top:1px solid var(--hairline);padding:40px 0 calc(34px + var(--saf
       "pill.call": "סביב שולחן · או בשיחת וידאו",
       "pill.lang": "עברית ואנגלית",
       "pill.custom": "מותאם לקבוצה שלכם",
+      "ph.p": "שחקן",
+      "ph.cap": "שולחן אחד · שלושה טלפונים · שלושה מסכים שונים. אף אחד לא רואה את כל התמונה.",
       "shelf.play": "זמין עכשיו",
       "shelf.soon": "בקרוב",
       "shelf.kind.story": "חידות עלילתיות",
