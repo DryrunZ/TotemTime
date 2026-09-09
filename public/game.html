@@ -102,6 +102,10 @@ body{margin:0;background:#050506;color:var(--tt-text);font-family:-apple-system,
 .col .cbody{padding:14px;display:flex;flex-direction:column;gap:12px;}
 .col .cta,.col .chip,.col .input{pointer-events:none;}
 .hidden-note{color:#5b616b;font-size:.75rem;border:1px dashed #333846;border-radius:8px;padding:6px 8px;}
+.c-text{white-space:pre-line}
+.c-quote{margin:14px 0;padding:12px 16px;border-inline-start:3px solid var(--tt-accent,#D0F267);background:rgba(255,255,255,.04);border-radius:0 12px 12px 0;font-style:italic;color:var(--tt-muted,#C9CCD8);line-height:1.5;white-space:pre-line}
+html[dir="rtl"] .c-quote{border-radius:12px 0 0 12px}
+.c-quote-who{display:block;font-style:normal;font-weight:700;font-size:.85em;color:var(--tt-accent,#D0F267);margin-bottom:4px}
 .adminbar{display:flex;justify-content:center;align-items:center;gap:10px;padding:12px;font-size:.9rem;color:var(--tt-muted);}
 .lb{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:20px;cursor:zoom-out;}
 .lb.open{display:flex;}
@@ -573,6 +577,7 @@ function comp(c,inter){
   if(c.type==="widget") return wcomp(c,inter);
   if(c.type==="title") return `<h1 class="c-title">${cz(t(c.text_key))}</h1>`;
   if(c.type==="subtitle") return `<p class="c-sub">${cz(t(c.text_key))}</p>`;
+  if(c.type==="quote"){ const v=cz(t(c.text_key)); const w=c.who_key?cz(t(c.who_key)):""; return v?`<blockquote class="c-quote">${w?`<span class="c-quote-who">${w}</span>`:""}${v}</blockquote>`:""; }
   if(c.type==="text"){ const v=cz(t(c.text_key)); return v ? `<p class="c-text">${v}</p>` : ""; }
   if(c.type==="image"){ const src=c.src||t(c.src_key); return src ? `<img class="c-img" src="${src}" alt=""/>` : ""; }
   if(c.type==="video"){
