@@ -99,7 +99,6 @@ exports.judge = onCall(async (req) => {
   const callerUid = req.auth && req.auth.uid;
   if (!callerUid) throw new HttpsError("unauthenticated", "sign in to play");
   if (!gameId) throw new HttpsError("invalid-argument", "gameId required");
-  if (seatId && seatId !== callerUid && !(await isAdmin(callerUid))) throw new HttpsError("permission-denied", "that seat is not yours");
 
   const gameSnap = await db.doc(`games/${gameId}`).get();
   if (!gameSnap.exists) throw new HttpsError("not-found", "game not found");
@@ -381,15 +380,12 @@ exports.judge = onCall(async (req) => {
       const room = (await tx.get(roomRef)).data();
       if (!room) throw new HttpsError("not-found", "room not found");
       const seats = room.seats || {};
-      const av = Number.isInteger(req.data && req.data.av) ? req.data.av : 0;
       if (!seats[seatId]) {
-        const cap = Number(room.maxSeats) || 0;
-        if (cap && Object.keys(seats).length >= cap) throw new HttpsError("resource-exhausted", "room is full");
         const joinIndex = Object.keys(seats).length + 1;
-        seats[seatId] = { joinIndex, name, av, ready: false, lastSeen: Date.now() };
+        seats[seatId] = { joinIndex, name, ready: false, lastSeen: Date.now() };
         tx.update(roomRef, { seats });
-      } else if (seats[seatId].name !== name || seats[seatId].av !== av) {
-        seats[seatId].name = name; seats[seatId].av = av;
+      } else if (seats[seatId].name !== name) {
+        seats[seatId].name = name;
         tx.update(roomRef, { seats });
       }
       return { joinIndex: seats[seatId].joinIndex, player: playerNum(seats[seatId].joinIndex, N) };

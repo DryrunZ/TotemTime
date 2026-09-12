@@ -312,8 +312,6 @@ function applyCustImages(){
 }
 let MY_NAME = "";
 let IS_ANON = false, ANON_TRIED = false;
-const AVS = ["\u{1F98A}","\u{1F43C}","\u{1F419}","\u{1F989}","\u{1F41D}","\u{1F438}","\u{1F984}","\u{1F43A}"];
-let MY_AV = 0; try{ MY_AV = Number(localStorage.getItem("tt.av")) || 0; }catch(e){}
 const S = { game:null, loc:{}, mode:"player", lang:"he", player:1, step:0, popup:null, elapsed:0, running:false, countdown:3, points:100, phase:null, seats:{}, flags:{}, prog:{}, hintsUsed:{}, hintOpen:false, dismissed:null, popupId:null };
 if(new URLSearchParams(location.search).get("dev")==="1"){ window.S=S; }
 const app = document.getElementById("app");
@@ -662,10 +660,10 @@ function lobbyView(){
   const he = S.lang === "he";
   const seats = Object.entries(S.seats).map(([id, v]) => ({ id, ...v })).sort((a, b) => a.joinIndex - b.joinIndex);
   const me = S.seats[SEAT_ID];
-  const rows = seats.map(v => `<p class="c-sub">${AVS[v.av||0]} ${v.name} — ${he ? "שחקן" : "Player"} ${((v.joinIndex - 1) % N) + 1} ${v.ready ? "✅" : "⏳"}${v.id === SEAT_ID ? (he ? " (אני)" : " (me)") : ""}</p>`).join("") || `<p class="c-sub">${he ? "אף אחד עדיין" : "Nobody yet"}</p>`;
+  const rows = seats.map(v => `<p class="c-sub">${v.name} — ${he ? "שחקן" : "Player"} ${((v.joinIndex - 1) % N) + 1} ${v.ready ? "✅" : "⏳"}${v.id === SEAT_ID ? (he ? " (אני)" : " (me)") : ""}</p>`).join("") || `<p class="c-sub">${he ? "אף אחד עדיין" : "Nobody yet"}</p>`;
   const joinUi = me
     ? `<button class="cta" data-ready>${me.ready ? (he ? "בטל מוכנות" : "Not ready") : (he ? "אני מוכן!" : "Ready!")}</button>`
-    : `<input class="input" id="joinName" value="${MY_NAME.replace(/"/g,"&quot;")}" placeholder="${he ? "השם שלך" : "Your name"}"/><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0">${AVS.map((a,i)=>`<button data-av="${i}" style="font-size:26px;line-height:1;padding:7px;border-radius:14px;cursor:pointer;background:${i===MY_AV?"rgba(208,242,103,.18)":"transparent"};border:2px solid ${i===MY_AV?"#D0F267":"rgba(255,255,255,.16)"}">${a}</button>`).join("")}</div><button class="cta" data-join>${he ? "הצטרפות" : "Join"}</button>`;
+    : `<input class="input" id="joinName" value="${MY_NAME.replace(/"/g,"&quot;")}" placeholder="${he ? "השם שלך" : "Your name"}"/><button class="cta" data-join>${he ? "הצטרפות" : "Join"}</button>`;
   return `<div class="wrap"><div class="phone">${topbar()}<div class="body"><h1 class="c-title">${he ? "חדר" : "Room"} ${ROOM_CODE}</h1>${rows}${joinUi}${(S.isAdmin||S.buyerUid===SEAT_ID)?`<button class="chip" data-forcestart>${he ? "התחל בכל זאת (מנהל)" : "Force start (director)"}</button>`:""}</div></div></div>`;
 }
 function topbar(){
@@ -915,7 +913,7 @@ app.addEventListener("click",(e)=>{
     return;
   }
   /* --- existing paths --- */
-  if(el.hasAttribute("data-join")){ const nm=((document.getElementById("joinName")||{}).value||"").trim(); if(!nm) return; try{ localStorage.setItem("tt.name", nm); localStorage.setItem("tt.av", String(MY_AV)); }catch(e){} MY_NAME = nm; judge({action:"join", gameId:GAME_ID, roomCode:ROOM_CODE, seatId:SEAT_ID, name:nm, av:MY_AV}).catch(err=>console.error("join failed",err)); return; }
+  if(el.hasAttribute("data-join")){ const nm=((document.getElementById("joinName")||{}).value||"").trim(); if(!nm) return; try{ localStorage.setItem("tt.name", nm); }catch(e){} MY_NAME = nm; judge({action:"join", gameId:GAME_ID, roomCode:ROOM_CODE, seatId:SEAT_ID, name:nm}).catch(err=>console.error("join failed",err)); return; }
   if(el.hasAttribute("data-ready")){ const me=S.seats[SEAT_ID]; judge({action:"ready", gameId:GAME_ID, roomCode:ROOM_CODE, seatId:SEAT_ID, ready:!(me&&me.ready)}).catch(err=>console.error("ready failed",err)); return; }
   if(el.hasAttribute("data-forcestart")){ judge({action:"forceStart", gameId:GAME_ID, roomCode:ROOM_CODE}).catch(err=>console.error("forceStart failed",err)); return; }
   if(el.hasAttribute("data-action")){ if(el.dataset.action==="advance") nextStep(); else if(el.dataset.action==="coupon"){ showCouponPopup(); } }
@@ -1114,15 +1112,6 @@ document.addEventListener('click', e => {
 document.addEventListener('change', async e => {
   if (e.target && e.target.id === 'photoIn' && e.target.files && e.target.files[0]) { PHOTO.blob = await shrinkImage(e.target.files[0]); PHOTO.err = ""; render(); }
 });
-
-document.addEventListener("click", e => {
-  const b = e.target.closest("[data-av]");
-  if (!b) return;
-  e.preventDefault(); e.stopPropagation();
-  MY_AV = Number(b.dataset.av) || 0;
-  try{ localStorage.setItem("tt.av", String(MY_AV)); }catch(err){}
-  render();
-}, true);
 
 function signoutSheet(){
   const he = S.lang === 'he';
