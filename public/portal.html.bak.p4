@@ -405,7 +405,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
   sendPasswordResetEmail, signOut, updateProfile, deleteUser,
-  EmailAuthProvider, reauthenticateWithCredential, linkWithCredential
+  EmailAuthProvider, reauthenticateWithCredential
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs,
@@ -1085,28 +1085,7 @@ function renderAuth(){
     err.classList.add("hide"); btn.disabled = true;
     try{
       if (authMode === "signup"){
-        const anon = auth.currentUser && auth.currentUser.isAnonymous ? auth.currentUser : null;
-        let cred;
-        if (anon){
-          try {
-            cred = await linkWithCredential(anon, EmailAuthProvider.credential(email, pw));
-          } catch(le){
-            const code = le && le.code;
-            if (code === "auth/email-already-in-use" || code === "auth/credential-already-in-use" || code === "auth/provider-already-linked"){
-              let anonToken = null;
-              try { anonToken = await anon.getIdToken(); } catch(te){ console.warn("anon token", te); }
-              await signInWithEmailAndPassword(auth, email, pw);
-              if (anonToken){
-                try { await httpsCallable(fns, "claimSession")({ anonToken }); }
-                catch(ce){ console.warn("claimSession", ce); }
-              }
-              return;
-            }
-            throw le;
-          }
-        } else {
-          cred = await createUserWithEmailAndPassword(auth, email, pw);
-        }
+        const cred = await createUserWithEmailAndPassword(auth, email, pw);
         if (name) await updateProfile(cred.user, { displayName: name });
         await ensureProfile(cred.user, { displayName: name });
       } else {
@@ -2581,7 +2560,7 @@ root.innerHTML = `<div class="authwrap"><div class="card sk" style="height:220px
 
 onAuthStateChanged(auth, async user => {
   S.user = user;
-  if (!user || user.isAnonymous){ S.profile=null; S.instances=[]; authMode = user && user.isAnonymous ? "signup" : authMode; renderAuth(); return; }
+  if (!user){ S.profile=null; S.instances=[]; renderAuth(); return; }
   try{
     await loadEverything();
     await resolveTitles();

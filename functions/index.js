@@ -2,6 +2,7 @@ const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getStorage } = require("firebase-admin/storage");
+const { getAuth } = require("firebase-admin/auth");
 const { randomUUID } = require("crypto");
 const { renderCollage } = require("./collage");
 
@@ -745,6 +746,51 @@ exports.claimGame = onCall(async (req) => {
   });
 
   return { instanceId: instRef.id, code, language: lang, mode: md };
+});
+
+// ---- claimSession: move a finished anonymous session onto a real account.
+// Only reachable by proving possession of the anonymous ID token, so a uid alone buys nothing.
+// Used when linkWithCredential fails because the email already has an account.
+exports.claimSession = onCall(async (req) => {
+  const uid = req.auth && req.auth.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "sign in first");
+  const { anonToken } = req.data || {};
+  if (!anonToken) throw new HttpsError("invalid-argument", "anonToken required");
+
+  let decoded;
+  try { decoded = await getAuth().verifyIdToken(anonToken); }
+  catch (e) { throw new HttpsError("permission-denied", "bad anon token"); }
+  if (decoded.firebase && decoded.firebase.sign_in_provider !== "anonymous")
+    throw new HttpsError("permission-denied", "not an anonymous session");
+  const anonUid = decoded.uid;
+  if (!anonUid || anonUid === uid) return { moved: 0, seats: 0 };
+
+  // coupons owned by the anon session move to the real account
+  const qs = await db.collection("coupons").where("ownerUid", "==", anonUid).get();
+  const moved = [];
+  for (const d of qs.docs) {
+    const c = d.data();
+    await d.ref.update({ ownerUid: uid, claimedFrom: anonUid, claimedAt: nowIso() });
+    await db.doc(`users/${uid}`).set({ coupons: FieldValue.arrayUnion({
+      code: c.code, discountPct: c.discountPct, expiresAt: c.expiresAt, used: !!c.used, source: c.source || "finish"
+    }) }, { merge: true });
+    moved.push(c.code);
+  }
+
+  // seats keep the game history attached to the person, and instances follow
+  const rooms = await db.collection("rooms").where(`seats.${anonUid}.joinIndex`, ">", 0).get().catch(() => null);
+  let seats = 0;
+  if (rooms) for (const r of rooms.docs) {
+    const room = r.data();
+    const seat = (room.seats || {})[anonUid];
+    if (!seat || (room.seats || {})[uid]) continue;
+    await r.ref.update({ [`seats.${uid}`]: seat, [`seats.${anonUid}`]: FieldValue.delete() });
+    if (room.instanceId) await db.doc(`users/${uid}`).set({ instances: FieldValue.arrayUnion(room.instanceId) }, { merge: true });
+    seats++;
+  }
+
+  try { await getAuth().deleteUser(anonUid); } catch (e) { console.warn("deleteUser", e && e.code); }
+  return { moved: moved.length, coupons: moved, seats };
 });
 
 // ---- getInvitePreview: pre-auth peek for the invite signup screen ----
