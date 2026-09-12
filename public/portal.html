@@ -1703,14 +1703,14 @@ function viewInvites(inst){
         ${Array.from({length:total},(_,k)=>`<i class="${k<used?"on":""}"></i>`).join("")}
       </div>
       ${rows}
-      <button class="btn ghost block" style="margin-top:14px" data-act="sharelink" data-v="${esc(inst.id)}">\u{1F517} ${esc(S.lang==="he"?"\u05e9\u05d9\u05ea\u05d5\u05e3 \u05e7\u05d9\u05e9\u05d5\u05e8 \u05dc\u05de\u05e9\u05d7\u05e7":"Share play link")}</button>
+      <button class="btn ghost block" style="margin-top:14px" data-act="sharelink" data-v="${esc(inst.id)}">${SHARE_ICON} ${S.lang==="he"?"\u05e9\u05d9\u05ea\u05d5\u05e3 \u05e7\u05d9\u05e9\u05d5\u05e8 \u05dc\u05de\u05e9\u05d7\u05e7":"Share play link"}</button>
     </div>
 
     <div class="card">
       <form id="invform" class="stack">
         <label class="field"><span class="label">${esc(t("inv.name"))}</span>
           <input class="input" name="name" placeholder="${esc(t("inv.name.ph"))}" required maxlength="40"></label>
-        <label class="field"><span class="label">${esc(t("inv.email"))} <span class="muted">${esc(S.lang==="he"?"(\u05e8\u05e9\u05d5\u05ea)":"(optional)")}</span></span>
+        <label class="field"><span class="label">${esc(t("inv.email"))} <span class="muted">${S.lang==="he"?"(\u05e8\u05e9\u05d5\u05ea)":"(optional)"}</span></span>
           <input class="input" name="email" type="email" inputmode="email"
                  placeholder="${esc(t("auth.email.ph"))}"></label>
         <p class="hint err hide" id="inverr"></p>
@@ -2408,28 +2408,36 @@ async function removeInvite(instanceId, tok){
   }catch{ toast(t("common.error"),"bad"); }
 }
 
-document.addEventListener("click", async e => {
-  const b = e.target.closest("[data-copy]");
+const SHARE_ICON = String.fromCodePoint(0x1F517);
+const CHAT_ICON  = String.fromCodePoint(0x1F4AC);
+const COPY_ICON  = String.fromCodePoint(0x1F4CB);
+
+document.addEventListener("click", async function(e){
+  var b = e.target.closest("[data-copy]");
   if (!b) return;
   e.preventDefault(); e.stopPropagation();
-  const txt = b.getAttribute("data-copy");
+  var txt = b.getAttribute("data-copy");
   try { await navigator.clipboard.writeText(txt); }
-  catch(err){ const ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); }catch(e2){} ta.remove(); }
+  catch(err){ var ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); }catch(e2){} ta.remove(); }
   toast(S.lang==="he" ? "\u05d4\u05e7\u05d9\u05e9\u05d5\u05e8 \u05d4\u05d5\u05e2\u05ea\u05e7" : "Link copied");
 }, true);
 
 function shareLinkSheet(instanceId){
-  const inst = instById(instanceId) || {};
-  const link = playUrlOf(inst);
-  const msg  = t("inv.share.msg", { name:"", game:inst.title||"", link });
-  const enc  = encodeURIComponent(msg);
-  sheet(`
-    <h3 class="h2 center" style="margin-bottom:6px">${esc(S.lang==="he"?"\u05e7\u05d9\u05e9\u05d5\u05e8 \u05dc\u05de\u05e9\u05d7\u05e7":"Play link")}</h3>
-    <p class="small muted center" style="margin-bottom:18px">${esc(S.lang==="he"?"\u05db\u05dc \u05de\u05d9 \u05e9\u05de\u05e7\u05d1\u05dc \u05d0\u05ea \u05d4\u05e7\u05d9\u05e9\u05d5\u05e8 \u05de\u05e6\u05d8\u05e8\u05e3 \u05de\u05d9\u05d3 \u2014 \u05d1\u05dc\u05d9 \u05d4\u05e8\u05e9\u05de\u05d4.":"Anyone with this link joins instantly \u2014 no signup."}</p>
-    <div class="sharegrid">
-      <button data-href="https://wa.me/?text=${enc}"><div class="bub">\u{1F4AC}</div>${esc(t("common.whatsapp"))}</button>
-      <button data-copy="${esc(link)}"><div class="bub">\u{1F4CB}</div>${esc(S.lang==="he"?"\u05d4\u05e2\u05ea\u05e7\u05d4":"Copy")}</button>
-    </div>`);
+  var inst = instById(instanceId) || {};
+  var link = playUrlOf(inst);
+  var msg  = t("inv.share.msg", { name:"", game:inst.title||"", link:link });
+  var enc  = encodeURIComponent(msg);
+  var ttl  = S.lang==="he" ? "\u05e7\u05d9\u05e9\u05d5\u05e8 \u05dc\u05de\u05e9\u05d7\u05e7" : "Play link";
+  var sub  = S.lang==="he" ? "\u05db\u05dc \u05de\u05d9 \u05e9\u05de\u05e7\u05d1\u05dc \u05d0\u05ea \u05d4\u05e7\u05d9\u05e9\u05d5\u05e8 \u05de\u05e6\u05d8\u05e8\u05e3 \u05de\u05d9\u05d3, \u05d1\u05dc\u05d9 \u05d4\u05e8\u05e9\u05de\u05d4." : "Anyone with this link joins instantly, no signup.";
+  var cpy  = S.lang==="he" ? "\u05d4\u05e2\u05ea\u05e7\u05d4" : "Copy";
+  sheet(
+    '<h3 class="h2 center" style="margin-bottom:6px">' + esc(ttl) + '</h3>' +
+    '<p class="small muted center" style="margin-bottom:18px">' + esc(sub) + '</p>' +
+    '<div class="sharegrid">' +
+      '<button data-href="https://wa.me/?text=' + enc + '"><div class="bub">' + CHAT_ICON + '</div>' + esc(t("common.whatsapp")) + '</button>' +
+      '<button data-copy="' + esc(link) + '"><div class="bub">' + COPY_ICON + '</div>' + esc(cpy) + '</button>' +
+    '</div>'
+  );
 }
 
 function shareSheet(instanceId, tok){
