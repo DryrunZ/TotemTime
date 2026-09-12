@@ -662,11 +662,15 @@ function lobbyView(){
   const he = S.lang === "he";
   const seats = Object.entries(S.seats).map(([id, v]) => ({ id, ...v })).sort((a, b) => a.joinIndex - b.joinIndex);
   const me = S.seats[SEAT_ID];
+  const total = Number(S.maxSeats) || 0;
+  const joined = total
+    ? (he ? `${seats.length} מתוך ${total} הצטרפו` : `${seats.length} of ${total} joined`)
+    : (he ? `${seats.length} הצטרפו` : `${seats.length} joined`);
   const rows = seats.map(v => `<p class="c-sub">${AVS[v.av||0]} ${v.name} — ${he ? "שחקן" : "Player"} ${((v.joinIndex - 1) % N) + 1} ${v.ready ? "✅" : "⏳"}${v.id === SEAT_ID ? (he ? " (אני)" : " (me)") : ""}</p>`).join("") || `<p class="c-sub">${he ? "אף אחד עדיין" : "Nobody yet"}</p>`;
   const joinUi = me
     ? `<button class="cta" data-ready>${me.ready ? (he ? "בטל מוכנות" : "Not ready") : (he ? "אני מוכן!" : "Ready!")}</button>`
     : `<input class="input" id="joinName" value="${MY_NAME.replace(/"/g,"&quot;")}" placeholder="${he ? "השם שלך" : "Your name"}"/><div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0">${AVS.map((a,i)=>`<button data-av="${i}" style="font-size:26px;line-height:1;padding:7px;border-radius:14px;cursor:pointer;background:${i===MY_AV?"rgba(208,242,103,.18)":"transparent"};border:2px solid ${i===MY_AV?"#D0F267":"rgba(255,255,255,.16)"}">${a}</button>`).join("")}</div><button class="cta" data-join>${he ? "הצטרפות" : "Join"}</button>`;
-  return `<div class="wrap"><div class="phone">${topbar()}<div class="body"><h1 class="c-title">${he ? "חדר" : "Room"} ${ROOM_CODE}</h1>${rows}${joinUi}${(S.isAdmin||S.buyerUid===SEAT_ID)?`<button class="chip" data-forcestart>${he ? "התחל בכל זאת (מנהל)" : "Force start (director)"}</button>`:""}</div></div></div>`;
+  return `<div class="wrap"><div class="phone">${topbar()}<div class="body"><h1 class="c-title">${he ? "כמעט מתחילים" : "Almost ready"}</h1><p class="c-sub" style="margin-bottom:16px">${he ? "אם יש לכם אביזר מצחיק בהישג יד — זה הרגע לתפוס אותו." : "Got a silly prop within reach? Now is the moment to grab it."}</p><p class="c-sub" style="opacity:.6;margin-bottom:6px">${joined}</p>${rows}${joinUi}<p class="c-sub" style="opacity:.4;margin-top:20px;font-size:12px">${he ? "חדר" : "Room"} ${ROOM_CODE}</p>${(S.isAdmin||S.buyerUid===SEAT_ID)?`<button class="chip" data-forcestart>${he ? "התחל בכל זאת (מנהל)" : "Force start (director)"}</button>`:""}</div></div></div>`;
 }
 function topbar(){
   return `<header class="topbar"><div class="brandside"><div class="logo"></div><div class="pl" ${IS_ANON?"":"data-signout"} style="cursor:pointer" title="${S.lang==='he'?'יציאה':'Sign out'}"><span class="nm">${MY_NAME||(S.lang==='he'?'מאיה':'Maya')}</span><span class="badge">${t("topbar.player")} ${S.player}</span></div></div><span class="timer" id="timer">${fmt(S.elapsed)}</span><div class="rightside"><div class="metaside"><span class="pts">${S.points} ${t("topbar.points")}</span><span class="stg">${t("topbar.stage")} ${S.step+1}</span></div></div></header>`;
@@ -977,6 +981,7 @@ onSnapshot(doc(db, "rooms", ROOM_CODE), (snap) => {
   S.points = r.points;
   S.phase = r.phase || "play";
   S.seats = r.seats || {};
+  S.maxSeats = r.maxSeats || 0;
   S.flags = r.flags || {};
   S.prog = r.prog || {};
   S.buyerUid = r.buyerUid || null;
