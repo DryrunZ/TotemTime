@@ -262,29 +262,6 @@ exports.judge = onCall(async (req) => {
     return { collageUrl: url, photos: photos.length };
   }
 
-  // ---- myFinish: the caller's own coupon + the group collage. Works for anonymous players,
-  // who have no users/{uid} doc and cannot read coupons/ directly. Seated callers only.
-  if (action === "myFinish") {
-    const room = (await roomRef.get()).data();
-    if (!room) throw new HttpsError("not-found", "room not found");
-    if (!room.seats || !room.seats[callerUid]) throw new HttpsError("permission-denied", "players only");
-    let coupon = null, collageUrl = null, finalPoints = null, durationMs = null;
-    if (room.instanceId) {
-      const inst = (await db.doc(`instances/${room.instanceId}`).get()).data() || {};
-      collageUrl = inst.collageUrl || null;
-      finalPoints = typeof inst.finalPoints === "number" ? inst.finalPoints : (room.points ?? null);
-      durationMs = inst.durationMs ?? null;
-      const qs = await db.collection("coupons")
-        .where("instanceId", "==", room.instanceId)
-        .where("ownerUid", "==", callerUid).limit(1).get();
-      if (!qs.empty) {
-        const c = qs.docs[0].data();
-        coupon = { code: c.code, discountPct: c.discountPct, expiresAt: c.expiresAt, used: !!c.used };
-      }
-    }
-    return { coupon, collageUrl, finalPoints, durationMs, anon: !!(req.auth && req.auth.token && req.auth.token.provider_id === "anonymous") };
-  }
-
   // ---- setMode: difficulty on the room (data the judge already reads via __mode). Admin anytime; director before start. ----
   if (action === "setMode") {
     const room = (await roomRef.get()).data() || {};
