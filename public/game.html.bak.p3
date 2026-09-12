@@ -786,7 +786,6 @@ function render(){ if(!S.game) return;
   document.querySelectorAll("[data-mode]").forEach(b=>b.classList.toggle("on",b.dataset.mode===S.mode));
   document.querySelectorAll("[data-lang]").forEach(b=>b.classList.toggle("on",b.dataset.lang===S.lang));
   document.querySelectorAll("[data-player]").forEach(b=>b.classList.toggle("on",+b.dataset.player===S.player));
-  if (S.wrapScreen) { app.innerHTML = wrapView(); return; }
   if (S.phase === "lobby") { app.innerHTML = lobbyView(); return; }
   app.innerHTML = S.photoScreen ? photoView() : (S.mode==="player" ? playerView() : adminView()); initPanos();
 }
@@ -940,7 +939,7 @@ app.addEventListener("click",(e)=>{
       S.popup = {kind:"lose",title:"!",body:"connection error — try again",cta:t("lose.cta")};
     }).finally(()=>{ el.disabled=false; render(); });
   }
-  else if(el.hasAttribute("data-popcta")){ const _href=S.popup&&S.popup.href; if(S.popup&&S.popup.next==="photo"){ S.popup=null; S.photoScreen=true; render(); return; } if(S.popup&&S.popup.next==="wrap"){ S.popup=null; openWrap(); return; } if(!String(S.popupId).startsWith("desk")) S.dismissed=S.popupId; S.popup=null; if(_href){ location.href=_href; return; } render(); }
+  else if(el.hasAttribute("data-popcta")){ const _href=S.popup&&S.popup.href; if(S.popup&&S.popup.next==="photo"){ S.popup=null; S.photoScreen=true; render(); return; } if(!String(S.popupId).startsWith("desk")) S.dismissed=S.popupId; S.popup=null; if(_href){ location.href=_href; return; } render(); }
   else if(el.hasAttribute("data-close")){ if(e.target===el){ if(!String(S.popupId).startsWith("desk")) S.dismissed=S.popupId; S.popup=null; render(); } }
 });
 lb.addEventListener("click",()=>{
@@ -1059,9 +1058,9 @@ async function showCouponPopup(){
   const cta = tk("coupon.cta", he ? 'סיימנו! חזרה למשחקים שלי' : 'Done! Back to My Games');
   let body = tk("coupon.soon", he ? 'הקופון שלכם מחכה בפורטל.' : 'Your coupon is waiting in the portal.');
   try{
-    const mf = (await judge({ action:"myFinish", gameId:GAME_ID, roomCode:ROOM_CODE })).data || {};
-    FIN = mf;
-    const c = mf.coupon;
+    const u = SEAT_ID ? (await getDoc(doc(db, "users", SEAT_ID))).data() : null;
+    const cs = ((u && u.coupons) || []).filter(c => c && c.source === "finish" && !c.used);
+    const c = cs[cs.length - 1];
     if (c){
       const d = new Date(c.expiresAt).toLocaleDateString(he ? 'he-IL' : 'en-GB', { day:'numeric', month:'short', year:'numeric' });
       const tpl = tk("coupon.body", he ? 'קופון {pct}% הנחה למשחק הבא<br><b style="font-size:1.3em;letter-spacing:.08em" dir="ltr">{code}</b><br>בתוקף עד {date}'
@@ -1070,12 +1069,11 @@ async function showCouponPopup(){
     }
   }catch(e){ console.warn('coupon popup', e); }
   const wantPhoto = !!(S.game && S.game.finish && S.game.finish.photo) && !!S.instanceId;
-  S.popup = wantPhoto ? { kind:"win", title:"🎁", body, cta, next:"photo" } : { kind:"win", title:"🎁", body, cta, next:"wrap" };
+  S.popup = wantPhoto ? { kind:"win", title:"🎁", body, cta, next:"photo" } : { kind:"win", title:"🎁", body, cta, href:"portal.html#/games" };
   render();
 }
 
 // ---- finish photo: one selfie per player -> instances/{id}/photos/{uid} -> judge rebuilds the collage ----
-let FIN = {};
 let PHOTO = { blob:null, busy:false, err:"" };
 function photoView(){
   const he = S.lang === 'he';
@@ -1110,12 +1108,12 @@ async function sendPhoto(){
   try{
     await uploadBytes(sRef(getStorage(), `instances/${S.instanceId}/photos/${SEAT_ID}`), PHOTO.blob, { contentType: 'image/jpeg' });
     await judge({ action:"buildCollage", gameId:GAME_ID, roomCode:ROOM_CODE });
-    PHOTO.busy = false; S.photoScreen = false; openWrap();
+    location.href = "portal.html#/games";
   }catch(e){ console.warn('photo', e); PHOTO.busy = false; PHOTO.err = S.lang==='he' ? 'לא הצלחנו לשלוח. נסו שוב.' : "Couldn't send. Try again."; render(); }
 }
 document.addEventListener('click', e => {
   if (e.target.closest('[data-photopick]')) { const i = document.getElementById('photoIn'); if (i) { i.value = ''; i.click(); } return; }
-  if (e.target.closest('[data-photoskip]')) { S.photoScreen=false; openWrap(); return; }
+  if (e.target.closest('[data-photoskip]')) { location.href = "portal.html#/games"; return; }
   if (e.target.closest('[data-photosend]')) { sendPhoto(); return; }
 }, true);
 document.addEventListener('change', async e => {
@@ -1133,44 +1131,6 @@ document.addEventListener("click", e => {
   render();
   const inp2 = document.getElementById("joinName");
   if (inp2) { inp2.focus(); try{ inp2.setSelectionRange(inp2.value.length, inp2.value.length); }catch(e3){} }
-}, true);
-
-async function openWrap(){
-  S.wrapScreen = true; render();
-  try {
-    var r = await judge({ action:"myFinish", gameId:GAME_ID, roomCode:ROOM_CODE });
-    FIN = r.data || {};
-  } catch(e){ console.warn("myFinish", e); }
-  render();
-}
-
-function wrapView(){
-  var he = S.lang === "he";
-  var esc2 = function(x){ return String(x==null?"":x).replace(/[&<>"]/g, function(ch){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[ch]; }); };
-  var out = '<div class="wrap"><div class="phone"><div class="body" style="text-align:center">';
-  out += '<h1 class="c-title">' + (he ? "\u05db\u05dc \u05d4\u05db\u05d1\u05d5\u05d3!" : "Nicely done!") + '</h1>';
-  if (FIN.collageUrl) {
-    out += '<img src="' + esc2(FIN.collageUrl) + '" alt="" style="width:100%;border-radius:18px;margin:12px 0">';
-    out += '<a class="chip" href="' + esc2(FIN.collageUrl) + '" download target="_blank" rel="noopener" style="display:inline-block;margin-bottom:14px">' + (he ? "\u05e9\u05de\u05d9\u05e8\u05ea \u05d4\u05ea\u05de\u05d5\u05e0\u05d4" : "Save the picture") + '</a>';
-  }
-  if (FIN.coupon) {
-    out += '<div style="border:1px dashed rgba(255,255,255,.25);border-radius:16px;padding:16px;margin:10px 0">';
-    out += '<p class="c-sub" style="margin:0 0 6px">' + (he ? "\u05d4\u05e7\u05d5\u05e4\u05d5\u05df \u05e9\u05dc\u05db\u05dd \u05dc\u05de\u05e9\u05d7\u05e7 \u05d4\u05d1\u05d0" : "Your coupon for the next game") + '</p>';
-    out += '<b style="font-size:1.4em;letter-spacing:.08em" dir="ltr">' + esc2(FIN.coupon.code) + '</b>';
-    out += '<p class="c-sub" style="margin:6px 0 0;opacity:.7">' + esc2(FIN.coupon.discountPct) + '% ' + (he ? "\u05d4\u05e0\u05d7\u05d4" : "off") + '</p></div>';
-    if (IS_ANON) {
-      out += '<p class="c-text" style="opacity:.8">' + (he ? "\u05e4\u05ea\u05d7\u05d5 \u05d7\u05e9\u05d1\u05d5\u05df \u05db\u05d3\u05d9 \u05dc\u05e9\u05de\u05d5\u05e8 \u05d0\u05ea \u05d4\u05e7\u05d5\u05e4\u05d5\u05df \u05d5\u05d0\u05ea \u05d4\u05ea\u05de\u05d5\u05e0\u05d4." : "Create an account to keep the coupon and the picture.") + '</p>';
-      out += '<button class="cta" data-wrapsignup>' + (he ? "\u05e9\u05de\u05d9\u05e8\u05d4 \u05d5\u05e4\u05ea\u05d9\u05d7\u05ea \u05d7\u05e9\u05d1\u05d5\u05df" : "Save it and create an account") + '</button>';
-    }
-  }
-  out += '<button class="chip" data-wrapdone style="margin-top:10px">' + (he ? "\u05e1\u05d9\u05d9\u05de\u05e0\u05d5" : "Done") + '</button>';
-  out += '</div></div></div>';
-  return out;
-}
-
-document.addEventListener("click", function(e){
-  if (e.target.closest("[data-wrapsignup]")) { e.preventDefault(); location.href = "portal.html#/account"; return; }
-  if (e.target.closest("[data-wrapdone]"))   { e.preventDefault(); location.href = IS_ANON ? "/" : "portal.html#/games"; return; }
 }, true);
 
 function signoutSheet(){
