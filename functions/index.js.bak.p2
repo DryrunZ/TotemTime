@@ -714,7 +714,7 @@ exports.claimGame = onCall(async (req) => {
   });
 
   const instRef = db.collection("instances").doc();
-  await db.doc(`rooms/${code}`).update({ instanceId: instRef.id, maxSeats: seats });
+  await db.doc(`rooms/${code}`).update({ instanceId: instRef.id });
   await instRef.set({
     gameId, buyerUid: uid, seatCount: seats,
     language: lang, mode: md, status: "open",
@@ -760,7 +760,6 @@ exports.addSeat = onCall(async (req) => {
     if (inst.seatCount >= cap)
       throw new HttpsError("failed-precondition", `seat cap reached (${cap})`);
     tx.update(ref, { baseSeatCount: base, seatCount: inst.seatCount + 1 });
-    if (inst.code) tx.update(db.doc(`rooms/${inst.code}`), { maxSeats: inst.seatCount + 1 });
     return { seatCount: inst.seatCount + 1, cap };
   });
 });
