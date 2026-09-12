@@ -1121,7 +1121,11 @@ document.addEventListener("click", e => {
   e.preventDefault(); e.stopPropagation();
   MY_AV = Number(b.dataset.av) || 0;
   try{ localStorage.setItem("tt.av", String(MY_AV)); }catch(err){}
+  const inp = document.getElementById("joinName");
+  if (inp) MY_NAME = inp.value;
   render();
+  const inp2 = document.getElementById("joinName");
+  if (inp2) { inp2.focus(); try{ inp2.setSelectionRange(inp2.value.length, inp2.value.length); }catch(e3){} }
 }, true);
 
 function signoutSheet(){
