@@ -420,6 +420,27 @@ exports.judge = onCall(async (req) => {
     });
   }
 
+  // ---- removeSeat: director (or admin) frees a seat taken by a stray share-link join.
+  // Lobby only: once the game has started, removing a player would shift joinIndex for everyone.
+  if (action === "removeSeat") {
+    const { targetUid } = req.data || {};
+    if (!targetUid) throw new HttpsError("invalid-argument", "targetUid required");
+    const room = (await roomRef.get()).data() || {};
+    if (!(await isAdmin(callerUid)) && room.buyerUid !== callerUid)
+      throw new HttpsError("permission-denied", "the director only");
+    if (room.phase !== "lobby") throw new HttpsError("failed-precondition", "only before the game starts");
+    if (targetUid === room.buyerUid) throw new HttpsError("failed-precondition", "the director keeps their seat");
+    const seats = room.seats || {};
+    if (!seats[targetUid]) throw new HttpsError("not-found", "no such player");
+    delete seats[targetUid];
+    // renumber so joinIndex stays 1..n and player numbers keep cycling correctly
+    Object.values(seats)
+      .sort((a, b) => a.joinIndex - b.joinIndex)
+      .forEach((v, i) => { v.joinIndex = i + 1; });
+    await roomRef.update({ seats });
+    return { removed: targetUid, seats: Object.keys(seats).length };
+  }
+
   if (action === "ready") {
     if (!seatId) throw new HttpsError("invalid-argument", "seatId required");
     return await db.runTransaction(async (tx) => {

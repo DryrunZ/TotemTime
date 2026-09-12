@@ -409,7 +409,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import {
   getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs,
-  query, where, addDoc, serverTimestamp, arrayUnion
+  query, where, addDoc, serverTimestamp, arrayUnion, onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage, ref as sRef, uploadBytes, getDownloadURL }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
@@ -1690,6 +1690,46 @@ function viewDirector(){
   return pageTitle(t("dir.title"), t("dir.sub")) + `<div class="cols">${cards}</div>`;
 }
 
+/* live seats: who is actually in the room right now, including share-link joins */
+let SEATS = { code:null, list:[], unsub:null };
+const AV_SET = ["\u{1F98A}","\u{1F43C}","\u{1F419}","\u{1F989}","\u{1F41D}","\u{1F438}","\u{1F984}","\u{1F43A}"];
+function watchSeats(code){
+  if (!code || SEATS.code === code) return;
+  if (SEATS.unsub) { try{ SEATS.unsub(); }catch(e){} }
+  SEATS = { code:code, list:[], unsub:null };
+  SEATS.unsub = onSnapshot(doc(db,"rooms",code), function(snap){
+    var r = snap.exists() ? snap.data() : {};
+    var seats = r.seats || {};
+    SEATS.list = Object.keys(seats).map(function(uid){ var v = seats[uid]; return { uid:uid, name:v.name||"", av:v.av||0, joinIndex:v.joinIndex||0 }; })
+      .sort(function(a,b){ return a.joinIndex - b.joinIndex; });
+    SEATS.phase = r.phase || null;
+    SEATS.buyerUid = r.buyerUid || null;
+    if (S.route && S.route.name === "invites") render();
+  }, function(e){ console.warn("seats", e); });
+}
+function seatRowsHtml(){
+  if (!SEATS.list.length) return "";
+  var canRemove = SEATS.phase === "lobby";
+  var head = '<p class="tiny muted" style="margin:14px 0 6px">' + esc(S.lang==="he" ? "\u05d1\u05d7\u05d3\u05e8 \u05e2\u05db\u05e9\u05d9\u05d5" : "In the room now") + '</p>';
+  return head + SEATS.list.map(function(p){
+    var isDir = p.uid === SEATS.buyerUid;
+    return '<div class="rowitem">' +
+      '<div class="avatar sm">' + AV_SET[p.av] + '</div>' +
+      '<div class="grow"><div class="small truncate" style="font-weight:600">' + esc(p.name) + '</div></div>' +
+      (isDir || !canRemove ? "" : '<button class="iconbtn" data-act="delseat" data-v="' + esc(p.uid) + '" aria-label="remove">\u2715</button>') +
+    '</div>';
+  }).join("");
+}
+async function removeSeat(targetUid){
+  var inst = instById(S.route.args[0]);
+  if (!inst || !inst.code) return;
+  var who = (SEATS.list.find(function(p){ return p.uid===targetUid; })||{}).name || "";
+  if (!confirm(t("inv.remove.confirm",{name:who}))) return;
+  try{
+    await httpsCallable(fns,"judge")({ action:"removeSeat", gameId:inst.gameId, roomCode:inst.code, targetUid:targetUid });
+  }catch(ex){ console.warn(ex); toast(t("common.error"),"bad"); }
+}
+
 function viewInvites(inst){
   const total = inst.seatCount || 6;
   const list  = inst.invites || [];
@@ -1724,6 +1764,7 @@ function viewInvites(inst){
         ${Array.from({length:total},(_,k)=>`<i class="${k<used?"on":""}"></i>`).join("")}
       </div>
       ${rows}
+      ${(watchSeats(inst.code), seatRowsHtml())}
       <button class="btn ghost block" style="margin-top:14px" data-act="sharelink" data-v="${esc(inst.id)}">${SHARE_ICON} ${S.lang==="he"?"\u05e9\u05d9\u05ea\u05d5\u05e3 \u05e7\u05d9\u05e9\u05d5\u05e8 \u05dc\u05de\u05e9\u05d7\u05e7":"Share play link"}</button>
     </div>
 
@@ -2157,6 +2198,7 @@ document.addEventListener("click", async e => {
     case "copycoupon": await copy(v); toast(t("coupons.copied")); break;
     case "shareinvite":{ const [id,tok]=v.split("|"); shareSheet(id,tok); break; }
     case "sharelink":{ shareLinkSheet(v); break; }
+    case "delseat":{ await removeSeat(v); break; }
     case "delinvite":  { const [id,tok]=v.split("|"); await removeInvite(id,tok); break; }
     case "acceptinvite":{ const [id,tok]=v.split("|"); await acceptInvite(id,tok); break; }
     case "addseat":{
