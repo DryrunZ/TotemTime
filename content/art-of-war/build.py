@@ -93,7 +93,7 @@ game = {
   "scoring": {"start": 100, "solve": 100, "mistake": -5, "hints": [-10, -15],
               "timeBonus": [{"underMin": 30, "bonus": 100}, {"underMin": 60, "bonus": 50}]},
   "store": {"price": 1500, "currency": "usd", "perSeat": 0, "freeLaunch": True, "claimCode": "boomers",
-            "seatOptions": [3, 6], "testRoom": "AOW1", "cover": "assets/games/art-of-war/cover.jpg",
+            "seatOptions": [3, 4, 5, 6], "testRoom": "AOW1", "cover": "assets/games/art-of-war/cover.jpg",
             "blurb_key": "store.blurb"},
   "texts": {s: {"plot": f"{s}.plot"} for s in ["story", "instructions", "finale"]},
   "oracle": {
