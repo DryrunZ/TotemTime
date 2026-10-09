@@ -3,7 +3,7 @@
   "title_key": "meta.title",
   "N": 3,
   "defaultLanguage": "he",
-  "published": false,
+  "published": true,
   "stepCount": 13,
   "lastAnswerStep": 10,
   "finish": {
@@ -29,6 +29,11 @@
     ]
   },
   "store": {
+    "price": 1500,
+    "currency": "usd",
+    "perSeat": 0,
+    "freeLaunch": true,
+    "claimCode": "boomers",
     "seatOptions": [
       3,
       6
