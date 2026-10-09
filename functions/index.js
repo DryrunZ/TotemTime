@@ -474,12 +474,42 @@ exports.judge = onCall(async (req) => {
     return { phase: "play" };
   }
 
+  // ---- AOW:patch1 reflect: Art of War. The step's designated writer saves one strategy per chapter.
+  // Gated on a component of type "reflection" on the current step. Director/admin may write for an absent player.
+  if (action === "reflect") {
+    const sIdx = Number(stepId);
+    const rc = (((game.steps || [])[sIdx] || {}).components || []).find((c) => c.type === "reflection");
+    if (!rc) throw new HttpsError("failed-precondition", "no reflection on this step");
+    const text = String((req.data && req.data.text) || "").replace(/\s+/g, " ").trim().slice(0, rc.maxLength || 200);
+    if (text.length < (rc.minLength || 1)) throw new HttpsError("invalid-argument", "too short");
+    const admin = await isAdmin(callerUid);
+    return await db.runTransaction(async (tx) => {
+      const room = (await tx.get(roomRef)).data();
+      if (!room) throw new HttpsError("not-found", "room not found");
+      if ((room.step || 0) !== sIdx) throw new HttpsError("failed-precondition", "not on this step");
+      const ch = String(rc.chapter);
+      if (room.refl && room.refl[ch]) return { already: true };
+      const seat = room.seats && room.seats[callerUid];
+      const pn = seat ? playerNum(seat.joinIndex, N) : 0;
+      if (pn !== rc.writer && !admin && room.buyerUid !== callerUid)
+        throw new HttpsError("permission-denied", "not your turn to write");
+      const refl = { text, by: seatName(room, callerUid), at: nowIso() };
+      tx.update(roomRef, { [`refl.${ch}`]: refl });
+      // instance copy feeds the oracle + strategies collage. Nested object (not a dotted key): instLog uses set+merge.
+      instLog(tx, room, callerUid, [{ kind: "reflect", ref: ch }], { reflections: { [ch]: refl } });
+      return { saved: true };
+    });
+  }
+
   if (action === "advance") {
     const fromStep = Number(stepId);
     return await db.runTransaction(async (tx) => {
       const room = (await tx.get(roomRef)).data();
       if (!room) throw new HttpsError("not-found", "room not found");
       let step = room.step || 0;
+      // AOW:patch1: a reflection step only advances once its strategy is saved
+      const __rc = (((game.steps || [])[step] || {}).components || []).find((c) => c.type === "reflection");
+      if (__rc && !(room.refl && room.refl[String(__rc.chapter)])) return { step, blocked: "reflection" };
       if (step === fromStep && step < lastStep) {
         step = step + 1;
         const nxt = game.steps && game.steps[step];

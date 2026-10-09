@@ -1,0 +1,865 @@
+{
+  "gameId": "art-of-war",
+  "title_key": "meta.title",
+  "N": 3,
+  "defaultLanguage": "he",
+  "published": false,
+  "stepCount": 13,
+  "lastAnswerStep": 10,
+  "finish": {
+    "photo": true
+  },
+  "scoring": {
+    "start": 100,
+    "solve": 100,
+    "mistake": -5,
+    "hints": [
+      -10,
+      -15
+    ],
+    "timeBonus": [
+      {
+        "underMin": 30,
+        "bonus": 100
+      },
+      {
+        "underMin": 60,
+        "bonus": 50
+      }
+    ]
+  },
+  "store": {
+    "seatOptions": [
+      3,
+      6
+    ],
+    "testRoom": "AOW1",
+    "cover": "assets/games/art-of-war/cover.jpg",
+    "blurb_key": "store.blurb"
+  },
+  "texts": {
+    "story": {
+      "plot": "story.plot"
+    },
+    "instructions": {
+      "plot": "instructions.plot"
+    },
+    "finale": {
+      "plot": "finale.plot"
+    }
+  },
+  "oracle": {
+    "system_key": "oracle.system",
+    "fallback_keys": [
+      "oracle.fallback.cookie1",
+      "oracle.fallback.cookie2",
+      "oracle.fallback.cookie3"
+    ],
+    "principles": [
+      {
+        "chapter": 1,
+        "word_key": "t1.word",
+        "quote_key": "t1.quote"
+      },
+      {
+        "chapter": 2,
+        "word_key": "t2.word",
+        "quote_key": "t2.quote"
+      },
+      {
+        "chapter": 3,
+        "word_key": "t3.word",
+        "quote_key": "t3.quote"
+      },
+      {
+        "chapter": 4,
+        "word_key": "t4.word",
+        "quote_key": "t4.quote"
+      },
+      {
+        "chapter": 5,
+        "word_key": "t5.word",
+        "quote_key": "t5.quote"
+      }
+    ],
+    "challengeField": "business_challenge"
+  },
+  "customizable": [
+    {
+      "key": "team_name",
+      "label_key": "custom.team_name",
+      "type": "text",
+      "default_key": "custom.team_name.default",
+      "maxLength": 30
+    },
+    {
+      "key": "business_challenge",
+      "label_key": "custom.business_challenge",
+      "type": "text",
+      "default_key": "custom.business_challenge.default",
+      "maxLength": 200,
+      "multiline": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "story",
+      "kind": "screen",
+      "components": [
+        {
+          "id": "st.c",
+          "type": "cta",
+          "visibleTo": "all",
+          "action": "advance",
+          "label_key": "screens.story.ready"
+        }
+      ]
+    },
+    {
+      "id": "instructions",
+      "kind": "screen",
+      "components": [
+        {
+          "id": "in.c",
+          "type": "cta",
+          "visibleTo": "all",
+          "action": "advance",
+          "label_key": "screens.instructions.ready"
+        }
+      ]
+    },
+    {
+      "id": "r1",
+      "kind": "puzzle",
+      "advanceOnSolve": true,
+      "components": [
+        {
+          "id": "r1.p1.t",
+          "type": "title",
+          "visibleTo": [
+            1
+          ],
+          "text_key": "r1.p1.t"
+        },
+        {
+          "id": "r1.p1.b",
+          "type": "text",
+          "visibleTo": [
+            1
+          ],
+          "text_key": "r1.p1.b"
+        },
+        {
+          "id": "r1.p1.img1",
+          "type": "image",
+          "visibleTo": [
+            1
+          ],
+          "src": "assets/games/art-of-war/r1-fastforward.jpg"
+        },
+        {
+          "id": "r1.p2.t",
+          "type": "title",
+          "visibleTo": [
+            2
+          ],
+          "text_key": "r1.p2.t"
+        },
+        {
+          "id": "r1.p2.b",
+          "type": "text",
+          "visibleTo": [
+            2
+          ],
+          "text_key": "r1.p2.b"
+        },
+        {
+          "id": "r1.p2.img1",
+          "type": "image",
+          "visibleTo": [
+            2
+          ],
+          "src": "assets/games/art-of-war/r1-chess-d7.jpg"
+        },
+        {
+          "id": "r1.p3.t",
+          "type": "title",
+          "visibleTo": [
+            3
+          ],
+          "text_key": "r1.p3.t"
+        },
+        {
+          "id": "r1.p3.b",
+          "type": "text",
+          "visibleTo": [
+            3
+          ],
+          "text_key": "r1.p3.b"
+        },
+        {
+          "id": "r1.p3.img1",
+          "type": "image",
+          "visibleTo": [
+            3
+          ],
+          "src": "assets/games/art-of-war/r1-toilet.jpg"
+        },
+        {
+          "id": "r1.q",
+          "type": "subtitle",
+          "visibleTo": "all",
+          "text_key": "r1.q"
+        },
+        {
+          "id": "r1.in",
+          "type": "input",
+          "visibleTo": [
+            3
+          ],
+          "placeholder_key": "common.answer",
+          "hints": [
+            "r1.h1",
+            "r1.h2"
+          ],
+          "outcome_key": "r1.out"
+        }
+      ]
+    },
+    {
+      "id": "t1",
+      "kind": "screen",
+      "components": [
+        {
+          "id": "t1.t",
+          "type": "title",
+          "visibleTo": "all",
+          "text_key": "t1.t"
+        },
+        {
+          "id": "t1.quote",
+          "type": "quote",
+          "visibleTo": "all",
+          "text_key": "t1.quote",
+          "who_key": "tzu.who"
+        },
+        {
+          "id": "t1.prompt",
+          "type": "text",
+          "visibleTo": "all",
+          "text_key": "t1.prompt"
+        },
+        {
+          "id": "t1.refl",
+          "type": "reflection",
+          "visibleTo": "all",
+          "chapter": 1,
+          "writer": 1,
+          "minLength": 15,
+          "maxLength": 120,
+          "prompt_key": "t1.ask"
+        }
+      ]
+    },
+    {
+      "id": "r2",
+      "kind": "puzzle",
+      "advanceOnSolve": true,
+      "components": [
+        {
+          "id": "r2.p1.t",
+          "type": "title",
+          "visibleTo": [
+            1
+          ],
+          "text_key": "r2.p1.t"
+        },
+        {
+          "id": "r2.p1.b",
+          "type": "text",
+          "visibleTo": [
+            1
+          ],
+          "text_key": "r2.p1.b"
+        },
+        {
+          "id": "r2.p2.t",
+          "type": "title",
+          "visibleTo": [
+            2
+          ],
+          "text_key": "r2.p2.t"
+        },
+        {
+          "id": "r2.p2.b",
+          "type": "text",
+          "visibleTo": [
+            2
+          ],
+          "text_key": "r2.p2.b"
+        },
+        {
+          "id": "r2.p3.t",
+          "type": "title",
+          "visibleTo": [
+            3
+          ],
+          "text_key": "r2.p3.t"
+        },
+        {
+          "id": "r2.p3.b",
+          "type": "text",
+          "visibleTo": [
+            3
+          ],
+          "text_key": "r2.p3.b"
+        },
+        {
+          "id": "r2.q",
+          "type": "subtitle",
+          "visibleTo": "all",
+          "text_key": "r2.q"
+        },
+        {
+          "id": "r2.in",
+          "type": "input",
+          "visibleTo": [
+            1
+          ],
+          "placeholder_key": "common.answer",
+          "hints": [
+            "r2.h1",
+            "r2.h2"
+          ],
+          "outcome_key": "r2.out"
+        }
+      ]
+    },
+    {
+      "id": "t2",
+      "kind": "screen",
+      "components": [
+        {
+          "id": "t2.t",
+          "type": "title",
+          "visibleTo": "all",
+          "text_key": "t2.t"
+        },
+        {
+          "id": "t2.quote",
+          "type": "quote",
+          "visibleTo": "all",
+          "text_key": "t2.quote",
+          "who_key": "tzu.who"
+        },
+        {
+          "id": "t2.prompt",
+          "type": "text",
+          "visibleTo": "all",
+          "text_key": "t2.prompt"
+        },
+        {
+          "id": "t2.refl",
+          "type": "reflection",
+          "visibleTo": "all",
+          "chapter": 2,
+          "writer": 2,
+          "minLength": 15,
+          "maxLength": 120,
+          "prompt_key": "t2.ask"
+        }
+      ]
+    },
+    {
+      "id": "r3",
+      "kind": "puzzle",
+      "advanceOnSolve": true,
+      "components": [
+        {
+          "id": "r3.p1.t",
+          "type": "title",
+          "visibleTo": [
+            1
+          ],
+          "text_key": "r3.p1.t"
+        },
+        {
+          "id": "r3.p1.b",
+          "type": "text",
+          "visibleTo": [
+            1
+          ],
+          "text_key": "r3.p1.b"
+        },
+        {
+          "id": "r3.count1",
+          "type": "counting",
+          "visibleTo": [
+            1
+          ],
+          "params": {
+            "item": "assets/games/art-of-war/r3-cookie.png",
+            "emoji": "🥠",
+            "count": 10,
+            "size": 16,
+            "worldWidth": 300,
+            "seed": 17,
+            "camera": true
+          }
+        },
+        {
+          "id": "r3.p2.t",
+          "type": "title",
+          "visibleTo": [
+            2
+          ],
+          "text_key": "r3.p2.t"
+        },
+        {
+          "id": "r3.p2.b",
+          "type": "text",
+          "visibleTo": [
+            2
+          ],
+          "text_key": "r3.p2.b"
+        },
+        {
+          "id": "r3.count2",
+          "type": "counting",
+          "visibleTo": [
+            2
+          ],
+          "params": {
+            "item": "assets/games/art-of-war/r3-x.png",
+            "emoji": "❌",
+            "count": 1,
+            "size": 60,
+            "worldWidth": 100,
+            "seed": 34,
+            "camera": true
+          }
+        },
+        {
+          "id": "r3.p3.t",
+          "type": "title",
+          "visibleTo": [
+            3
+          ],
+          "text_key": "r3.p3.t"
+        },
+        {
+          "id": "r3.p3.b",
+          "type": "text",
+          "visibleTo": [
+            3
+          ],
+          "text_key": "r3.p3.b"
+        },
+        {
+          "id": "r3.count3",
+          "type": "counting",
+          "visibleTo": [
+            3
+          ],
+          "params": {
+            "item": "assets/games/art-of-war/r3-fan.png",
+            "emoji": "🪭",
+            "count": 10,
+            "size": 16,
+            "worldWidth": 300,
+            "seed": 51,
+            "camera": true
+          }
+        },
+        {
+          "id": "r3.q",
+          "type": "subtitle",
+          "visibleTo": "all",
+          "text_key": "r3.q"
+        },
+        {
+          "id": "r3.in",
+          "type": "input",
+          "visibleTo": [
+            2
+          ],
+          "placeholder_key": "common.answer",
+          "hints": [
+            "r3.h1",
+            "r3.h2"
+          ],
+          "outcome_key": "r3.out"
+        }
+      ]
+    },
+    {
+      "id": "t3",
+      "kind": "screen",
+      "components": [
+        {
+          "id": "t3.t",
+          "type": "title",
+          "visibleTo": "all",
+          "text_key": "t3.t"
+        },
+        {
+          "id": "t3.quote",
+          "type": "quote",
+          "visibleTo": "all",
+          "text_key": "t3.quote",
+          "who_key": "tzu.who"
+        },
+        {
+          "id": "t3.prompt",
+          "type": "text",
+          "visibleTo": "all",
+          "text_key": "t3.prompt"
+        },
+        {
+          "id": "t3.refl",
+          "type": "reflection",
+          "visibleTo": "all",
+          "chapter": 3,
+          "writer": 3,
+          "minLength": 15,
+          "maxLength": 120,
+          "prompt_key": "t3.ask"
+        }
+      ]
+    },
+    {
+      "id": "r4",
+      "kind": "puzzle",
+      "advanceOnSolve": true,
+      "components": [
+        {
+          "id": "r4.p1.t",
+          "type": "title",
+          "visibleTo": [
+            1
+          ],
+          "text_key": "r4.p1.t"
+        },
+        {
+          "id": "r4.p1.b",
+          "type": "text",
+          "visibleTo": [
+            1
+          ],
+          "text_key": "r4.p1.b"
+        },
+        {
+          "id": "r4.p1.img1",
+          "type": "image",
+          "visibleTo": [
+            1
+          ],
+          "src": "assets/games/art-of-war/r4-p1-player.jpg"
+        },
+        {
+          "id": "r4.p1.img2",
+          "type": "image",
+          "visibleTo": [
+            1
+          ],
+          "src": "assets/games/art-of-war/r4-p1-series.jpg"
+        },
+        {
+          "id": "r4.p2.t",
+          "type": "title",
+          "visibleTo": [
+            2
+          ],
+          "text_key": "r4.p2.t"
+        },
+        {
+          "id": "r4.p2.b",
+          "type": "text",
+          "visibleTo": [
+            2
+          ],
+          "text_key": "r4.p2.b"
+        },
+        {
+          "id": "r4.p2.img1",
+          "type": "image",
+          "visibleTo": [
+            2
+          ],
+          "src": "assets/games/art-of-war/r4-p2-player.jpg"
+        },
+        {
+          "id": "r4.p2.img2",
+          "type": "image",
+          "visibleTo": [
+            2
+          ],
+          "src": "assets/games/art-of-war/r4-p2-series.jpg"
+        },
+        {
+          "id": "r4.p3.t",
+          "type": "title",
+          "visibleTo": [
+            3
+          ],
+          "text_key": "r4.p3.t"
+        },
+        {
+          "id": "r4.p3.b",
+          "type": "text",
+          "visibleTo": [
+            3
+          ],
+          "text_key": "r4.p3.b"
+        },
+        {
+          "id": "r4.p3.img1",
+          "type": "image",
+          "visibleTo": [
+            3
+          ],
+          "src": "assets/games/art-of-war/r4-p3-player.jpg"
+        },
+        {
+          "id": "r4.p3.img2",
+          "type": "image",
+          "visibleTo": [
+            3
+          ],
+          "src": "assets/games/art-of-war/r4-p3-ambulance.jpg"
+        },
+        {
+          "id": "r4.q",
+          "type": "subtitle",
+          "visibleTo": "all",
+          "text_key": "r4.q"
+        },
+        {
+          "id": "r4.in",
+          "type": "input",
+          "visibleTo": [
+            3
+          ],
+          "placeholder_key": "common.answer",
+          "hints": [
+            "r4.h1",
+            "r4.h2"
+          ],
+          "outcome_key": "r4.out"
+        }
+      ]
+    },
+    {
+      "id": "t4",
+      "kind": "screen",
+      "components": [
+        {
+          "id": "t4.t",
+          "type": "title",
+          "visibleTo": "all",
+          "text_key": "t4.t"
+        },
+        {
+          "id": "t4.quote",
+          "type": "quote",
+          "visibleTo": "all",
+          "text_key": "t4.quote",
+          "who_key": "tzu.who"
+        },
+        {
+          "id": "t4.prompt",
+          "type": "text",
+          "visibleTo": "all",
+          "text_key": "t4.prompt"
+        },
+        {
+          "id": "t4.refl",
+          "type": "reflection",
+          "visibleTo": "all",
+          "chapter": 4,
+          "writer": 1,
+          "minLength": 15,
+          "maxLength": 120,
+          "prompt_key": "t4.ask"
+        }
+      ]
+    },
+    {
+      "id": "r5",
+      "kind": "puzzle",
+      "advanceOnSolve": true,
+      "components": [
+        {
+          "id": "r5.p1.t",
+          "type": "title",
+          "visibleTo": [
+            1
+          ],
+          "text_key": "r5.p1.t"
+        },
+        {
+          "id": "r5.p1.b",
+          "type": "text",
+          "visibleTo": [
+            1
+          ],
+          "text_key": "r5.p1.b"
+        },
+        {
+          "id": "r5.mg1",
+          "type": "minigame",
+          "visibleTo": [
+            1
+          ],
+          "kind": "memory",
+          "params": {
+            "pairs": 3
+          },
+          "reward_key": "r5.word1",
+          "won_key": "mg.won",
+          "name_key": "r5.mg1.name"
+        },
+        {
+          "id": "r5.p2.t",
+          "type": "title",
+          "visibleTo": [
+            2
+          ],
+          "text_key": "r5.p2.t"
+        },
+        {
+          "id": "r5.p2.b",
+          "type": "text",
+          "visibleTo": [
+            2
+          ],
+          "text_key": "r5.p2.b"
+        },
+        {
+          "id": "r5.mg2",
+          "type": "minigame",
+          "visibleTo": [
+            2
+          ],
+          "kind": "stars",
+          "params": {
+            "target": 5
+          },
+          "reward_key": "r5.word2",
+          "won_key": "mg.won",
+          "name_key": "r5.mg2.name"
+        },
+        {
+          "id": "r5.p3.t",
+          "type": "title",
+          "visibleTo": [
+            3
+          ],
+          "text_key": "r5.p3.t"
+        },
+        {
+          "id": "r5.p3.b",
+          "type": "text",
+          "visibleTo": [
+            3
+          ],
+          "text_key": "r5.p3.b"
+        },
+        {
+          "id": "r5.mg3",
+          "type": "minigame",
+          "visibleTo": [
+            3
+          ],
+          "kind": "rps",
+          "params": {
+            "wins": 2,
+            "pityAfter": 3
+          },
+          "reward_key": "r5.word3",
+          "won_key": "mg.won",
+          "name_key": "r5.mg3.name"
+        },
+        {
+          "id": "r5.q",
+          "type": "subtitle",
+          "visibleTo": "all",
+          "text_key": "r5.q"
+        },
+        {
+          "id": "r5.in",
+          "type": "input",
+          "visibleTo": [
+            2
+          ],
+          "placeholder_key": "common.answer",
+          "hints": [
+            "r5.h1",
+            "r5.h2"
+          ],
+          "outcome_key": "r5.out"
+        }
+      ]
+    },
+    {
+      "id": "t5",
+      "kind": "screen",
+      "components": [
+        {
+          "id": "t5.t",
+          "type": "title",
+          "visibleTo": "all",
+          "text_key": "t5.t"
+        },
+        {
+          "id": "t5.quote",
+          "type": "quote",
+          "visibleTo": "all",
+          "text_key": "t5.quote",
+          "who_key": "tzu.who"
+        },
+        {
+          "id": "t5.prompt",
+          "type": "text",
+          "visibleTo": "all",
+          "text_key": "t5.prompt"
+        },
+        {
+          "id": "t5.refl",
+          "type": "reflection",
+          "visibleTo": "all",
+          "chapter": 5,
+          "writer": 3,
+          "minLength": 15,
+          "maxLength": 120,
+          "prompt_key": "t5.ask"
+        }
+      ]
+    },
+    {
+      "id": "finale",
+      "kind": "screen",
+      "components": [
+        {
+          "id": "fin.oracle",
+          "type": "oracle",
+          "visibleTo": "all",
+          "chapters": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ]
+        },
+        {
+          "id": "fin.cta",
+          "type": "cta",
+          "visibleTo": "all",
+          "action": "coupon",
+          "label_key": "finale.button"
+        }
+      ]
+    }
+  ]
+}

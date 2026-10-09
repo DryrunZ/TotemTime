@@ -575,9 +575,214 @@ function wcomp(c, inter){
   }
   return "";
 }
+// ===== AOW:patch1: Art of War components (reflection, counting). Only reached via their own c.type. =====
+const aowEsc = (s)=> String(s==null?"":s).replace(/[&<>"']/g, ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+let AOW_CAM = null;             // one camera stream for the whole page; reattached after every render
+function aowRefl(c,inter){
+  const ch=String(c.chapter), r=(S.refl||{})[ch];
+  if(r){
+    const by=t("refl.by").split("{name}").join(aowEsc(r.by));
+    return `<p class="c-sub" style="margin-top:14px">${t("refl.saved")}</p><blockquote class="c-quote aow-refl">${aowEsc(r.text)}<span class="c-quote-who" style="margin:8px 0 0">${by}</span></blockquote><button class="cta" data-action="advance">${t("refl.continue")}</button>`;
+  }
+  const amWriter = S.player===c.writer || (S.isAdmin && S.mode!=="player");
+  if(!amWriter || !inter){
+    return `<p class="c-sub aow-wait">✍️ ${t("refl.waiting").split("{n}").join(c.writer)}</p>`;
+  }
+  const max=c.maxLength||120, v=W["refl_"+ch]||"";
+  return `<p class="c-sub" style="margin-top:14px"><b>${t(c.prompt_key)}</b></p>
+    <textarea class="input aow-ta" id="refl_${ch}" data-ch="${ch}" maxlength="${max}" rows="3" placeholder="${t("refl.placeholder")}">${aowEsc(v)}</textarea>
+    <div class="aow-cnt"><span id="reflmsg_${ch}"></span><span id="reflcnt_${ch}">${v.length}/${max}</span></div>
+    <button class="cta" data-reflsave="${ch}" data-min="${c.minLength||1}">${t("refl.submit")}</button>`;
+}
+function aowRng(seed){ let a=seed>>>0; return ()=>{ a=(a+0x6D2B79F5)>>>0; let x=a; x=Math.imul(x^(x>>>15),x|1); x^=x+Math.imul(x^(x>>>7),x|61); return ((x^(x>>>14))>>>0)/4294967296; }; }
+function aowCount(c){
+  const p=c.params||{}, ww=p.worldWidth||300, n=p.count||1, size=p.size||16;
+  const wPct=size*100/ww, rnd=aowRng(p.seed||1), pts=[];
+  for(let i=0;i<n;i++){
+    let best=null;
+    for(let k=0;k<60;k++){                 // rejection sampling: keep items apart so they are countable
+      const x=2+rnd()*(96-wPct), y=6+rnd()*(78-size*0.6);
+      const d=pts.reduce((m,q)=>Math.min(m,Math.hypot((q.x-x)*ww/100,(q.y-y))),1e9);
+      if(!best||d>best.d) best={x,y,d};
+      if(d>size*1.1) break;
+    }
+    pts.push(best);
+  }
+  const items=pts.map((q,i)=>`<img class="aow-item" src="${p.item}" alt="" draggable="false" data-emoji="${aowEsc(p.emoji||"")}" style="left:${q.x}%;top:${q.y}%;width:${wPct}%;--r:${(i*47%30)-15}deg;--d:${(i%5)*0.4}s" onerror="this.outerHTML='<span class=&quot;aow-item aow-emo&quot; style=&quot;'+this.getAttribute('style')+';font-size:'+(${size}*0.75)+'vw&quot;>'+this.dataset.emoji+'</span>'">`).join("");
+  const camBtn = p.camera && !AOW_CAM && !W._aowCamErr ? `<button class="chip aow-cambtn" data-aowcam>${t("count.start")}</button>` : "";
+  const err = W._aowCamErr ? `<p class="c-sub aow-camerr">${t("count.noCamera")}</p>` : "";
+  return `<div class="aow-ar"><video class="aow-cam" playsinline muted autoplay></video>
+    <div class="aow-scroll" data-aowscroll="${c.id}"><div class="aow-world" style="width:${ww}%">${items}</div></div>
+    ${camBtn}${ww>100?`<div class="aow-swipe">${t("count.swipe")}</div>`:""}</div>${err}`;
+}
+function aowAfterRender(){
+  // camera: reattach the live stream to the freshly rendered <video>; stop it once no counting view is on screen
+  const vids=document.querySelectorAll("video.aow-cam");
+  if(AOW_CAM && !vids.length){ AOW_CAM.getTracks().forEach(tr=>tr.stop()); AOW_CAM=null; }
+  vids.forEach(v=>{ if(AOW_CAM){ v.srcObject=AOW_CAM; v.play().catch(()=>{}); v.classList.add("on"); } });
+  document.querySelectorAll("[data-aowscroll]").forEach(el=>{ const k="_aowsc_"+el.dataset.aowscroll; if(W[k]) el.scrollLeft=W[k]; el.onscroll=()=>{ W[k]=el.scrollLeft; }; });
+  // reflection draft survives room-snapshot re-renders
+  const ta=document.querySelector("textarea.aow-ta");
+  if(ta && W._aowFocus===ta.id){ ta.focus(); const L=ta.value.length; try{ ta.setSelectionRange(L,L); }catch(e){} }
+}
+document.addEventListener("input",(e)=>{ const ta=e.target.closest&&e.target.closest("textarea.aow-ta"); if(!ta) return;
+  const ch=ta.dataset.ch; W["refl_"+ch]=ta.value; const cn=document.getElementById("reflcnt_"+ch); if(cn) cn.textContent=ta.value.length+"/"+ta.maxLength; });
+document.addEventListener("focusin",(e)=>{ if(e.target.matches&&e.target.matches("textarea.aow-ta")) W._aowFocus=e.target.id; });
+document.addEventListener("focusout",(e)=>{ const el=e.target; if(!(el.matches&&el.matches("textarea.aow-ta"))) return; setTimeout(()=>{ if(el.isConnected) W._aowFocus=null; },0); });  // removed by a re-render -> keep focus
+document.addEventListener("click",(e)=>{
+  const cam=e.target.closest("[data-aowcam]");
+  if(cam){ e.preventDefault(); cam.disabled=true;
+    navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+      ? navigator.mediaDevices.getUserMedia({ video:{ facingMode:"environment" }, audio:false })
+          .then(s=>{ AOW_CAM=s; render(); }).catch(()=>{ W._aowCamErr=true; render(); })
+      : (W._aowCamErr=true, render());
+    return; }
+  const sv=e.target.closest("[data-reflsave]");
+  if(sv){ e.preventDefault();
+    const ch=sv.dataset.reflsave, ta=document.getElementById("refl_"+ch), txt=((ta&&ta.value)||"").trim(), min=+sv.dataset.min||1;
+    const msg=document.getElementById("reflmsg_"+ch);
+    if(txt.length<min){ if(msg) msg.textContent=t("refl.tooShort").split("{min}").join(min); return; }
+    sv.disabled=true;
+    judge({ action:"reflect", gameId:GAME_ID, roomCode:ROOM_CODE, stepId:S.step, text:txt })
+      .then(()=>{ W._aowFocus=null; })
+      .catch(err=>{ console.error("reflect failed",err); sv.disabled=false; if(msg) msg.textContent=err.message||"error"; });
+    return; }
+}, true);
+document.head.insertAdjacentHTML("beforeend", `<style>
+.aow-ta{min-height:96px;resize:none;font:inherit;line-height:1.5}
+.aow-cnt{display:flex;justify-content:space-between;font-size:12px;color:var(--tt-muted,#999);margin:4px 2px 10px}
+.aow-cnt span:first-child{color:#ff8a8a}
+.aow-wait{margin-top:18px;padding:14px;border:1px dashed var(--tt-border,#333);border-radius:12px;text-align:center}
+.aow-ar{position:relative;height:62vh;max-height:560px;border-radius:16px;overflow:hidden;margin:12px 0;background:radial-gradient(120% 90% at 50% 20%,#2a2f3a,#0b0c10)}
+.aow-cam{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .4s}
+.aow-cam.on{opacity:1}
+.aow-scroll{position:absolute;inset:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.aow-scroll::-webkit-scrollbar{display:none}
+.aow-world{position:relative;height:100%}
+.aow-item{position:absolute;height:auto;transform:rotate(var(--r));filter:drop-shadow(0 6px 10px rgba(0,0,0,.55));animation:aowfloat 3.2s ease-in-out var(--d) infinite;pointer-events:none;-webkit-user-select:none;user-select:none;line-height:1;text-align:center}
+@keyframes aowfloat{0%,100%{translate:0 0}50%{translate:0 -8px}}
+.aow-cambtn{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:2;background:var(--tt-accent,#D0F267);color:#111;font-weight:700}
+.aow-swipe{position:absolute;left:0;right:0;top:10px;text-align:center;font-size:12px;color:#fff;text-shadow:0 1px 3px #000;pointer-events:none;opacity:.85}
+.aow-camerr{font-size:12px;opacity:.7}
+</style>`);
+// ===== AOW:patch2: mini-games. State lives in W (survives room re-renders); a win also in localStorage. =====
+const MG_FACES = ["🐉","🏯","⚔️","🏹","🐎","🥠"];
+const MG_RPS = ["rock","paper","scissors"], MG_ICON = { rock:"✊", paper:"✋", scissors:"✌️" };
+const MG_BEATS = { rock:"scissors", paper:"rock", scissors:"paper" };   // key beats value
+const mgKey = (c)=> "tt.mg."+ROOM_CODE+"."+c.id;
+function mgState(c){
+  if(!W["mg_"+c.id]){
+    let won=false; try{ won = localStorage.getItem(mgKey(c))==="1"; }catch(e){}
+    W["mg_"+c.id] = { won };
+  }
+  return W["mg_"+c.id];
+}
+function mgWin(c){
+  const s=mgState(c); s.won=true; s.running=false;
+  try{ localStorage.setItem(mgKey(c),"1"); }catch(e){}
+  if(navigator.vibrate) try{ navigator.vibrate([60,40,120]); }catch(e){}
+  render();
+}
+function aowMini(c,inter){
+  const s=mgState(c), p=c.params||{};
+  if(s.won) return `<div class="mg-won"><p class="c-sub">${t(c.won_key)}</p><div class="mg-word">${t(c.reward_key)}</div></div>`;
+  if(!inter) return `<p class="c-sub">🎮 ${t(c.name_key)}</p>`;
+  if(c.kind==="memory"){
+    const pairs=p.pairs||3;
+    if(!s.deck){ const f=MG_FACES.slice(0,pairs); s.deck=[...f,...f].sort(()=>Math.random()-.5); s.open=[]; s.done=[]; }
+    const cards=s.deck.map((f,i)=>{ const up=s.open.includes(i)||s.done.includes(i);
+      return `<button class="mg-card ${up?"up":""} ${s.done.includes(i)?"done":""}" data-mg="${c.id}" data-i="${i}">${up?f:"?"}</button>`; }).join("");
+    return `<div class="mg-mem">${cards}</div>`;
+  }
+  if(c.kind==="stars"){
+    const target=p.target||5, n=s.caught||0;
+    const lbl=t("mg.caught").split("{n}").join(n).split("{of}").join(target);
+    return `<div class="mg-sky" id="mgsky_${c.id}" data-mgsky="${c.id}">
+      <div class="mg-hud" id="mghud_${c.id}">${lbl}</div>
+      ${s.running?"":`<button class="cta mg-go" data-mg="${c.id}" data-go="1">${t("mg.start")}</button>`}</div>`;
+  }
+  if(c.kind==="rps"){
+    const need=p.wins||2, w=s.wins||0;
+    const last = s.last ? `<div class="mg-rps-last"><span>${MG_ICON[s.last.me]}</span><small>vs</small><span>${MG_ICON[s.last.sys]}</span></div>
+      <p class="c-sub">${t(s.last.res==="win"?"mg.youWin":s.last.res==="lose"?"mg.youLose":"mg.draw")}</p>` : "";
+    const btns=MG_RPS.map(k=>`<button class="mg-rps-btn" data-mg="${c.id}" data-pick="${k}"><span>${MG_ICON[k]}</span>${t("mg."+k)}</button>`).join("");
+    return `<div class="mg-rps">${last}<p class="c-sub mg-score">${t("mg.score").split("{n}").join(w).split("{of}").join(need)}</p><div class="mg-rps-row">${btns}</div></div>`;
+  }
+  return "";
+}
+// stars: one global ticker drops a star into whichever running sky is on screen
+setInterval(()=>{
+  document.querySelectorAll("[data-mgsky]").forEach(sky=>{
+    const c=findComp(sky.dataset.mgsky); if(!c) return; const s=mgState(c); if(!s.running||s.won) return;
+    const st=document.createElement("button"); st.className="mg-star"; st.textContent="⭐"; st.dataset.mgstar=c.id;
+    st.style.left=(6+Math.random()*80)+"%"; st.style.animationDuration=(2.2+Math.random()*1.2)+"s";
+    st.addEventListener("animationend",()=>st.remove()); sky.appendChild(st);
+  });
+}, 650);
+document.addEventListener("pointerdown",(e)=>{
+  const st=e.target.closest&&e.target.closest("[data-mgstar]"); if(!st) return;
+  e.preventDefault(); const c=findComp(st.dataset.mgstar); if(!c) return; const s=mgState(c), target=(c.params||{}).target||5;
+  st.remove(); s.caught=(s.caught||0)+1;
+  const hud=document.getElementById("mghud_"+c.id); if(hud) hud.textContent=t("mg.caught").split("{n}").join(s.caught).split("{of}").join(target);
+  if(s.caught>=target) mgWin(c);
+}, true);
+document.addEventListener("click",(e)=>{
+  const b=e.target.closest&&e.target.closest("[data-mg]"); if(!b) return;
+  e.preventDefault(); const c=findComp(b.dataset.mg); if(!c) return; const s=mgState(c), p=c.params||{};
+  if(s.won) return;
+  if(c.kind==="stars" && b.dataset.go){ s.running=true; s.caught=s.caught||0; render(); return; }
+  if(c.kind==="memory"){
+    const i=+b.dataset.i; if(s.busy||s.open.includes(i)||s.done.includes(i)) return;
+    s.open.push(i);
+    if(s.open.length===2){
+      const [a,bb]=s.open;
+      if(s.deck[a]===s.deck[bb]){ s.done.push(a,bb); s.open=[]; if(s.done.length===s.deck.length){ render(); setTimeout(()=>mgWin(c),500); return; } }
+      else { s.busy=true; setTimeout(()=>{ s.open=[]; s.busy=false; render(); },800); }
+    }
+    render(); return;
+  }
+  if(c.kind==="rps"){
+    const me=b.dataset.pick, pity=p.pityAfter||3;
+    let sys=MG_RPS[Math.floor(Math.random()*3)];
+    if((s.streak||0)>=pity) sys=MG_BEATS[me];               // pity: nobody gets stuck on luck
+    const res = sys===me ? "draw" : (MG_BEATS[me]===sys ? "win" : "lose");
+    s.streak = res==="win" ? 0 : (s.streak||0)+1;
+    if(res==="win") s.wins=(s.wins||0)+1;
+    s.last={ me, sys, res };
+    if((s.wins||0)>=(p.wins||2)){ render(); setTimeout(()=>mgWin(c),900); return; }
+    render(); return;
+  }
+}, true);
+document.head.insertAdjacentHTML("beforeend", `<style>
+.mg-won{text-align:center;margin:18px 0;padding:22px 12px;border-radius:16px;background:radial-gradient(circle at 50% 30%,rgba(208,242,103,.18),transparent 70%);border:1px solid rgba(208,242,103,.35)}
+.mg-word{font-size:44px;font-weight:900;color:var(--tt-accent,#D0F267);letter-spacing:2px;animation:mgpop .5s cubic-bezier(.2,1.6,.4,1)}
+@keyframes mgpop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.mg-mem{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.mg-card{aspect-ratio:3/4;border-radius:14px;border:1px solid var(--tt-border,#333);background:linear-gradient(145deg,#1d2230,#11141b);color:var(--tt-muted,#888);font-size:30px;font-weight:800;cursor:pointer;transition:transform .2s,background .2s;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.mg-card.up{background:#f3ead2;color:#111;font-size:40px;transform:rotateY(0) scale(1.03)}
+.mg-card.done{background:var(--tt-accent,#D0F267);opacity:.85}
+.mg-sky{position:relative;height:48vh;max-height:420px;margin:14px 0;border-radius:16px;overflow:hidden;background:linear-gradient(#070a1a,#1b1340);touch-action:manipulation}
+.mg-hud{position:absolute;top:10px;left:0;right:0;text-align:center;font-weight:800;color:#fff;z-index:2;pointer-events:none}
+.mg-go{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:auto;padding-inline:36px;z-index:3}
+.mg-star{position:absolute;top:-60px;font-size:40px;line-height:1;padding:10px;background:none;border:0;cursor:pointer;animation:mgfall linear forwards;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+@keyframes mgfall{to{transform:translateY(calc(48vh + 80px)) rotate(200deg)}}
+.mg-rps{text-align:center;margin:14px 0}
+.mg-rps-last{display:flex;justify-content:center;align-items:center;gap:18px;font-size:54px;margin-bottom:4px}
+.mg-rps-last small{font-size:14px;color:var(--tt-muted,#888)}
+.mg-score{font-weight:700}
+.mg-rps-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.mg-rps-btn{display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 4px;border-radius:14px;border:1px solid var(--tt-border,#333);background:#161a22;color:inherit;font:inherit;font-size:14px;cursor:pointer;touch-action:manipulation}
+.mg-rps-btn span{font-size:36px}
+.mg-rps-btn:active{transform:scale(.94);background:#232a36}
+</style>`);
+// ===== /AOW:patch2 =====
+// ===== /AOW:patch1 =====
 function comp(c,inter){
   const dis = inter ? "" : "disabled";
   if(c.type==="widget") return wcomp(c,inter);
+  if(c.type==="reflection") return aowRefl(c,inter);   // AOW:patch1
+  if(c.type==="counting") return aowCount(c);
+  if(c.type==="minigame") return aowMini(c,inter);   // AOW:patch2
   if(c.type==="title") return `<h1 class="c-title">${cz(t(c.text_key))}</h1>`;
   if(c.type==="subtitle") return `<p class="c-sub">${cz(t(c.text_key))}</p>`;
   if(c.type==="quote"){ const v=cz(t(c.text_key)); const w=c.who_key?cz(t(c.who_key)):""; return v?`<blockquote class="c-quote">${w?`<span class="c-quote-who">${w}</span>`:""}${v}</blockquote>`:""; }
@@ -788,7 +993,7 @@ function render(){ if(!S.game) return;
   document.querySelectorAll("[data-player]").forEach(b=>b.classList.toggle("on",+b.dataset.player===S.player));
   if (S.wrapScreen) { app.innerHTML = wrapView(); return; }
   if (S.phase === "lobby") { app.innerHTML = lobbyView(); return; }
-  app.innerHTML = S.photoScreen ? photoView() : (S.mode==="player" ? playerView() : adminView()); initPanos();
+  app.innerHTML = S.photoScreen ? photoView() : (S.mode==="player" ? playerView() : adminView()); initPanos(); aowAfterRender();
 }
 document.querySelector(".dev").insertAdjacentHTML("beforeend", '<button data-resetroom>↺ Reset</button>');
 document.querySelector(".dev").addEventListener("click",(e)=>{
@@ -985,6 +1190,7 @@ onSnapshot(doc(db, "rooms", ROOM_CODE), (snap) => {
   S.maxSeats = r.maxSeats || 0;
   S.flags = r.flags || {};
   S.prog = r.prog || {};
+  S.refl = r.refl || {}; // AOW:patch1
   S.buyerUid = r.buyerUid || null;
   S.instanceId = r.instanceId || null;
   // difficulty is room data (judge reads room.mode); mirror it so client hint gating matches the server

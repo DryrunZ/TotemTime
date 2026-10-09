@@ -1,0 +1,60 @@
+{
+  "2": {
+    "values": [
+      "זהב"
+    ],
+    "value": "זהב",
+    "match": "exact",
+    "normalize": [
+      "trim",
+      "caseInsensitive"
+    ]
+  },
+  "4": {
+    "values": [
+      "הונאה"
+    ],
+    "value": "הונאה",
+    "match": "exact",
+    "normalize": [
+      "trim",
+      "caseInsensitive"
+    ]
+  },
+  "6": {
+    "values": [
+      "100",
+      "מאה"
+    ],
+    "value": "100",
+    "match": "exact",
+    "normalize": [
+      "trim",
+      "caseInsensitive"
+    ]
+  },
+  "8": {
+    "values": [
+      "מגן",
+      "המגן"
+    ],
+    "value": "מגן",
+    "match": "exact",
+    "normalize": [
+      "trim",
+      "caseInsensitive"
+    ]
+  },
+  "10": {
+    "values": [
+      "ניצחון",
+      "נצחון"
+    ],
+    "value": "ניצחון",
+    "match": "exact",
+    "normalize": [
+      "trim",
+      "caseInsensitive"
+    ]
+  }
+}
