@@ -1,4 +1,6 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { defineSecret } = require("firebase-functions/params");   // AOW:patch3
+const GEMINI_KEY = defineSecret("GEMINI_API_KEY");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getStorage } = require("firebase-admin/storage");
@@ -496,7 +498,7 @@ exports.judge = onCall(async (req) => {
       const refl = { text, by: seatName(room, callerUid), at: nowIso() };
       tx.update(roomRef, { [`refl.${ch}`]: refl });
       // instance copy feeds the oracle + strategies collage. Nested object (not a dotted key): instLog uses set+merge.
-      instLog(tx, room, callerUid, [{ kind: "reflect", ref: ch }], { reflections: { [ch]: refl } });
+      instLog(tx, room, callerUid, [{ kind: "reflect", ref: ch, text }], { reflections: { [ch]: refl } });  // AOW:patch3: text in ledger
       return { saved: true };
     });
   }
@@ -748,6 +750,89 @@ exports.judge = onCall(async (req) => {
   }
 
   throw new HttpsError("invalid-argument", `unknown action: ${action}`);
+});
+
+// ---- AOW:patch3 oracle: Art of War finale. Sun Tzu reads the team's 5 strategies and answers with
+// encouragement + 2-3 fortune-cookie tips. One Gemini call per play-through (cached, keyed by room.startedAt).
+// Data-gated: only games carrying game.oracle. Never hangs: any failure -> locale fallback.
+const oracleFallback = (loc, cfg) => ({
+  opening: loc["oracle.fallback.opening"] || "",
+  perStrategy: [],
+  cookies: (cfg.fallback_keys || []).map((k) => loc[k]).filter(Boolean),
+});
+async function askGemini(system, user, model) {
+  const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 25000);
+  try {
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+      method: "POST", signal: ctl.signal,
+      headers: { "Content-Type": "application/json", "x-goog-api-key": GEMINI_KEY.value() },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: system }] },
+        contents: [{ role: "user", parts: [{ text: user }] }],
+        generationConfig: { responseMimeType: "application/json", temperature: 0.8 },
+      }),
+    });
+    if (!r.ok) throw new Error(`gemini ${r.status}: ${(await r.text()).slice(0, 300)}`);
+    const j = await r.json();
+    const txt = ((((j.candidates || [])[0] || {}).content || {}).parts || []).map((p) => p.text || "").join("");
+    const out = JSON.parse(txt.replace(/^```(json)?|```$/g, "").trim());
+    const str = (x) => typeof x === "string" && x.trim();
+    if (!str(out.opening) || !Array.isArray(out.perStrategy) || out.perStrategy.length !== 5 || !out.perStrategy.every(str)
+        || !Array.isArray(out.cookies) || out.cookies.length < 2 || !out.cookies.every(str))
+      throw new Error("gemini: bad shape " + txt.slice(0, 200));
+    return { opening: out.opening.trim(), perStrategy: out.perStrategy.map((s) => s.trim()), cookies: out.cookies.slice(0, 3).map((s) => s.trim()) };
+  } finally { clearTimeout(timer); }
+}
+exports.oracle = onCall({ secrets: [GEMINI_KEY], timeoutSeconds: 60 }, async (req) => {
+  const uid = req.auth && req.auth.uid;
+  if (!uid) throw new HttpsError("unauthenticated", "sign in to play");
+  const { roomCode } = req.data || {};
+  if (!roomCode) throw new HttpsError("invalid-argument", "roomCode required");
+  const room = (await db.doc(`rooms/${roomCode}`).get()).data();
+  if (!room) throw new HttpsError("not-found", "room not found");
+  if (!(room.seats && room.seats[uid]) && room.buyerUid !== uid && !(await isAdmin(uid)))
+    throw new HttpsError("permission-denied", "players only");
+  const game = (await db.doc(`games/${room.gameId}`).get()).data() || {};
+  const cfg = game.oracle;
+  if (!cfg) throw new HttpsError("failed-precondition", "this game has no oracle");
+
+  const runKey = room.startedAt || null;               // a reset starts a new run -> a new answer
+  const ref = db.doc(`oracles/${roomCode}`);
+  const claim = await db.runTransaction(async (tx) => {
+    const s = await tx.get(ref); const d = s.exists ? s.data() : null;
+    if (d && d.runKey === runKey) {
+      if (d.status === "ready") return { ready: d };
+      if (d.status === "pending" && Date.now() - d.t < 60000) return { pending: true };
+    }
+    tx.set(ref, { status: "pending", t: Date.now(), runKey, gameId: room.gameId });
+    return { go: true };
+  });
+  if (claim.ready) return { status: "ready", result: claim.ready.result };
+  if (claim.pending) return { status: "pending" };
+
+  const lang = room.language || game.defaultLanguage || "he";
+  const loc = (await db.doc(`games/${room.gameId}/locales/${lang}`).get()).data() || {};
+  const inst = room.instanceId ? ((await db.doc(`instances/${room.instanceId}`).get()).data() || {}) : {};
+  const challenge = String(((inst.customization || {})[cfg.challengeField]) || loc["custom.business_challenge.default"] || "").trim();
+  const strategies = (cfg.principles || []).map((p, i) => ({
+    n: i + 1, word: loc[p.word_key] || "", quote: loc[p.quote_key] || "",
+    plan: (((room.refl || {})[String(p.chapter)]) || {}).text || "",
+  }));
+  const user = `Business challenge: ${challenge}\n\n` + strategies.map((s) =>
+    `${s.n}. Principle "${s.word}": ${s.quote}\n   The team's plan: ${s.plan || "(left blank)"}`).join("\n\n");
+
+  const cfgP = (((await db.doc("config/platform").get()).data() || {}).oracle) || {};
+  const model = cfgP.model || "gemini-3.8-flash";
+  let result, fallback = false, error = null;
+  try { result = await askGemini(loc[cfg.system_key] || "", user, model); }
+  catch (e) { console.error("oracle", e); error = String(e.message || e).slice(0, 300); result = oracleFallback(loc, cfg); fallback = true; }
+
+  const at = nowIso();
+  await ref.set({ status: "ready", result, model, fallback, error, at, runKey, gameId: room.gameId, challenge, strategies });
+  // permanent record on the instance + ledger (data-gated: instance rooms only)
+  await instLogDirect(room, uid, [{ kind: "oracle", model, fallback, result }],
+    { oracle: { result, model, fallback, at, challenge } });
+  return { status: "ready", result };
 });
 
 // ---- claimGame: free-launch checkout replacement ----

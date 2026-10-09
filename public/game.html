@@ -776,6 +776,48 @@ document.head.insertAdjacentHTML("beforeend", `<style>
 .mg-rps-btn:active{transform:scale(.94);background:#232a36}
 </style>`);
 // ===== /AOW:patch2 =====
+// ===== AOW:patch3: oracle (finale). One server call per run; polls while another player's call is in flight. =====
+const oracleFn = httpsCallable(getFunctions(fbApp), "oracle", { timeout: 70000 });
+function aowOracleFetch(){
+  if(W._orBusy) return; W._orBusy=true;
+  oracleFn({ roomCode: ROOM_CODE }).then(r=>{
+    const d=r.data||{}; W._orBusy=false;
+    if(d.status==="ready"){ W._oracle=d.result; render(); }
+    else setTimeout(aowOracleFetch, 3000);
+  }).catch(e=>{ console.error("oracle", e); W._orBusy=false; W._orErr=true; render(); });
+}
+function aowOracle(c){
+  const res=W._oracle;
+  if(!res){
+    if(!W._orErr) aowOracleFetch();
+    return W._orErr ? `<p class="c-sub">—</p>`
+      : `<div class="or-wait"><div class="or-cookie">🥠</div><p class="c-sub">${t("oracle.loading")}</p></div>`;
+  }
+  const pr=(S.game.oracle&&S.game.oracle.principles)||[];
+  const cards=pr.map((p,i)=>{
+    const mine=((S.refl||{})[String(p.chapter)]||{}).text||"", say=(res.perStrategy||[])[i]||"";
+    if(!mine && !say) return "";
+    return `<div class="or-card"><div class="or-word">${t(p.word_key)}</div>
+      ${mine?`<p class="or-mine">«${aowEsc(mine)}»</p>`:""}${say?`<p class="or-say">${aowEsc(say)}</p>`:""}</div>`;
+  }).join("");
+  const cookies=(res.cookies||[]).map((k,i)=>`<div class="or-fc" style="--d:${i*0.25}s"><span>🥠</span><p>${aowEsc(k)}</p></div>`).join("");
+  return `${res.opening?`<blockquote class="c-quote"><span class="c-quote-who">${t("tzu.who")}</span>${aowEsc(res.opening)}</blockquote>`:""}
+    ${cards?`<p class="c-sub or-h">${t("oracle.strategies")}</p>${cards}`:""}
+    ${cookies?`<p class="c-sub or-h">${t("oracle.cookies")}</p>${cookies}`:""}`;
+}
+document.head.insertAdjacentHTML("beforeend", `<style>
+.or-wait{text-align:center;margin:40px 0}
+.or-cookie{font-size:64px;animation:orwob 1.2s ease-in-out infinite}
+@keyframes orwob{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(10deg) scale(1.08)}}
+.or-h{margin:22px 0 8px;font-weight:800;color:var(--tt-accent,#D0F267)}
+.or-card{border:1px solid var(--tt-border,#2a2a2a);border-radius:14px;padding:12px 14px;margin:8px 0;background:rgba(255,255,255,.03)}
+.or-word{font-weight:900;font-size:18px;color:var(--tt-accent,#D0F267);margin-bottom:4px}
+.or-mine{margin:0 0 6px;color:var(--tt-muted,#aaa);font-size:14px;line-height:1.45}
+.or-say{margin:0;font-size:15px;line-height:1.5}
+.or-fc{display:flex;gap:12px;align-items:flex-start;margin:10px 0;padding:14px;border-radius:14px;background:#f3ead2;color:#2a2410;animation:mgpop .5s cubic-bezier(.2,1.6,.4,1) var(--d) both}
+.or-fc span{font-size:28px;line-height:1}
+.or-fc p{margin:0;font-size:15px;line-height:1.45;font-weight:600}
+</style>`);
 // ===== /AOW:patch1 =====
 function comp(c,inter){
   const dis = inter ? "" : "disabled";
@@ -783,6 +825,7 @@ function comp(c,inter){
   if(c.type==="reflection") return aowRefl(c,inter);   // AOW:patch1
   if(c.type==="counting") return aowCount(c);
   if(c.type==="minigame") return aowMini(c,inter);   // AOW:patch2
+  if(c.type==="oracle") return aowOracle(c);   // AOW:patch3
   if(c.type==="title") return `<h1 class="c-title">${cz(t(c.text_key))}</h1>`;
   if(c.type==="subtitle") return `<p class="c-sub">${cz(t(c.text_key))}</p>`;
   if(c.type==="quote"){ const v=cz(t(c.text_key)); const w=c.who_key?cz(t(c.who_key)):""; return v?`<blockquote class="c-quote">${w?`<span class="c-quote-who">${w}</span>`:""}${v}</blockquote>`:""; }
